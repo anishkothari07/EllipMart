@@ -33,8 +33,10 @@ jobs:
         with:
           node-version: 20
 
-      - name: Install pnpm
-        run: sudo npm install -g pnpm@11.15.1
+      - name: Enable Corepack & Setup pnpm
+        run: |
+          corepack enable
+          corepack prepare pnpm@11.15.1 --activate
 
       - name: Install dependencies
         run: pnpm install --no-frozen-lockfile
