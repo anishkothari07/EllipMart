@@ -34,7 +34,7 @@ jobs:
           node-version: 20
 
       - name: Install pnpm
-        run: npm install -g pnpm@11.15.1
+        run: sudo npm install -g pnpm@11.15.1
 
       - name: Install dependencies
         run: pnpm install --no-frozen-lockfile
