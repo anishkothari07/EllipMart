@@ -1,0 +1,10 @@
+export const ErrorCodes = {
+  UNAUTHORIZED: 'UNAUTHORIZED',
+  FORBIDDEN: 'FORBIDDEN',
+  NOT_FOUND: 'NOT_FOUND',
+  VALIDATION_ERROR: 'VALIDATION_ERROR',
+  INTERNAL_SERVER_ERROR: 'INTERNAL_SERVER_ERROR',
+  BAD_REQUEST: 'BAD_REQUEST',
+} as const;
+
+export type ErrorCode = keyof typeof ErrorCodes;

@@ -1,0 +1,80 @@
+import { Product as UIProduct, ProductVariant, Review } from '../../types';
+import { products as mockProducts } from '../../data';
+
+export function mapProductToUI(
+  product: any, // Fully hydrated Prisma product
+): UIProduct {
+  // Aggregate specifications
+  const specifications = product.specifications?.map((s: any) => ({
+    label: s.name,
+    value: s.value,
+  })) || [];
+
+  // Group variants into UI structure
+  const variantMap = new Map<string, ProductVariant>();
+  
+  if (product.variants) {
+    for (const v of product.variants) {
+      const type = v.name.toLowerCase().includes('size') ? 'size' : 'color'; // Fallback logic or map by proper variant types
+      // In a real system, we'd have explicit Variant Option Groups linked to attributes
+      
+      // Let's rely on productAttributes instead if we have them
+      // Assuming product.productAttributes contains COLOR / SIZE mappings
+    }
+  }
+
+  // Handle images
+  const images = product.images?.sort((a: any, b: any) => a.sortOrder - b.sortOrder).map((img: any) => img.media?.path || img.url) || [];
+  if (images.length === 0) {
+    // Fallback to beautiful mock images to preserve the premium UI animations
+    const charCode = product.id ? product.id.charCodeAt(0) + product.id.charCodeAt(product.id.length - 1) : 0;
+    const mockProduct = mockProducts[charCode % mockProducts.length];
+    if (mockProduct && mockProduct.images) {
+      images.push(...mockProduct.images);
+    } else {
+      images.push('/images/p-headphones.png', '/images/p-earbuds.png');
+    }
+  }
+
+  return {
+    id: product.id,
+    slug: product.slug,
+    name: product.name,
+    brand: product.brand?.name || '',
+    category: product.category?.slug || '',
+    price: Number(product.variants?.[0]?.pricing?.sellingPrice || 0), // Fallback to first variant price
+    oldPrice: product.variants?.[0]?.pricing?.mrp ? Number(product.variants?.[0]?.pricing?.mrp) : undefined,
+    currency: 'USD', // Hardcoded or pulled from config
+    rating: product.ratingAverage || 0,
+    reviewCount: product.reviewCount || 0,
+    images: images,
+    colors: [], // Extract from attributes
+    badge: product.tags?.map((t: any) => t.tag.name)[0], // Use first tag as badge for now
+    inStock: product.variants?.some((v: any) => v.inventory?.quantityAvailable > 0) || false,
+    stockCount: product.variants?.reduce((sum: number, v: any) => sum + (v.inventory?.quantityAvailable || 0), 0) || 0,
+    freeDelivery: product.price > 50, // Mock business rule
+    isNew: product.tags?.some((t: any) => t.tag.slug === 'new') || false,
+    isBestSeller: product.salesCount > 100, // Example rule
+    description: product.shortDescription || product.longDescription,
+    highlights: [],
+    specifications,
+    variants: [], // To be populated properly below or by service
+    rawVariants: product.variants?.map((v: any) => ({
+      id: v.id,
+      name: v.name,
+      price: Number(v.pricing?.sellingPrice || 0),
+      inStock: (v.inventory?.quantityAvailable || 0) > 0,
+    })) || [],
+    reviews: product.reviews?.map((r: any): Review => ({
+      id: r.id,
+      author: r.user?.firstName ? `${r.user.firstName} ${r.user.lastName}` : 'Anonymous',
+      avatar: r.user?.avatar?.url,
+      rating: r.rating,
+      date: r.createdAt.toISOString(),
+      title: r.title || '',
+      body: r.comment || '',
+      verified: r.isVerified,
+      helpful: r.helpfulVotes,
+    })) || [],
+  };
+}

@@ -1,0 +1,29 @@
+import type { Metadata } from 'next'
+import Link from 'next/link'
+import { AuthShell } from '@/components/auth/auth-shell'
+import { ForgotPasswordForm } from '@/components/auth/forgot-password-form'
+
+export const metadata: Metadata = {
+  title: 'Reset password · SmartGO',
+  description: 'Reset your SmartGO account password.',
+}
+
+export default function ForgotPasswordPage() {
+  return (
+    <AuthShell
+      title="Forgot your password?"
+      subtitle="Enter your email and we'll send you a link to reset it."
+      image="/images/hero-home.png"
+      footer={
+        <>
+          Remembered it?{' '}
+          <Link href="/auth/login" className="font-medium text-foreground hover:text-accent">
+            Back to sign in
+          </Link>
+        </>
+      }
+    >
+      <ForgotPasswordForm />
+    </AuthShell>
+  )
+}

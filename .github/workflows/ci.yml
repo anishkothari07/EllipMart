@@ -1,0 +1,60 @@
+name: SmartGO Production CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, master, develop ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  test-and-build:
+    runs-on: ubuntu-latest
+
+    services:
+      mysql:
+        image: mariadb:10.11
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: smartgo_test
+        ports:
+          - 3306:3306
+        options: --health-cmd="healthcheck.sh --connect --innodb_initialized" --health-interval=10s --health-timeout=5s --health-retries=3
+
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 9
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Generate Prisma Client
+        run: npx prisma generate
+
+      - name: Lint and Typecheck
+        run: pnpm lint && pnpm tsc --noEmit
+
+      - name: Production Build Check
+        run: pnpm build
+        env:
+          DATABASE_URL: "mysql://root:root@localhost:3306/smartgo_test"
+          REDIS_URL: "redis://localhost:6379"
+
+      - name: Verify PWA Endpoints
+        run: npx tsx scripts/test-pwa.ts
+
+      - name: Run Load Benchmark Verification
+        run: npx tsx scripts/benchmark-load-test.ts
