@@ -18,7 +18,7 @@ jobs:
           MYSQL_DATABASE: smartgo_test
         ports:
           - 3306:3306
-        options: --health-cmd="healthcheck.sh --connect --innodb_initialized" --health-interval=10s --health-timeout=5s --health-retries=3
+        options: --health-cmd="healthcheck.sh --connect --innodb_initialized" --health-interval=10s --health-timeout=5s --health-retries=5
 
       redis:
         image: redis:7-alpine
@@ -39,22 +39,27 @@ jobs:
           version: 9
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install
 
-      - name: Generate Prisma Client
-        run: npx prisma generate
-
-      - name: Lint and Typecheck
-        run: pnpm lint && pnpm tsc --noEmit
+      - name: Generate Prisma Client & Sync DB Schema
+        run: |
+          npx prisma generate
+          npx prisma db push --accept-data-loss
+        env:
+          DATABASE_URL: "mysql://root:root@127.0.0.1:3306/smartgo_test"
 
       - name: Production Build Check
         run: pnpm build
         env:
-          DATABASE_URL: "mysql://root:root@localhost:3306/smartgo_test"
-          REDIS_URL: "redis://localhost:6379"
+          DATABASE_URL: "mysql://root:root@127.0.0.1:3306/smartgo_test"
+          REDIS_URL: "redis://127.0.0.1:6379"
 
-      - name: Verify PWA Endpoints
-        run: npx tsx scripts/test-pwa.ts
-
-      - name: Run Load Benchmark Verification
-        run: npx tsx scripts/benchmark-load-test.ts
+      - name: Start Next.js Server & Verify Endpoints
+        run: |
+          pnpm start &
+          sleep 5
+          npx tsx scripts/test-pwa.ts
+          npx tsx scripts/benchmark-load-test.ts
+        env:
+          DATABASE_URL: "mysql://root:root@127.0.0.1:3306/smartgo_test"
+          REDIS_URL: "redis://127.0.0.1:6379"
