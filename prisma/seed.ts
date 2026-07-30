@@ -1,8 +1,7 @@
-import 'dotenv/config';
-import { ProductStatus, ProductVisibility } from '@prisma/client';
+import { PrismaClient, ProductStatus, ProductVisibility } from '@prisma/client';
 import { faker } from '@faker-js/faker';
-import { prisma } from '../lib/prisma/client';
-import { ensureDefaultPaymentMethods } from '../lib/modules/payment/payment-seed';
+
+const prisma = new PrismaClient();
 
 async function main() {
   faker.seed(2026);
@@ -119,11 +118,35 @@ async function main() {
   // or maybe 800 inventory records (1 per variant) makes more sense. Let's create an inventory for each variant, so 800 inventories, but 2000 movements.
   console.log('Creating 300 Products with Variants, Pricing, and Inventory...');
 
+  // 6.5. Seed Media records for products (20)
+  const productImagesList = [
+    'p-backpack.png', 'p-bag.png', 'p-boots.png', 'p-candle.png', 'p-chair.png',
+    'p-coat.png', 'p-earbuds.png', 'p-headphones.png', 'p-jeans.png', 'p-lamp.png',
+    'p-perfume.png', 'p-scarf.png', 'p-serum.png', 'p-smartwatch.png', 'p-sneaker.png',
+    'p-speaker.png', 'p-sunglasses.png', 'p-sweater.png', 'p-wallet.png', 'p-watch.png'
+  ];
+
+  const mediaRecords = [];
+  for (const filename of productImagesList) {
+    mediaRecords.push({
+      id: faker.string.uuid(),
+      filename,
+      originalName: filename,
+      mimeType: 'image/png',
+      size: 1024,
+      storageProvider: 'LOCAL',
+      path: `/images/${filename}`
+    });
+  }
+  await prisma.media.createMany({ data: mediaRecords });
+  console.log('Created 20 Media records for product images');
+
   for (let i = 0; i < 300; i++) {
     const productId = faker.string.uuid();
     const productTags = faker.helpers.arrayElements(tags, faker.number.int({ min: 1, max: 4 }));
     const productCollections = faker.helpers.arrayElements(collections, faker.number.int({ min: 0, max: 2 }));
     const productSpecs = faker.helpers.arrayElements(allSpecs, faker.number.int({ min: 2, max: 6 }));
+    const productMedia = faker.helpers.arrayElements(mediaRecords, faker.number.int({ min: 1, max: 2 }));
 
     const numVariants = faker.number.int({ min: 1, max: 4 });
 
@@ -134,10 +157,17 @@ async function main() {
         slug: faker.helpers.slugify(`product-${i}-${faker.string.alphanumeric(4)}`).toLowerCase(),
         shortDescription: faker.commerce.productDescription(),
         longDescription: faker.lorem.paragraphs(2),
-        status: faker.helpers.arrayElement([ProductStatus.ACTIVE, ProductStatus.DRAFT]),
-        visibility: faker.helpers.arrayElement([ProductVisibility.PUBLIC, ProductVisibility.HIDDEN]),
+        status: ProductStatus.ACTIVE, // Force active for dev/storefront visibility
+        visibility: ProductVisibility.PUBLIC, // Force public
         brandId: faker.helpers.arrayElement(brands).id,
         categoryId: faker.helpers.arrayElement(categories).id,
+        images: {
+          create: productMedia.map((m, idx) => ({
+            mediaId: m.id,
+            sortOrder: idx,
+            isPrimary: idx === 0
+          }))
+        },
         tags: {
           create: productTags.map(t => ({ tagId: t.id }))
         },
@@ -189,8 +219,6 @@ async function main() {
 
     if (i % 50 === 0) console.log(`... ${i}/300 products created`);
   }
-  
-  await ensureDefaultPaymentMethods();
   
   console.log('Seed completed successfully!');
 }

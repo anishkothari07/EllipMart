@@ -1,0 +1,133 @@
+'use server';
+
+import { OrderStatus } from '@prisma/client';
+import { orderMerchantService, MerchantOrderListParams } from '@corecart/commerce/src/order/order-merchant.service';
+import { revalidatePath } from 'next/cache';
+
+// ─────────────────────────────────────────────
+// LIST
+// ─────────────────────────────────────────────
+
+export async function fetchOrdersAction(params: MerchantOrderListParams) {
+  try {
+    const data = await orderMerchantService.listOrders(params);
+    return { success: true, data: JSON.parse(JSON.stringify(data)) };
+  } catch (error: any) {
+    return { success: false, error: error.message || 'Failed to fetch orders' };
+  }
+}
+
+export async function fetchOrderStatusCountsAction() {
+  try {
+    const data = await orderMerchantService.getOrderStatusCounts();
+    return { success: true, data };
+  } catch (error: any) {
+    return { success: false, error: error.message || 'Failed to fetch status counts' };
+  }
+}
+
+// ─────────────────────────────────────────────
+// DETAIL
+// ─────────────────────────────────────────────
+
+export async function fetchOrderDetailAction(orderId: string) {
+  try {
+    const data = await orderMerchantService.getOrderDetail(orderId);
+    return { success: true, data: JSON.parse(JSON.stringify(data)) };
+  } catch (error: any) {
+    return { success: false, error: error.message || 'Failed to fetch order' };
+  }
+}
+
+// ─────────────────────────────────────────────
+// STATUS UPDATE
+// ─────────────────────────────────────────────
+
+export async function updateOrderStatusAction(
+  orderId: string,
+  status: OrderStatus,
+  note?: string,
+) {
+  try {
+    await orderMerchantService.updateOrderStatus(orderId, status, note, 'MERCHANT');
+    revalidatePath('/orders');
+    revalidatePath(`/orders/${orderId}`);
+    return { success: true };
+  } catch (error: any) {
+    return { success: false, error: error.message || 'Failed to update status' };
+  }
+}
+
+// ─────────────────────────────────────────────
+// FULFILLMENT
+// ─────────────────────────────────────────────
+
+export async function fulfillOrderAction(
+  orderId: string,
+  action: 'PACK' | 'MARK_READY' | 'SHIP' | 'DELIVER' | 'CANCEL',
+  payload: {
+    trackingNumber?: string;
+    shippingProvider?: string;
+    estimatedDelivery?: string;
+    note?: string;
+  },
+) {
+  try {
+    await orderMerchantService.fulfillOrder(orderId, action, { ...payload, actor: 'MERCHANT' });
+    revalidatePath('/orders');
+    revalidatePath(`/orders/${orderId}`);
+    return { success: true };
+  } catch (error: any) {
+    return { success: false, error: error.message || 'Fulfillment action failed' };
+  }
+}
+
+// ─────────────────────────────────────────────
+// NOTES
+// ─────────────────────────────────────────────
+
+export async function addOrderNoteAction(orderId: string, content: string, author: string = 'Merchant') {
+  try {
+    const note = await orderMerchantService.addNote(orderId, content, author);
+    revalidatePath(`/orders/${orderId}`);
+    return { success: true, data: JSON.parse(JSON.stringify(note)) };
+  } catch (error: any) {
+    return { success: false, error: error.message || 'Failed to add note' };
+  }
+}
+
+// ─────────────────────────────────────────────
+// REFUND
+// ─────────────────────────────────────────────
+
+export async function initiateRefundAction(
+  orderId: string,
+  amount: number,
+  reason: string,
+) {
+  try {
+    await orderMerchantService.initiateRefund(orderId, amount, reason, 'MERCHANT');
+    revalidatePath('/orders');
+    revalidatePath(`/orders/${orderId}`);
+    return { success: true };
+  } catch (error: any) {
+    return { success: false, error: error.message || 'Failed to initiate refund' };
+  }
+}
+
+// ─────────────────────────────────────────────
+// BULK
+// ─────────────────────────────────────────────
+
+export async function bulkUpdateOrderStatusAction(
+  orderIds: string[],
+  status: OrderStatus,
+) {
+  try {
+    const result = await orderMerchantService.bulkUpdateStatus(orderIds, status, 'MERCHANT');
+    revalidatePath('/orders');
+    return { success: true, data: result };
+  } catch (error: any) {
+    return { success: false, error: error.message || 'Bulk update failed' };
+  }
+}

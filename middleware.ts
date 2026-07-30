@@ -38,7 +38,12 @@ export async function middleware(req: NextRequest) {
     pathname.startsWith('/api/v1/notification') ||
     pathname.startsWith('/api/v1/webhooks') ||
     pathname.startsWith('/api/v1/analytics') ||
-    pathname.startsWith('/api/v1/ai')
+    pathname.startsWith('/api/v1/ai') ||
+    pathname.startsWith('/api/v1/products') ||
+    pathname.startsWith('/api/v1/search') ||
+    pathname.startsWith('/api/v1/categories') ||
+    pathname.startsWith('/api/v1/brands') ||
+    pathname.startsWith('/api/v1/collections')
   ) {
     return NextResponse.next();
   }

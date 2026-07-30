@@ -1,25 +1,11 @@
-import "dotenv/config";
 import { paymentService } from "@/lib/modules/payment/payment.service";
-import { refundService } from "@/lib/modules/payment/refund.service";
-import { prisma as db } from "@/lib/prisma/client";
+import { db } from "@/lib/db";
 
 async function run() {
   try {
-    const user = await db.user.upsert({
-      where: { email: "test-payment@example.com" },
-      update: {},
-      create: {
-        id: "test-payment-user-1",
-        email: "test-payment@example.com",
-        firstName: "Test",
-        lastName: "User",
-        password: "hashedpassword123",
-      }
-    });
-
     console.log("Creating checkout session...");
     const session = await paymentService.createCheckoutSession({
-      userId: user.id,
+      userId: "test-user-1",
       shippingAddress: "123 Main St",
       billingAddress: "123 Main St",
       subTotal: 100.0,
@@ -48,8 +34,8 @@ async function run() {
     console.log("Final Order Status:", order?.status);
     
     console.log("Refunding payment...");
-    const refund = await refundService.processRefund(session.paymentId, 10, "Test reason");
-    console.log("Refund Processed:", refund);
+    const refund = await paymentService.refundPayment(init.paymentId, 50, "Customer requested partial refund");
+    console.log("Refund result:", refund);
 
   } catch (error) {
     console.error("Test failed:", error);
