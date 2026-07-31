@@ -10,6 +10,7 @@ import { BottomNavigation } from './bottom-navigation'
 import { MobileSearchOverlay } from '../search/mobile-search-overlay'
 import { X, ChevronRight, LayoutGrid } from 'lucide-react'
 import Link from 'next/link'
+import { AnnouncementBanner } from './announcement-banner'
 
 export function SiteChrome({
   children,
@@ -26,32 +27,13 @@ export function SiteChrome({
   trendingSearches: string[]
   announcements: string[]
 }) {
-  const [index, setIndex] = useState(0)
   const [isSearchOpen, setSearchOpen] = useState(false)
   const [isMenuOpen, setMenuOpen] = useState(false)
-
-  useEffect(() => {
-    const id = setInterval(() => setIndex((i) => (i + 1) % announcements.length), 4000)
-    return () => clearInterval(id)
-  }, [announcements.length])
 
   return (
     <div className="flex min-h-screen flex-col pb-16 lg:pb-0">
       {/* Top Banner (Hidden on extra small screens for more real estate) */}
-      <div className="hidden sm:flex h-9 items-center justify-center overflow-hidden bg-foreground text-background">
-        <AnimatePresence mode="wait">
-          <motion.p
-            key={index}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            transition={{ duration: 0.4 }}
-            className="text-xs font-medium tracking-wide"
-          >
-            {announcements[index]}
-          </motion.p>
-        </AnimatePresence>
-      </div>
+      <AnnouncementBanner announcements={announcements} />
 
       <Header
         navLinks={navLinks}
@@ -113,6 +95,7 @@ export function SiteChrome({
                   <Link
                     key={cat.id}
                     href={`/category/${cat.slug}`}
+                    prefetch={false}
                     onClick={() => setMenuOpen(false)}
                     className="flex items-center justify-between p-3.5 rounded-xl hover:bg-muted text-sm font-semibold transition-colors text-foreground"
                   >

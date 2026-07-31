@@ -131,3 +131,18 @@ export async function bulkUpdateOrderStatusAction(
     return { success: false, error: error.message || 'Bulk update failed' };
   }
 }
+
+// ─────────────────────────────────────────────
+// COD PAYMENT COLLECTION
+// ─────────────────────────────────────────────
+
+export async function markCodPaymentCollectedAction(orderId: string) {
+  try {
+    const result = await orderMerchantService.markCodPaymentCollected(orderId, 'MERCHANT');
+    revalidatePath('/orders');
+    revalidatePath(`/orders/${orderId}`);
+    return { success: true, data: result };
+  } catch (error: any) {
+    return { success: false, error: error.message || 'Failed to mark payment collected' };
+  }
+}

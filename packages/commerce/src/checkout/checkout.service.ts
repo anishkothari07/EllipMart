@@ -44,7 +44,7 @@ export class CheckoutValidationPipeline {
     }
 
     // 6. Validate Shipping
-    let shippingRate: any = { id: 'mock', zone: { provider: { name: 'Standard' } }, estDays: '3-5 days' }; 
+    let shippingRate: any = { id: 'mock', cost: 0, zone: { provider: { name: 'Standard' } }, estDays: '3-5 days' };
     if (input.shippingRateId) {
       shippingRate = await shippingService.getRateById(input.shippingRateId);
       if (!shippingRate) throw new AppError('Invalid shipping rate selected', 400);
@@ -122,7 +122,17 @@ export const checkoutService = {
     const paymentResult = await paymentService.initializeOrderPayment(session.id);
     const order = await prisma.order.findUnique({ where: { id: paymentResult.orderId } });
 
-    // 3. Fire analytics
+    // 3. For COD: explicitly confirm the order (PENDING_PAYMENT → CONFIRMED)
+    //    Payment stays PENDING — cash is collected on delivery.
+    //    ORDER CONFIRMATION ≠ PAYMENT VERIFICATION for COD.
+    if (paymentMethodCode === 'COD') {
+      await paymentService.confirmCodOrder(paymentResult.orderId, paymentResult.paymentId);
+    }
+
+    // 4. Clear the cart (server-side) — cart is also cleared client-side on success
+    await cartService.clearCart(userId);
+
+    // 5. Fire analytics
     this.triggerAnalyticsHooks(cart.items);
 
     return {
@@ -135,6 +145,7 @@ export const checkoutService = {
       session
     };
   },
+
 
   async triggerAnalyticsHooks(items: any[]) {
     items.forEach(async (item) => {

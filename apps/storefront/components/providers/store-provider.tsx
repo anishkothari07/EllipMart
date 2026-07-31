@@ -70,7 +70,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
           let itemImages = dbItem.variant?.product?.images?.map((img: any) => {
             let src = img.media?.publicUrl || img.media?.path || img.url;
             if (typeof src === 'string' && src.startsWith('/uploads/')) {
-              src = `http://localhost:3002${src}`;
+              src = `${process.env.NEXT_PUBLIC_MERCHANT_URL || 'http://localhost:3002'}${src}`;
             }
             return src;
           }).filter(Boolean) || [];

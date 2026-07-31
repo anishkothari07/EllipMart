@@ -1,7 +1,7 @@
 import { prisma } from '@corecart/database';
 import { OrderStatus } from '@prisma/client';
 import { notificationService } from '../notification/notification.service';
-import { AppError } from '@corecart/shared';
+import { AppError, NotFoundError, ForbiddenError, ValidationError } from '@corecart/shared';
 
 export const orderService = {
   async createOrder(data: any) {
@@ -9,12 +9,22 @@ export const orderService = {
       data: {
         orderNumber: data.orderNumber,
         userId: data.userId,
+        checkoutSessionId: data.checkoutSessionId,
         subTotal: data.subTotal,
         discountTotal: data.discountTotal,
         taxTotal: data.taxTotal,
         shippingTotal: data.shippingTotal,
         grandTotal: data.grandTotal,
         status: data.status || OrderStatus.PENDING_PAYMENT,
+
+        // GST / Business billing
+        isBusinessOrder: data.isBusinessOrder || false,
+        gstin: data.gstin ?? null,
+        companyName: data.companyName ?? null,
+        invoiceType: data.invoiceType ?? null,
+        cgstDecimal: data.cgstDecimal ?? null,
+        sgstDecimal: data.sgstDecimal ?? null,
+        igstDecimal: data.igstDecimal ?? null,
 
         // Address Snapshots
         shippingName: data.shippingName,
@@ -141,8 +151,8 @@ export const orderService = {
       include: { items: true, timeline: { orderBy: { createdAt: 'desc' } } }
     });
     
-    if (!order) throw new AppError('Order not found', 404);
-    if (userId && order.userId !== userId) throw new AppError('Unauthorized access to order', 403);
+    if (!order) throw new NotFoundError('Order not found');
+    if (userId && order.userId !== userId) throw new ForbiddenError('Unauthorized access to order');
     
     return order;
   },
@@ -153,5 +163,66 @@ export const orderService = {
       include: { items: true },
       orderBy: { createdAt: 'desc' }
     });
+  },
+
+  async cancelOrder(orderId: string, userId: string) {
+    const order = await prisma.order.findUnique({
+      where: { id: orderId },
+      include: { user: true, items: true }
+    });
+
+    if (!order) throw new NotFoundError('Order not found');
+    if (order.userId !== userId) throw new ForbiddenError('Unauthorized access to order');
+
+    const cancellableStatuses: string[] = ['PENDING_PAYMENT', 'CONFIRMED', 'PROCESSING'];
+    if (!cancellableStatuses.includes(order.status)) {
+      throw new ValidationError(`Order cannot be cancelled in its current status (${order.status})`);
+    }
+
+    await prisma.order.update({
+      where: { id: orderId },
+      data: { status: OrderStatus.CANCELLED }
+    });
+
+    await this.addTimelineEvent(orderId, OrderStatus.CANCELLED, 'Order cancelled by customer', 'CUSTOMER');
+
+    // Restore inventory based on what stage it was at
+    const { inventoryService } = await import('../inventory/inventory.service');
+    for (const item of order.items) {
+      if (item.variantId) {
+        try {
+          if (order.status === 'PENDING_PAYMENT') {
+            // Inventory is still reserved (not yet sold); release the reservation
+            await inventoryService.release(
+              item.variantId,
+              item.quantity,
+              orderId,
+              'Released — order cancelled before confirmation'
+            );
+          } else {
+            // CONFIRMED, PROCESSING, PACKED — inventory was sold via sale()
+            // Reverse the sale to restore available quantity
+            await inventoryService.unsale(
+              item.variantId,
+              item.quantity,
+              orderId,
+              'Reversed sale — order cancelled after confirmation'
+            );
+          }
+        } catch (err: any) {
+          console.error(`[Inventory] Restore failed for variant ${item.variantId}:`, err.message);
+        }
+      }
+    }
+
+    notificationService.emit('OrderCancelled', {
+      orderId: order.id,
+      userId: order.userId,
+      email: order.user.email,
+      firstName: order.user.firstName,
+      orderNumber: order.orderNumber
+    });
+
+    return { success: true };
   }
 };

@@ -1,21 +1,17 @@
 'use client'
 
-import { ArrowRight, Package, Search } from 'lucide-react'
+import { ArrowRight, Package, Search, Clock } from 'lucide-react'
 import Link from 'next/link'
 import { useMemo, useState } from 'react'
 import { EmptyState } from '@corecart/ui'
-import { formatPrice } from '@corecart/shared'
-import { cn } from '@corecart/shared'
-
-export type OrderStatus = 'PENDING' | 'PROCESSING' | 'SHIPPED' | 'DELIVERED' | 'CANCELLED'
-
-export const statusMeta: Record<OrderStatus, { label: string; className: string }> = {
-  PENDING: { label: 'Pending', className: 'bg-muted text-muted-foreground' },
-  PROCESSING: { label: 'Processing', className: 'bg-blue-500/10 text-blue-500' },
-  SHIPPED: { label: 'Shipped', className: 'bg-indigo-500/10 text-indigo-500' },
-  DELIVERED: { label: 'Delivered', className: 'bg-success/10 text-success' },
-  CANCELLED: { label: 'Cancelled', className: 'bg-destructive/10 text-destructive' },
-}
+import { 
+  formatPrice, 
+  ORDER_STATUS_MAP, 
+  OrderStatus,
+  getEstimatedDeliveryDate,
+  getDeliveryMessage,
+  cn 
+} from '@corecart/shared'
 
 const filters: { id: OrderStatus | 'all'; label: string }[] = [
   { id: 'all', label: 'All' },
@@ -35,10 +31,11 @@ export function OrdersView({ initialOrders }: { initialOrders: any[] }) {
       const matchQuery =
         query.trim() === '' ||
         o.id.toLowerCase().includes(query.toLowerCase()) ||
+        o.orderNumber?.toLowerCase().includes(query.toLowerCase()) ||
         o.lines.some((l: any) => l.product?.name?.toLowerCase().includes(query.toLowerCase()))
       return matchStatus && matchQuery
     })
-  }, [filter, query])
+  }, [filter, query, initialOrders])
 
   return (
     <div className="flex flex-col gap-6">
@@ -81,67 +78,89 @@ export function OrdersView({ initialOrders }: { initialOrders: any[] }) {
         />
       ) : (
         <ul className="flex flex-col gap-4">
-          {filtered.map((order) => (
-            <li key={order.id} className="rounded-2xl border border-border bg-card p-5">
-              <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border pb-4">
-                <div>
-                  <p className="text-sm font-semibold">{order.id}</p>
-                  <p className="text-xs text-muted-foreground">
-                    Placed{' '}
-                    {new Date(order.createdAt).toLocaleDateString('en-US', {
-                      month: 'long',
-                      day: 'numeric',
-                      year: 'numeric',
-                    })}
-                  </p>
-                </div>
-                <span
-                  className={`rounded-full px-2.5 py-1 text-xs font-medium ${statusMeta[order.status as OrderStatus]?.className}`}
-                >
-                  {statusMeta[order.status as OrderStatus]?.label}
-                </span>
-              </div>
+          {filtered.map((order) => {
+            const estDate = getEstimatedDeliveryDate(order.createdAt, order.estimatedDelivery);
+            const latestTimeline = order.timeline?.[0];
+            const deliveredAt = order.status === 'DELIVERED' && latestTimeline?.status === 'DELIVERED' ? latestTimeline.createdAt : null;
+            const deliveryMsg = getDeliveryMessage(
+              order.status as OrderStatus,
+              estDate,
+              deliveredAt,
+              order.paymentMethodCode // COD-aware
+            );
+            const isCancelled = ['CANCELLED', 'RETURNED', 'REFUNDED'].includes(order.status);
 
-              <div className="flex items-center gap-4 py-4">
-                <div className="flex -space-x-3">
-                  {order.lines.slice(0, 3).map((line: any) => (
-                    <img
-                      key={line.id}
-                      src={line.product?.images?.[0]?.path || '/placeholder.svg'}
-                      alt=""
-                      className="size-16 rounded-xl border-2 border-card object-cover"
-                    />
-                  ))}
-                  {order.lines.length > 3 && (
-                    <div className="grid size-16 place-items-center rounded-xl border-2 border-card bg-muted text-sm font-medium">
-                      +{order.lines.length - 3}
+            // COD legacy orders at PENDING_PAYMENT should show "Order placed"
+            const isCodLegacy = order.status === 'PENDING_PAYMENT' && order.paymentMethodCode === 'COD';
+            const statusLabel = isCodLegacy
+              ? 'Order placed'
+              : ORDER_STATUS_MAP[order.status as OrderStatus]?.label || order.status;
+            const statusClass = isCodLegacy
+              ? 'bg-primary/10 text-primary'
+              : ORDER_STATUS_MAP[order.status as OrderStatus]?.className || '';
+            
+            return (
+              <li key={order.id} className="rounded-2xl border border-border bg-card p-5">
+                <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border pb-4">
+                  <div className="flex items-center gap-3">
+                    <p className="text-sm font-semibold">Order #{order.orderNumber || order.id.slice(0, 8)}</p>
+                    <span className="text-xs text-muted-foreground">
+                      {new Date(order.createdAt).toLocaleDateString('en-US', {
+                        month: 'short',
+                        day: 'numeric',
+                        year: 'numeric',
+                      })} • {order.lines.length} item{order.lines.length !== 1 && 's'}
+                    </span>
+                  </div>
+                  <span className={`rounded-full px-2.5 py-1 text-xs font-medium ${statusClass}`}>
+                    {statusLabel}
+                  </span>
+                </div>
+
+                <div className="flex items-center gap-4 py-4">
+                  <div className="flex -space-x-3 shrink-0">
+                    {order.lines.slice(0, 3).map((line: any) => (
+                      <img
+                        key={line.id}
+                        src={line.product?.imagePath || '/placeholder.svg'}
+                        alt=""
+                        className="size-16 rounded-xl border-2 border-card object-cover bg-muted"
+                      />
+                    ))}
+                    {order.lines.length > 3 && (
+                      <div className="grid size-16 place-items-center rounded-xl border-2 border-card bg-muted text-sm font-medium">
+                        +{order.lines.length - 3}
+                      </div>
+                    )}
+                  </div>
+                  
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-medium">
+                      {order.lines[0]?.product?.name || 'Unknown Product'}
+                      {order.lines.length > 1 && <span className="text-muted-foreground"> and more</span>}
+                    </p>
+                    <div className="mt-1 flex items-center gap-1.5 text-xs text-muted-foreground">
+                      <Clock className="size-3.5" />
+                      <span className={isCancelled ? "line-through opacity-70" : ""}>{deliveryMsg}</span>
                     </div>
-                  )}
+                  </div>
+                  
+                  <div className="text-right shrink-0">
+                    <p className="text-sm font-medium">{formatPrice(Number(order.grandTotal || 0))}</p>
+                  </div>
                 </div>
-                <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-medium">
-                    {order.lines[0]?.product?.name || 'Unknown Product'}
-                    {order.lines.length > 1 && <span className="text-muted-foreground"> and more</span>}
-                  </p>
-                </div>
-                <div className="text-right">
-                  <p className="text-sm font-medium">{formatPrice(Number(order.total))}</p>
-                </div>
-              </div>
 
-              <div className="flex items-center justify-between gap-3 border-t border-border pt-4">
-                <p className="text-xs text-muted-foreground">
-                  {order.lines.length} item{order.lines.length !== 1 && 's'}
-                </p>
-                <Link
-                  href={`/account/orders/${order.id}`}
-                  className="inline-flex h-9 items-center justify-center rounded-full bg-foreground px-4 text-sm font-medium text-background transition-colors hover:bg-foreground/90"
-                >
-                  View details
-                </Link>
-              </div>
-            </li>
-          ))}
+                <div className="flex items-center justify-end gap-3 border-t border-border pt-4">
+                  <Link
+                    href={`/account/orders/${order.id}`}
+                    className="inline-flex h-9 items-center justify-center rounded-full bg-foreground px-4 text-sm font-medium text-background transition-colors hover:bg-foreground/90"
+                  >
+                    View order <ArrowRight className="ml-1.5 size-3.5" />
+                  </Link>
+                </div>
+              </li>
+            );
+          })}
         </ul>
       )}
     </div>

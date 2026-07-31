@@ -88,5 +88,36 @@ export const inventoryService = {
 
       return updated;
     });
+  },
+
+  /**
+   * Reverses a completed sale (e.g., confirmed order cancelled).
+   * Used when an order has already moved past the RESERVE stage
+   * and inventory was converted from reserved → sold via sale().
+   */
+  async unsale(variantId: string, quantity: number, referenceId: string, notes?: string) {
+    return await prisma.$transaction(async (tx) => {
+      const inventory = await tx.inventory.findUnique({ where: { variantId } });
+      if (!inventory) throw new AppError('Inventory not found', 404);
+
+      const updated = await tx.inventory.update({
+        where: { variantId },
+        data: {
+          quantityAvailable: { increment: quantity },
+        }
+      });
+
+      await tx.inventoryMovement.create({
+        data: {
+          inventoryId: inventory.id,
+          quantity,
+          type: 'RELEASE',
+          referenceId,
+          notes: notes || `Unsale — reversed sale for ${referenceId}`
+        }
+      });
+
+      return updated;
+    });
   }
 };

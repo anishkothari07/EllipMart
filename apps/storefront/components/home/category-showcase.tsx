@@ -29,6 +29,7 @@ export function CategoryShowcase() {
             >
               <Link
                 href={`/category/${cat.slug}`}
+                prefetch={false}
                 className="group relative block h-full overflow-hidden rounded-[var(--radius-lg)] bg-muted"
               >
                 <div

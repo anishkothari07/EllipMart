@@ -249,6 +249,7 @@ export function Header({
                         <li key={l.label}>
                           <Link
                             href={l.href}
+                            prefetch={false}
                             onClick={() => setActiveMenu(null)}
                             className="text-sm text-foreground/80 transition-colors hover:text-accent"
                           >
@@ -262,6 +263,7 @@ export function Header({
                 {section.featured && (
                   <Link
                     href={section.featured.href}
+                    prefetch={false}
                     onClick={() => setActiveMenu(null)}
                     className="group relative overflow-hidden rounded-2xl"
                   >
@@ -361,12 +363,13 @@ function MobileMenu({
               </p>
               <div className="grid grid-cols-2 gap-3">
                 {categories.map((c) => (
-                  <Link
-                    key={c.id}
-                    href={`/category/${c.slug}`}
-                    onClick={onClose}
-                    className="relative aspect-[4/3] overflow-hidden rounded-xl bg-muted"
-                  >
+                   <Link
+                     key={c.id}
+                     href={`/category/${c.slug}`}
+                     prefetch={false}
+                     onClick={onClose}
+                     className="relative aspect-[4/3] overflow-hidden rounded-xl bg-muted"
+                   >
                     <Image src={c.image || '/placeholder.svg'} alt={c.name} fill className="object-cover" sizes="180px" />
                     <div className="absolute inset-0 bg-gradient-to-t from-foreground/60 to-transparent" />
                     <span className="absolute bottom-2 left-3 text-sm font-semibold text-background">

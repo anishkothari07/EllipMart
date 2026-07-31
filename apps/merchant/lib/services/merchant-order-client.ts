@@ -7,6 +7,7 @@ import {
   addOrderNoteAction,
   initiateRefundAction,
   bulkUpdateOrderStatusAction,
+  markCodPaymentCollectedAction,
 } from '@/app/orders/actions';
 import type { MerchantOrderListParams } from '@corecart/commerce';
 import type { OrderStatus } from '@prisma/client';
@@ -65,6 +66,12 @@ export class MerchantOrderClient {
 
   static async bulkUpdateStatus(orderIds: string[], status: OrderStatus) {
     const res = await bulkUpdateOrderStatusAction(orderIds, status);
+    if (!res.success) throw new Error(res.error);
+    return res.data;
+  }
+
+  static async markCodPaymentCollected(orderId: string) {
+    const res = await markCodPaymentCollectedAction(orderId);
     if (!res.success) throw new Error(res.error);
     return res.data;
   }

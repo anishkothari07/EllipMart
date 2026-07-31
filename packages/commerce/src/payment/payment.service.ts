@@ -5,10 +5,13 @@ import { MockProvider } from "./providers/mock.provider";
 import { CodProvider } from "./providers/cod.provider";
 import { RazorpayProvider } from "./providers/razorpay.provider";
 import { IPaymentProvider } from "./types";
+import { orderService } from '../order/order.service';
+import { inventoryService } from '../inventory/inventory.service';
 
 // Register provider factories
 paymentRegistry.register("MOCK", (config) => new MockProvider(config));
 paymentRegistry.register("COD", (config) => new CodProvider(config));
+paymentRegistry.register("INTERNAL", (config) => new CodProvider(config));
 paymentRegistry.register("RAZORPAY", (config) => new RazorpayProvider(config));
 
 export class PaymentService {
@@ -114,20 +117,20 @@ export class PaymentService {
     
     const { provider, providerCode } = await this.resolveProviderInstance(methodCode);
 
-    // 1. Create Order (PENDING_PAYMENT)
+    // 1. Parse address snapshot
     const orderNumber = `ORD-${Date.now()}`;
-    
     let isBusinessOrder = false;
-    let gstin = null;
-    let companyName = null;
-    let cgstDecimal = null;
-    let sgstDecimal = null;
-    let igstDecimal = null;
+    let gstin: string | null = null;
+    let companyName: string | null = null;
+    let cgstDecimal: number | null = null;
+    let sgstDecimal: number | null = null;
+    let igstDecimal: number | null = null;
     let invoiceType = "RETAIL_INVOICE";
+    let addrObj: any = null;
     
     try {
       if (session.shippingAddress) {
-        const addrObj = JSON.parse(session.shippingAddress);
+        addrObj = JSON.parse(session.shippingAddress);
         isBusinessOrder = addrObj.isBusiness || false;
         gstin = addrObj.gstin || null;
         companyName = addrObj.companyName || null;
@@ -140,33 +143,89 @@ export class PaymentService {
       console.error("Failed to parse shippingAddress JSON during order creation:", e);
     }
 
-    const order = await db.order.create({
-      data: {
-        orderNumber,
-        userId: session.userId || "guest",
-        checkoutSessionId: session.id,
-        subTotal: session.subTotal,
-        discountTotal: session.discountTotal,
-        taxTotal: session.taxTotal,
-        shippingTotal: session.shippingTotal,
-        grandTotal: session.grandTotal,
-        status: OrderStatus.PENDING_PAYMENT,
-        shippingCost: session.shippingTotal,
-        shippingProvider: session.shippingMethod,
-        couponCode: session.couponCode,
-        isBusinessOrder,
-        gstin,
-        companyName,
-        cgstDecimal,
-        sgstDecimal,
-        igstDecimal,
-        invoiceType,
+    // 2. Fetch cart items to build order items snapshot
+    const cartItems = await db.cartItem.findMany({
+      where: { cartId: session.cartId, isSaved: false },
+      include: {
+        variant: {
+          include: {
+            pricing: true,
+            product: {
+              include: { brand: true }
+            }
+          }
+        }
       }
     });
 
-    // 2. Reserve Inventory (Mock logic for now)
-    
-    // 3. Create Payment record
+    const orderItemsData = cartItems.map((item) => {
+      const unitPrice = Number(item.variant?.pricing?.sellingPrice || 0);
+      const totalPrice = unitPrice * item.quantity;
+      return {
+        variantId: item.variantId,
+        productName: item.variant?.product?.name || item.variant?.name || 'Unknown Product',
+        brandName: item.variant?.product?.brand?.name ?? null,
+        sku: item.variant?.sku || 'UNKNOWN-SKU',
+        quantity: item.quantity,
+        unitPrice,
+        discount: 0,
+        tax: 0,
+        totalPrice,
+      };
+    });
+
+    // 3. Create Order + OrderItems atomically via orderService
+    const order = await orderService.createOrder({
+      orderNumber,
+      userId: session.userId || "guest",
+      checkoutSessionId: session.id,
+      subTotal: session.subTotal,
+      discountTotal: session.discountTotal,
+      taxTotal: session.taxTotal,
+      shippingTotal: session.shippingTotal,
+      grandTotal: session.grandTotal,
+      status: OrderStatus.PENDING_PAYMENT,
+      shippingCost: session.shippingTotal,
+      shippingProvider: session.shippingMethod,
+      couponCode: session.couponCode,
+      isBusinessOrder,
+      gstin,
+      companyName,
+      cgstDecimal,
+      sgstDecimal,
+      igstDecimal,
+      invoiceType,
+      // Address snapshot (flat fields)
+      shippingName: addrObj?.fullName ?? null,
+      shippingPhone: addrObj?.phone ?? null,
+      shippingEmail: addrObj?.email ?? null,
+      shippingStreet: addrObj?.street ?? null,
+      shippingCity: addrObj?.city ?? null,
+      shippingState: addrObj?.state ?? null,
+      shippingCountry: addrObj?.country ?? null,
+      shippingPostalCode: addrObj?.postalCode ?? null,
+      billingAddr: session.billingAddress,
+      items: orderItemsData,
+    });
+
+    // 4. Reserve inventory for each item
+    for (const item of orderItemsData) {
+      if (item.variantId) {
+        try {
+          await inventoryService.reserve(
+            item.variantId,
+            item.quantity,
+            order.id,
+            `Reserved for order ${orderNumber}`
+          );
+        } catch (err: any) {
+          console.error(`[Inventory] Reserve failed for variant ${item.variantId}:`, err.message);
+          // Non-fatal — stock was validated at checkout time; proceed
+        }
+      }
+    }
+
+    // 5. Create Payment record
     const payment = await db.payment.create({
       data: {
         orderId: order.id,
@@ -180,15 +239,15 @@ export class PaymentService {
     // Immutable Event: CREATED
     await this.logEvent(payment.id, PaymentEventStatus.CREATED, null, null);
 
-    // 4. Initialize with provider
+    // 6. Initialize with provider
     const initResult = await provider.initializePayment({
       amount: Number(order.grandTotal),
-      currency: "USD",
+      currency: "INR",
       orderId: order.id,
       paymentId: payment.id,
     });
 
-    // 5. Update Payment with provider info
+    // 7. Update Payment with provider info
     await db.payment.update({
       where: { id: payment.id },
       data: {
@@ -210,6 +269,53 @@ export class PaymentService {
       paymentId: payment.id,
       ...initResult
     };
+  }
+
+  /**
+   * COD-specific order acceptance path.
+   * Confirms the order (PENDING_PAYMENT → CONFIRMED) while keeping
+   * payment status as PENDING — cash is collected on delivery.
+   * Converts reserved inventory to sold inventory exactly once.
+   */
+  async confirmCodOrder(orderId: string, paymentId: string) {
+    const payment = await db.payment.findUnique({ where: { id: paymentId } });
+    if (!payment) throw new Error('Payment not found for COD order');
+    if (payment.paymentMethodCode !== 'COD') {
+      throw new Error('confirmCodOrder called on a non-COD payment method');
+    }
+
+    // Payment stays PENDING — cash not yet collected
+    // Log a COD_ACCEPTED event for auditability
+    await this.logEvent(paymentId, PaymentEventStatus.AUTHORIZED, `cod_accepted_${orderId}`, {
+      message: 'COD order accepted — payment to be collected on delivery'
+    });
+
+    // Confirm the order
+    await orderService.updateOrderStatus(
+      orderId,
+      OrderStatus.CONFIRMED,
+      'COD order confirmed — payment to be collected on delivery',
+      'SYSTEM'
+    );
+
+    // Convert reserved inventory → sold (exactly once for COD acceptance)
+    const orderItems = await db.orderItem.findMany({ where: { orderId } });
+    for (const item of orderItems) {
+      if (item.variantId) {
+        try {
+          await inventoryService.sale(
+            item.variantId,
+            item.quantity,
+            orderId,
+            `Sale confirmed — COD order ${orderId} accepted`
+          );
+        } catch (err: any) {
+          console.error(`[Inventory] COD sale failed for variant ${item.variantId}:`, err.message);
+        }
+      }
+    }
+
+    return { confirmed: true, orderId, paymentStatus: 'PENDING', paymentMethod: 'COD' };
   }
 
   async verifyPayment(orderId: string, paymentId: string, providerPaymentId: string, signature?: string) {
@@ -254,19 +360,58 @@ export class PaymentService {
     await this.logEvent(payment.id, eventStatus, providerPaymentId, verifyResult.rawResponse);
 
     // Update Order Status based on payment outcome
-    const newOrderStatus = newStatus === PaymentStatus.CAPTURED 
-      ? OrderStatus.CONFIRMED 
-      : OrderStatus.CANCELLED;
+    // Only online payment verification reaches here. COD uses confirmCodOrder() instead.
+    let newOrderStatus: OrderStatus;
+    if (newStatus === PaymentStatus.CAPTURED) {
+      newOrderStatus = OrderStatus.CONFIRMED;
+    } else {
+      newOrderStatus = OrderStatus.CANCELLED;
+    }
       
-    await db.order.update({
-      where: { id: orderId },
-      data: { status: newOrderStatus }
-    });
+    await orderService.updateOrderStatus(
+      orderId,
+      newOrderStatus,
+      newOrderStatus === OrderStatus.CONFIRMED
+        ? `Payment captured — order confirmed`
+        : `Payment failed — order cancelled`,
+      'SYSTEM'
+    );
+
+    // Fetch order items for inventory operations
+    const orderItems = await db.orderItem.findMany({ where: { orderId } });
 
     if (newOrderStatus === OrderStatus.CONFIRMED) {
-      // Deduct Inventory here
+      // Convert reserved stock to sold stock
+      for (const item of orderItems) {
+        if (item.variantId) {
+          try {
+            await inventoryService.sale(
+              item.variantId,
+              item.quantity,
+              orderId,
+              `Sale confirmed for order ${orderId}`
+            );
+          } catch (err: any) {
+            console.error(`[Inventory] Sale failed for variant ${item.variantId}:`, err.message);
+          }
+        }
+      }
     } else {
-      // Release Inventory here
+      // Release reserved stock because payment failed
+      for (const item of orderItems) {
+        if (item.variantId) {
+          try {
+            await inventoryService.release(
+              item.variantId,
+              item.quantity,
+              orderId,
+              `Released — payment failed for order ${orderId}`
+            );
+          } catch (err: any) {
+            console.error(`[Inventory] Release failed for variant ${item.variantId}:`, err.message);
+          }
+        }
+      }
     }
 
     return verifyResult;

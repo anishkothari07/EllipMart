@@ -31,7 +31,7 @@ export function mapProductToUI(
     .map((img: any) => {
       let src = img.media?.publicUrl || img.media?.path || null;
       if (typeof src === 'string' && src.startsWith('/uploads/')) {
-        src = `http://localhost:3002${src}`;
+        src = `${process.env.NEXT_PUBLIC_MERCHANT_URL || 'http://localhost:3002'}${src}`;
       }
       return src;
     })

@@ -42,7 +42,7 @@ export function ProductCard({
       className={cn('group flex flex-col', className)}
     >
       <div ref={imageContainerRef} className="relative aspect-[4/5] overflow-hidden rounded-2xl bg-card shadow-soft transition-shadow duration-300 group-hover:shadow-float">
-        <Link href={`/product/${product.slug}`} aria-label={product.name} className="block h-full">
+        <Link href={`/product/${product.slug}`} prefetch={false} aria-label={product.name} className="block h-full">
           <Image
             src={product.images[0] || '/placeholder.svg'}
             alt={product.name}
@@ -136,6 +136,7 @@ export function ProductCard({
         </div>
         <Link
           href={`/product/${product.slug}`}
+          prefetch={false}
           className="mt-1 line-clamp-1 text-sm font-medium text-foreground transition-colors hover:text-accent"
         >
           {product.name}

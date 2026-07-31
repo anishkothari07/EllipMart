@@ -1,22 +1,23 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
-import { ArrowRight, Gift, Heart, MapPin, Package, Truck } from 'lucide-react'
-import { formatPrice } from '@corecart/shared'
+import { ArrowRight, Gift, Heart, MapPin, Package, Truck, Clock } from 'lucide-react'
+import { 
+  formatPrice, 
+  ORDER_STATUS_MAP, 
+  OrderStatus,
+  getEstimatedDeliveryDate,
+  getDeliveryMessage,
+  getPaymentPresentation,
+  getOrderProductImage,
+  getOrderProductName
+} from '@corecart/shared'
 import { getCurrentUser } from '@corecart/shared/src/auth'
 import { prisma } from '@corecart/database'
 
 export const metadata: Metadata = {
   title: 'Account · SmartGO',
   description: 'Manage your SmartGO account, orders, and preferences.',
-}
-
-const statusMeta: Record<string, { label: string; className: string }> = {
-  PENDING: { label: 'Pending', className: 'bg-muted text-muted-foreground' },
-  PROCESSING: { label: 'Processing', className: 'bg-blue-500/10 text-blue-500' },
-  SHIPPED: { label: 'Shipped', className: 'bg-indigo-500/10 text-indigo-500' },
-  DELIVERED: { label: 'Delivered', className: 'bg-success/10 text-success' },
-  CANCELLED: { label: 'Cancelled', className: 'bg-destructive/10 text-destructive' },
 }
 
 export default async function AccountDashboardPage() {
@@ -36,22 +37,34 @@ export default async function AccountDashboardPage() {
             include: {
               product: {
                 include: {
-                  images: true
+                  images: {
+                    include: { media: true },
+                    orderBy: { sortOrder: 'asc' },
+                    take: 1
+                  }
                 }
               }
             }
           }
         }
+      },
+      payment: true,
+      timeline: {
+        orderBy: { createdAt: 'desc' },
+        take: 1
       }
     }
   })
 
-  const activeOrder = orders.find((o) => o.status === 'SHIPPED' || o.status === 'PROCESSING')
+  const activeOrder = orders.find(
+    (o) => o.status === 'SHIPPED' || o.status === 'PROCESSING' || o.status === 'PACKED' || o.status === 'CONFIRMED'
+  )
   const recent = orders.slice(0, 3)
   
-  // Lifetime spend = sum of all non-cancelled orders
+  // Lifetime spend = sum of all successful orders
+  const excludedStatuses = ['CANCELLED', 'RETURNED', 'REFUNDED']
   const totalSpent = orders
-    .filter((o) => o.status !== 'CANCELLED')
+    .filter((o) => !excludedStatuses.includes(o.status))
     .reduce((sum, o) => sum + Number(o.grandTotal), 0)
 
   const stats = [
@@ -95,9 +108,9 @@ export default async function AccountDashboardPage() {
               <h2 className="font-medium">Latest shipment</h2>
             </div>
             <span
-              className={`rounded-full px-2.5 py-1 text-xs font-medium ${statusMeta[activeOrder.status]?.className || ''}`}
+              className={`rounded-full px-2.5 py-1 text-xs font-medium ${ORDER_STATUS_MAP[activeOrder.status as OrderStatus]?.className || ''}`}
             >
-              {statusMeta[activeOrder.status]?.label || activeOrder.status}
+              {ORDER_STATUS_MAP[activeOrder.status as OrderStatus]?.label || activeOrder.status}
             </span>
           </div>
           <div className="mt-4 flex items-center gap-4">
@@ -105,7 +118,7 @@ export default async function AccountDashboardPage() {
               {activeOrder.items.slice(0, 3).map((item: any) => (
                 <img
                   key={item.id}
-                  src={item.variant?.product?.images?.[0]?.path || '/placeholder.svg'}
+                  src={getOrderProductImage(item)}
                   alt=""
                   className="size-14 rounded-xl border-2 border-card object-cover"
                 />
@@ -118,7 +131,7 @@ export default async function AccountDashboardPage() {
             </div>
             <div className="min-w-0 flex-1">
               <p className="truncate text-sm font-medium">
-                {activeOrder.items[0]?.variant?.product?.name || activeOrder.items[0]?.productName || 'Unknown Product'}
+                {getOrderProductName(activeOrder.items[0])}
                 {activeOrder.items.length > 1 && <span className="text-muted-foreground"> and more</span>}
               </p>
               <p className="text-xs text-muted-foreground">
@@ -127,7 +140,7 @@ export default async function AccountDashboardPage() {
             </div>
             <Link
               href={`/account/orders/${activeOrder.id}`}
-              className="inline-flex h-10 shrink-0 items-center gap-1.5 rounded-full border border-border px-4 text-sm font-medium transition-colors hover:bg-accent"
+              className="inline-flex h-10 shrink-0 items-center gap-1.5 rounded-full border border-border px-4 text-sm font-medium transition-colors hover:bg-accent hover:text-background"
             >
               Track <ArrowRight className="size-4" />
             </Link>
@@ -151,38 +164,102 @@ export default async function AccountDashboardPage() {
             <p className="mt-1 text-sm text-muted-foreground">When you place orders, they will appear here.</p>
           </div>
         ) : (
-          <ul className="flex flex-col divide-y divide-border rounded-2xl border border-border bg-card">
+          <ul className="flex flex-col gap-4">
             {recent.map((order) => {
-              const image = order.items[0]?.variant?.product?.images?.[0]?.path || '/placeholder.svg';
+              const image = getOrderProductImage(order.items[0]);
+              const estDate = getEstimatedDeliveryDate(order.createdAt.toISOString(), order.estimatedDelivery);
+              
+              const latestTimeline = order.timeline?.[0];
+              const deliveredAt = order.status === 'DELIVERED' && latestTimeline?.status === 'DELIVERED' ? latestTimeline.createdAt : null;
+              
+              const deliveryMsg = getDeliveryMessage(
+                order.status as OrderStatus,
+                estDate,
+                deliveredAt?.toISOString(),
+                order.payment?.paymentMethodCode
+              );
+              
+              const isCancelled = ['CANCELLED', 'RETURNED', 'REFUNDED'].includes(order.status);
+              const isCodLegacy = order.status === 'PENDING_PAYMENT' && order.payment?.paymentMethodCode === 'COD';
+              // COD orders at PENDING_PAYMENT should show as active (they are placed, not failed)
+              const isActive = !isCancelled && order.status !== 'DELIVERED' &&
+                (order.status !== 'PENDING_PAYMENT' || isCodLegacy);
+              
+              // For status badge: COD legacy shows "Order placed" not "Payment pending"
+              const statusLabel = isCodLegacy
+                ? 'Order placed'
+                : ORDER_STATUS_MAP[order.status as OrderStatus]?.label || order.status;
+              const statusClass = isCodLegacy
+                ? 'bg-primary/10 text-primary'
+                : ORDER_STATUS_MAP[order.status as OrderStatus]?.className || '';
+              
               return (
-                <li key={order.id}>
-                  <Link
-                    href={`/account/orders/${order.id}`}
-                    className="flex items-center gap-4 p-4 transition-colors hover:bg-muted/50"
-                  >
-                    <img
-                      src={image}
-                      alt=""
-                      className="size-12 rounded-xl border border-border object-cover"
-                    />
-                    <div className="min-w-0 flex-1">
-                      <p className="truncate text-sm font-medium">Order #{order.id.slice(0, 8)}</p>
-                      <p className="text-xs text-muted-foreground">
+                <li key={order.id} className="rounded-2xl border border-border bg-card p-5">
+                  <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border pb-4">
+                    <div className="flex items-center gap-3">
+                      <p className="text-sm font-semibold">Order #{order.orderNumber || order.id.slice(0, 8)}</p>
+                      <span className="text-xs text-muted-foreground">
                         {new Date(order.createdAt).toLocaleDateString('en-US', {
                           month: 'short',
                           day: 'numeric',
                           year: 'numeric',
-                        })}{' '}
-                        · {order.items.length} item{order.items.length !== 1 && 's'}
-                      </p>
+                        })} • {order.items.length} item{order.items.length !== 1 && 's'}
+                      </span>
                     </div>
-                    <span
-                      className={`hidden rounded-full px-2.5 py-1 text-xs font-medium sm:inline ${statusMeta[order.status]?.className || ''}`}
-                    >
-                      {statusMeta[order.status]?.label || order.status}
+                    <span className={`rounded-full px-2.5 py-1 text-xs font-medium ${statusClass}`}>
+                      {statusLabel}
                     </span>
-                    <span className="text-sm font-semibold">{formatPrice(Number(order.grandTotal))}</span>
-                  </Link>
+                  </div>
+
+                  <div className="flex items-center gap-4 py-4">
+                    <div className="size-16 shrink-0 overflow-hidden rounded-xl border border-border bg-muted">
+                      <img
+                        src={image}
+                        alt=""
+                        className="size-full object-cover"
+                      />
+                    </div>
+                    
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-sm font-medium transition-colors">
+                        {getOrderProductName(order.items[0])}
+                        {order.items.length > 1 && <span className="text-muted-foreground"> and more</span>}
+                      </p>
+                      
+                      <div className="mt-1 flex items-center gap-1.5 text-xs text-muted-foreground">
+                        <Clock className="size-3.5" />
+                        <span className={isCancelled ? "line-through opacity-70" : ""}>{deliveryMsg}</span>
+                      </div>
+                      
+                      {isActive && (
+                        <div className="mt-2.5 flex items-center gap-1">
+                          {['CONFIRMED', 'PROCESSING', 'PACKED', 'SHIPPED', 'DELIVERED'].map((stepStatus, idx) => {
+                            const statuses = ['CONFIRMED', 'PROCESSING', 'PACKED', 'SHIPPED', 'DELIVERED'];
+                            const currentIdx = statuses.indexOf(order.status);
+                            const done = idx <= currentIdx;
+                            return (
+                              <div key={stepStatus} className="flex-1 h-1 rounded-full bg-border overflow-hidden">
+                                {done && <div className="h-full bg-foreground w-full" />}
+                              </div>
+                            )
+                          })}
+                        </div>
+                      )}
+                    </div>
+                    
+                    <div className="text-right shrink-0">
+                      <p className="text-sm font-medium">{formatPrice(Number(order.grandTotal))}</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-end gap-3 border-t border-border pt-4">
+                    <Link
+                      href={`/account/orders/${order.id}`}
+                      className="inline-flex h-9 items-center justify-center rounded-full bg-foreground px-4 text-sm font-medium text-background transition-colors hover:bg-foreground/90"
+                    >
+                      View order <ArrowRight className="ml-1.5 size-3.5" />
+                    </Link>
+                  </div>
                 </li>
               );
             })}

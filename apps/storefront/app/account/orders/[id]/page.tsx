@@ -1,9 +1,20 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound, redirect } from 'next/navigation'
-import { ArrowLeft, Check, CircleDashed, MapPin, Package, Truck } from 'lucide-react'
-import { formatPrice } from '@corecart/shared'
-import { cn } from '@corecart/shared'
+import { ArrowLeft, Banknote, Check, CircleDashed, MapPin, Package, Truck, XCircle, Clock } from 'lucide-react'
+import { 
+  formatPrice, 
+  ORDER_STATUS_MAP,
+  PAYMENT_STATUS_MAP,
+  OrderStatus,
+  PaymentStatus,
+  getEstimatedDeliveryDate,
+  getDeliveryMessage,
+  getPaymentPresentation,
+  getOrderProductImage,
+  getOrderProductName,
+  cn 
+} from '@corecart/shared'
 import { prisma } from '@corecart/database'
 import { getCurrentUser } from '@corecart/shared/src/auth'
 
@@ -21,20 +32,12 @@ export async function generateMetadata({
   }
 }
 
-export type OrderStatus = 'PROCESSING' | 'SHIPPED' | 'DELIVERED' | 'CANCELLED' | 'PENDING'
-
-const statusMeta: Record<string, { label: string; className: string }> = {
-  PROCESSING: { label: 'Processing', className: 'bg-primary/10 text-primary' },
-  SHIPPED: { label: 'Shipped', className: 'bg-info/10 text-info' },
-  DELIVERED: { label: 'Delivered', className: 'bg-success/10 text-success' },
-  CANCELLED: { label: 'Cancelled', className: 'bg-destructive/10 text-destructive' },
-  PENDING: { label: 'Pending', className: 'bg-muted text-muted-foreground' },
-}
-
-const steps: { key: OrderStatus; label: string; icon: typeof Package }[] = [
-  { key: 'PROCESSING', label: 'Order placed', icon: Check },
-  { key: 'SHIPPED', label: 'Shipped', icon: Package },
-  { key: 'DELIVERED', label: 'Delivered', icon: Truck },
+const TRACKING_STEPS: OrderStatus[] = [
+  'CONFIRMED',
+  'PROCESSING',
+  'PACKED',
+  'SHIPPED',
+  'DELIVERED'
 ]
 
 export default async function OrderDetailPage({
@@ -54,22 +57,63 @@ export default async function OrderDetailPage({
           variant: {
             include: {
               product: {
-                include: { images: true }
+                include: {
+                  images: {
+                    include: { media: true },
+                    orderBy: { sortOrder: 'asc' },
+                    take: 1,
+                  }
+                }
               }
             }
           }
         }
+      },
+      payment: true,
+      timeline: {
+        orderBy: { createdAt: 'asc' }
       }
     }
   })
 
   if (!order) notFound()
 
-  const isCancelled = order.status === 'CANCELLED'
-  const activeIndex = steps.findIndex((s) => s.key === order.status)
+  const isCancelled = ['CANCELLED', 'RETURNED', 'REFUNDED'].includes(order.status)
+  
+  // Find current step index based on timeline or status
+  const currentStatusIdx = TRACKING_STEPS.indexOf(order.status as OrderStatus)
 
-  // Map snapshot JSON back to something usable
-  const address = order.shippingAddress as any || {}
+  // Map flat address columns back to an address object for the view
+  const address = {
+    fullName: order.shippingName,
+    phone: order.shippingPhone,
+    street: order.shippingStreet,
+    city: order.shippingCity,
+    state: order.shippingState,
+    postalCode: order.shippingPostalCode,
+    country: order.shippingCountry,
+  }
+
+  const cancellableStatuses = ['PENDING_PAYMENT', 'CONFIRMED', 'PROCESSING']
+  const canCancel = cancellableStatuses.includes(order.status)
+
+  const estDate = getEstimatedDeliveryDate(order.createdAt.toISOString(), order.estimatedDelivery);
+  const latestTimeline = order.timeline.length ? order.timeline[order.timeline.length - 1] : null;
+  const deliveredAt = order.status === 'DELIVERED' && latestTimeline?.status === 'DELIVERED' ? latestTimeline.createdAt : null;
+  const deliveryMsg = getDeliveryMessage(
+    order.status as OrderStatus,
+    estDate,
+    deliveredAt?.toISOString(),
+    order.payment?.paymentMethodCode // COD-aware
+  );
+  const paymentPresentation = order.payment
+    ? getPaymentPresentation(order.payment.paymentMethodCode, order.payment.status)
+    : null;
+
+  // For PENDING_PAYMENT + COD: treat as CONFIRMED for tracking progress display
+  const isCodLegacy = order.status === 'PENDING_PAYMENT' && order.payment?.paymentMethodCode === 'COD';
+  const displayStatus = isCodLegacy ? 'CONFIRMED' : order.status;
+  const displayStatusIdx = TRACKING_STEPS.indexOf(displayStatus as OrderStatus);
 
   return (
     <div className="flex flex-col gap-8">
@@ -82,8 +126,8 @@ export default async function OrderDetailPage({
         </Link>
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
-            <h1 className="font-serif text-3xl font-medium tracking-tight">Order {order.orderNumber}</h1>
-            <p className="mt-1 text-sm text-muted-foreground">
+            <h1 className="font-serif text-3xl font-medium tracking-tight">Order {order.orderNumber || order.id.slice(0,8)}</h1>
+            <p className="mt-1 flex items-center gap-2 text-sm text-muted-foreground">
               Placed{' '}
               {new Date(order.createdAt).toLocaleDateString('en-US', {
                 month: 'long',
@@ -92,63 +136,100 @@ export default async function OrderDetailPage({
               })}
             </p>
           </div>
-          <span
-            className={`rounded-full px-3 py-1.5 text-sm font-medium ${statusMeta[order.status]?.className || ''}`}
-          >
-            {statusMeta[order.status]?.label || order.status}
-          </span>
+          <div className="flex gap-2 flex-wrap">
+            {paymentPresentation && (
+              <span className={`rounded-full px-3 py-1.5 text-sm font-medium flex items-center gap-1.5 ${paymentPresentation.badgeClass}`}>
+                {paymentPresentation.isCod && <Banknote className="size-3.5" />}
+                {paymentPresentation.methodLabel}: {paymentPresentation.statusLabel}
+              </span>
+            )}
+            <span
+              className={`rounded-full px-3 py-1.5 text-sm font-medium ${isCodLegacy ? 'bg-primary/10 text-primary' : ORDER_STATUS_MAP[order.status as OrderStatus]?.className || ''}`}
+            >
+              Order: {isCodLegacy ? 'Placed' : ORDER_STATUS_MAP[order.status as OrderStatus]?.label || order.status}
+            </span>
+          </div>
         </div>
       </div>
 
       {/* Tracking timeline */}
       {!isCancelled ? (
         <div className="rounded-2xl border border-border bg-card p-6">
-          <div className="flex items-center justify-between">
-            {steps.map((step, i) => {
-              const done = i <= activeIndex
-              const Icon = done ? step.icon : CircleDashed
+          <div className="mb-6 flex items-center gap-2 text-sm font-medium">
+            <Clock className="size-4" /> 
+            <span>{deliveryMsg}</span>
+          </div>
+          <div className="flex items-start justify-between">
+            {TRACKING_STEPS.map((stepKey, i) => {
+              // Find if this step exists in timeline
+              const timelineEvent = order.timeline.find((t: any) => t.status === stepKey);
+              
+              // Use displayStatusIdx so COD orders at PENDING_PAYMENT show CONFIRMED step highlighted
+              const done = !!timelineEvent || (displayStatusIdx >= 0 && i <= displayStatusIdx);
+              const isActive = (displayStatusIdx === i) || (!timelineEvent && displayStatusIdx < 0 && i === 0 && !['PENDING_PAYMENT', 'CANCELLED', 'RETURNED', 'REFUNDED'].includes(order.status));
+              
+              const stepInfo = ORDER_STATUS_MAP[stepKey];
+              let Icon = CircleDashed;
+              if (stepKey === 'DELIVERED') Icon = Truck;
+              else if (stepKey === 'SHIPPED') Icon = Package;
+              else if (done) Icon = Check;
+              
               return (
-                <div key={step.key} className="flex flex-1 flex-col items-center gap-2 text-center">
+                <div key={stepKey} className="flex flex-1 flex-col items-center gap-3 text-center relative group">
                   <div className="flex w-full items-center">
                     <span
                       className={cn(
                         'h-0.5 flex-1',
-                        i === 0 ? 'bg-transparent' : done ? 'bg-success' : 'bg-border',
+                        i === 0 ? 'bg-transparent' : done ? 'bg-foreground' : 'bg-border',
                       )}
                     />
                     <span
                       className={cn(
-                        'grid size-9 shrink-0 place-items-center rounded-full border-2',
-                        done
-                          ? 'border-success bg-success text-background'
+                        'grid size-8 shrink-0 place-items-center rounded-full border-2 transition-colors',
+                        done || isActive
+                          ? 'border-foreground bg-foreground text-background'
                           : 'border-border bg-card text-muted-foreground',
                       )}
                     >
-                      <Icon className="size-4" />
+                      <Icon className="size-3.5" />
                     </span>
                     <span
                       className={cn(
                         'h-0.5 flex-1',
-                        i === steps.length - 1
+                        i === TRACKING_STEPS.length - 1
                           ? 'bg-transparent'
-                          : i < activeIndex
-                            ? 'bg-success'
+                          : (done && i < displayStatusIdx)
+                            ? 'bg-foreground'
                             : 'bg-border',
                       )}
                     />
                   </div>
-                  <span className={cn('text-xs font-medium', !done && 'text-muted-foreground')}>
-                    {step.label}
-                  </span>
+                  <div className="flex flex-col gap-0.5">
+                    <span className={cn('text-xs font-semibold', !(done || isActive) && 'text-muted-foreground')}>
+                      {stepInfo?.label || stepKey}
+                    </span>
+                    {timelineEvent && (
+                      <span className="text-[10px] text-muted-foreground">
+                        {new Date(timelineEvent.createdAt).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}
+                        <br/>
+                        {new Date(timelineEvent.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                      </span>
+                    )}
+                  </div>
                 </div>
               )
             })}
           </div>
         </div>
       ) : (
-        <div className="rounded-2xl border border-destructive/20 bg-destructive/5 p-5 text-sm text-destructive">
-          This order was cancelled. If you were charged, a refund has been issued to your original
-          payment method.
+        <div className="rounded-2xl border border-destructive/20 bg-destructive/5 p-5 flex flex-col gap-2">
+          <p className="text-sm font-semibold text-destructive flex items-center gap-2">
+            <XCircle className="size-4" /> Order {order.status.toLowerCase()}
+          </p>
+          <p className="text-xs text-destructive/80">
+            This order was cancelled. If you were charged, a refund has been issued to your original
+            payment method.
+          </p>
         </div>
       )}
 
@@ -158,9 +239,9 @@ export default async function OrderDetailPage({
           <h2 className="mb-4 text-lg font-semibold">Items</h2>
           <ul className="flex flex-col divide-y divide-border rounded-2xl border border-border bg-card">
             {order.items.map((line: any) => {
-              const productName = line.productName || line.variant?.product?.name || 'Unknown'
+              const productName = getOrderProductName(line)
               const price = Number(line.unitPrice || 0)
-              const image = line.variant?.product?.images?.[0]?.path || '/placeholder.svg'
+              const image = getOrderProductImage(line)
               return (
               <li key={line.id} className="flex gap-4 p-4">
                 <div className="size-20 shrink-0 overflow-hidden rounded-xl border border-border bg-muted">
@@ -172,7 +253,7 @@ export default async function OrderDetailPage({
                 </div>
                 <div className="min-w-0 flex-1">
                   <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
-                    {line.variant?.product?.brand || 'Brand'}
+                    {line.brandName || line.variant?.product?.brand || 'Brand'}
                   </p>
                   <p className="text-sm font-medium transition-colors hover:text-accent">
                     {productName}
@@ -242,6 +323,34 @@ export default async function OrderDetailPage({
             </dl>
           </div>
 
+          {/* Payment info card */}
+          {paymentPresentation && (
+            <div className="rounded-2xl border border-border bg-card p-5">
+              <h2 className="mb-3 text-sm font-semibold">Payment</h2>
+              <div className="flex flex-col gap-2.5 text-sm">
+                <div className="flex items-center justify-between">
+                  <span className="text-muted-foreground">{paymentPresentation.methodLabel}</span>
+                  <span className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${paymentPresentation.badgeClass}`}>
+                    {paymentPresentation.statusLabel}
+                  </span>
+                </div>
+                {paymentPresentation.isCod && !paymentPresentation.isPaid && (
+                  <p className="text-xs text-teal-600 dark:text-teal-400 font-medium">
+                    💵 Pay {formatPrice(Number(order.grandTotal))} when your order arrives
+                  </p>
+                )}
+                {paymentPresentation.isCod && paymentPresentation.isPaid && order.payment?.paidAt && (
+                  <p className="text-xs text-muted-foreground">
+                    Collected on {new Date(order.payment.paidAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                  </p>
+                )}
+                {!paymentPresentation.isCod && paymentPresentation.isPaid && (
+                  <p className="text-xs text-muted-foreground">Payment received ✓</p>
+                )}
+              </div>
+            </div>
+          )}
+
           <div className="rounded-2xl border border-border bg-card p-5">
             <h2 className="mb-3 flex items-center gap-2 text-sm font-semibold">
               <MapPin className="size-4" /> Shipping address
@@ -258,6 +367,25 @@ export default async function OrderDetailPage({
           </div>
         </aside>
       </div>
+
+      {/* Cancel Order */}
+      {canCancel && (
+        <div className="rounded-2xl border border-destructive/20 bg-destructive/5 p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <p className="text-sm font-semibold text-destructive">Cancel this order?</p>
+            <p className="text-xs text-muted-foreground mt-0.5">You can cancel before it is packed or shipped.</p>
+          </div>
+          <form action={`/api/v1/orders/${order.id}/cancel`} method="POST">
+            <button
+              type="submit"
+              className="inline-flex h-9 items-center gap-1.5 rounded-full border border-destructive/30 bg-background px-5 text-xs font-semibold text-destructive transition-colors hover:bg-destructive/10"
+            >
+              <XCircle className="size-3.5" />
+              Cancel Order
+            </button>
+          </form>
+        </div>
+      )}
     </div>
   )
 }

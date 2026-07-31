@@ -1,6 +1,7 @@
 import { prisma } from '@corecart/database';
 import { OrderStatus } from '@prisma/client';
 import { AppError } from '@corecart/shared';
+import { inventoryService } from '../inventory/inventory.service';
 
 // ─────────────────────────────────────────────
 // Types
@@ -380,6 +381,25 @@ export const orderMerchantService = {
       });
     }
 
+    // Release inventory when order is cancelled by merchant
+    if (action === 'CANCEL') {
+      const items = await prisma.orderItem.findMany({ where: { orderId } });
+      for (const item of items) {
+        if (item.variantId) {
+          try {
+            await inventoryService.release(
+              item.variantId,
+              item.quantity,
+              orderId,
+              'Released — order cancelled by merchant'
+            );
+          } catch (err: any) {
+            console.error(`[Inventory] Release failed for variant ${item.variantId}:`, err.message);
+          }
+        }
+      }
+    }
+
     return updated;
   },
 
@@ -453,6 +473,53 @@ export const orderMerchantService = {
     });
 
     return { success: true };
+  },
+
+  // ── COD Payment Collection ───────────────────
+
+  async markCodPaymentCollected(orderId: string, actor: string) {
+    const order = await prisma.order.findUnique({
+      where: { id: orderId },
+      include: { payment: true },
+    });
+    if (!order) throw new AppError('Order not found', 404);
+
+    const payment = order.payment;
+    if (!payment) throw new AppError('No payment record found for this order', 400);
+
+    // Guard: only for COD
+    if (payment.paymentMethodCode !== 'COD') {
+      throw new AppError('markCodPaymentCollected is only valid for Cash on Delivery orders', 400);
+    }
+
+    // Guard: only if still pending (prevent double-collection)
+    if (payment.status !== 'PENDING') {
+      throw new AppError(
+        `Payment is already in status ${payment.status}. Cannot mark as collected again.`,
+        400
+      );
+    }
+
+    // Mark payment as captured (cash received)
+    await prisma.payment.update({
+      where: { id: payment.id },
+      data: {
+        status: 'CAPTURED',
+        paidAt: new Date(),
+      },
+    });
+
+    // Timeline event: who collected, when
+    await prisma.orderTimeline.create({
+      data: {
+        orderId,
+        status: 'PAYMENT_COLLECTED',
+        message: `Cash on Delivery payment collected by ${actor}`,
+        createdBy: actor,
+      },
+    });
+
+    return { success: true, collectedBy: actor, collectedAt: new Date().toISOString() };
   },
 
   // ── Bulk Actions ─────────────────────────────

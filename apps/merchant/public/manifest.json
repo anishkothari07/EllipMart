@@ -1,0 +1,42 @@
+{
+  "name": "SmartGO Elevated Everyday Commerce",
+  "short_name": "SmartGO",
+  "description": "Curated collections, luxury essentials, and the season’s best.",
+  "start_url": "/",
+  "id": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#fbfbf9",
+  "theme_color": "#FF5733",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/favicon.ico",
+      "sizes": "32x32",
+      "type": "image/x-icon"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Cart",
+      "url": "/cart",
+      "description": "View your shopping cart"
+    },
+    {
+      "name": "Wishlist",
+      "url": "/account/wishlist",
+      "description": "View your wishlist items"
+    }
+  ]
+}

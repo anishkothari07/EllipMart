@@ -18,6 +18,8 @@ import { FulfillmentPanel } from '@/components/merchant/order/FulfillmentPanel';
 import { StatusUpdatePanel } from '@/components/merchant/order/StatusUpdatePanel';
 import { CommunicationPanel } from '@/components/merchant/order/CommunicationPanel';
 import { RefundDialog } from '@/components/merchant/order/RefundDialog';
+import { PaymentPanel } from '@/components/merchant/order/PaymentPanel';
+
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -155,6 +157,11 @@ export default function MerchantOrderDetailPage({ params }: PageProps) {
         <div className="space-y-6">
           {/* Order Summary costs */}
           <OrderSummary order={order} />
+
+          {/* Payment Panel: COD collection, payment status */}
+          {order.payment && (
+            <PaymentPanel order={order} onSuccess={loadOrder} />
+          )}
 
           {/* Fulfillment Panel */}
           <FulfillmentPanel orderId={order.id} status={order.status} onSuccess={loadOrder} />

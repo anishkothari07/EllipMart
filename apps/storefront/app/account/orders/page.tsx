@@ -24,12 +24,21 @@ export default async function OrdersPage() {
             include: {
               product: {
                 include: {
-                  images: true
+                  images: {
+                    include: { media: true },
+                    orderBy: { sortOrder: 'asc' },
+                    take: 1,
+                  }
                 }
               }
             }
           }
         }
+      },
+      payment: true,
+      timeline: {
+        orderBy: { createdAt: 'desc' },
+        take: 1
       }
     }
   })
@@ -37,14 +46,28 @@ export default async function OrdersPage() {
   // Convert Date objects to strings for serialization to Client Component
   const serializedOrders = orders.map(o => ({
     ...o,
+    subTotal: o.subTotal.toString(),
+    discountTotal: o.discountTotal.toString(),
+    taxTotal: o.taxTotal.toString(),
+    shippingTotal: o.shippingTotal.toString(),
+    grandTotal: o.grandTotal.toString(),
     createdAt: o.createdAt.toISOString(),
     updatedAt: o.updatedAt.toISOString(),
+    // Serialize payment for client use
+    paymentMethodCode: o.payment?.paymentMethodCode ?? null,
+    paymentStatus: o.payment?.status ?? null,
     lines: o.items.map((l: any) => ({
       ...l,
+      unitPrice: l.unitPrice?.toString(),
+      discount: l.discount?.toString(),
+      tax: l.tax?.toString(),
+      totalPrice: l.totalPrice?.toString(),
       product: {
         ...(l.variant?.product || {}),
         name: l.variant?.product?.name || l.productName || 'Unknown Product',
-        images: l.variant?.product?.images?.map((img: any) => ({ ...img, createdAt: img.createdAt.toISOString(), updatedAt: img.updatedAt.toISOString() })) || []
+        imagePath: l.variant?.product?.images?.[0]?.media?.publicUrl
+          || l.variant?.product?.images?.[0]?.media?.path
+          || null,
       }
     }))
   }))

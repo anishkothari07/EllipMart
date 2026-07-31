@@ -32,3 +32,4 @@ export * from './events/domain-event.bus';
 export * from './responsive/responsive-hooks';
 export * from './motion/presets';
 export * from './motion/tokens';
+export * from './utils/order';

@@ -298,10 +298,10 @@ export function CheckoutView() {
       const data = await res.json()
       if (data.success) {
         clearCart()
-        const orderNum = data.data?.orderNumber || data.data?.orderId || `ORD-${Date.now()}`
-        router.push(`/checkout/success?order=${orderNum}`)
+        const orderId = data.data?.orderId
+        router.push(`/checkout/success?order=${orderId}`)
       } else {
-        setErrorMsg(data.error || data.message || 'Failed to place order. Please try again.')
+        setErrorMsg(data.message || 'Failed to place order. Please try again.')
         setPlacing(false)
       }
     } catch (e: any) {
