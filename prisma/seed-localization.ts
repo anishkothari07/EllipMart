@@ -2,7 +2,7 @@ import 'dotenv/config';
 import { PrismaClient } from "@prisma/client";
 import { PrismaMariaDb } from "@prisma/adapter-mariadb";
 
-const databaseUrl = process.env.DATABASE_URL || "mysql://root:@localhost:3306/smartgo";
+const databaseUrl = process.env.DATABASE_URL;
 const adapter = new PrismaMariaDb(databaseUrl.replace("mysql://", "mariadb://"));
 const prisma = new PrismaClient({ adapter });
 

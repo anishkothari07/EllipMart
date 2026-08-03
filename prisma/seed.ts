@@ -1,7 +1,9 @@
-import { PrismaClient, ProductStatus, ProductVisibility } from '@prisma/client';
+import 'dotenv/config';
+import { ProductStatus, ProductVisibility } from '@prisma/client';
 import { faker } from '@faker-js/faker';
-
-const prisma = new PrismaClient();
+import fs from 'fs';
+import path from 'path';
+import { prisma } from '../packages/database/src/index';
 
 async function main() {
   faker.seed(2026);
@@ -116,30 +118,25 @@ async function main() {
   // 7. Products (300), Variants (800), Inventory (300?), Movements (2000)
   // Wait, user asked for "300 Inventory records" -> This implies only some variants have inventory, 
   // or maybe 800 inventory records (1 per variant) makes more sense. Let's create an inventory for each variant, so 800 inventories, but 2000 movements.
-  console.log('Creating 300 Products with Variants, Pricing, and Inventory...');
+  console.log('Creating 300 Products with Variants, Pricing, and Inventory in batches...');
 
-  // 6.5. Seed Media records for products (20)
-  const productImagesList = [
-    'p-backpack.png', 'p-bag.png', 'p-boots.png', 'p-candle.png', 'p-chair.png',
-    'p-coat.png', 'p-earbuds.png', 'p-headphones.png', 'p-jeans.png', 'p-lamp.png',
-    'p-perfume.png', 'p-scarf.png', 'p-serum.png', 'p-smartwatch.png', 'p-sneaker.png',
-    'p-speaker.png', 'p-sunglasses.png', 'p-sweater.png', 'p-wallet.png', 'p-watch.png'
-  ];
+  // 6.5. Seed Media records from Cloudinary JSON
+  const cloudinaryMediaData = JSON.parse(fs.readFileSync(path.join(process.cwd(), 'cloudinary-seed-media.json'), 'utf-8'));
+  const mediaRecords = cloudinaryMediaData.map((m: any) => ({
+    id: m.id,
+    assetType: m.assetType,
+    assetKey: m.assetKey,
+    filename: m.filename,
+    originalName: m.originalName,
+    mimeType: m.mimeType,
+    size: m.size,
+    storageProvider: m.storageProvider,
+    path: m.path,
+    publicUrl: m.publicUrl
+  }));
 
-  const mediaRecords = [];
-  for (const filename of productImagesList) {
-    mediaRecords.push({
-      id: faker.string.uuid(),
-      filename,
-      originalName: filename,
-      mimeType: 'image/png',
-      size: 1024,
-      storageProvider: 'LOCAL',
-      path: `/images/${filename}`
-    });
-  }
   await prisma.media.createMany({ data: mediaRecords });
-  console.log('Created 20 Media records for product images');
+  console.log(`Created ${mediaRecords.length} Media records for product images from Cloudinary`);
 
   for (let i = 0; i < 300; i++) {
     const productId = faker.string.uuid();
@@ -217,7 +214,10 @@ async function main() {
       }
     });
 
-    if (i % 50 === 0) console.log(`... ${i}/300 products created`);
+    if (i > 0 && i % 10 === 0) {
+      console.log(`... ${i}/300 products created`);
+      await new Promise(res => setTimeout(res, 500)); // Sleep 500ms between batches to prevent DB overload
+    }
   }
   
   console.log('Seed completed successfully!');
