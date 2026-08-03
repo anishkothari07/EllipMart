@@ -5,7 +5,19 @@ import { MerchantOrderClient } from '@/lib/services/merchant-order-client';
 import { OrderFilters, OrderFiltersState } from '@/components/merchant/order/OrderFilters';
 import { OrderTable } from '@/components/merchant/order/OrderTable';
 import { RefreshCw, ArrowLeft, ArrowRight, CheckCircle2, ChevronRight } from 'lucide-react';
-import { OrderStatus } from '@prisma/client';
+// OrderStatus values duplicated here to avoid importing @prisma/client in a client component
+const OrderStatus = {
+  PENDING_PAYMENT: 'PENDING_PAYMENT',
+  CONFIRMED: 'CONFIRMED',
+  PROCESSING: 'PROCESSING',
+  PACKED: 'PACKED',
+  SHIPPED: 'SHIPPED',
+  DELIVERED: 'DELIVERED',
+  CANCELLED: 'CANCELLED',
+  RETURNED: 'RETURNED',
+  REFUNDED: 'REFUNDED',
+} as const;
+type OrderStatus = (typeof OrderStatus)[keyof typeof OrderStatus];
 
 export default function MerchantOrderListPage() {
   const [orders, setOrders] = useState<any[]>([]);

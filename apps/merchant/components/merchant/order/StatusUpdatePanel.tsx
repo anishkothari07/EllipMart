@@ -2,7 +2,19 @@
 
 import React, { useState } from 'react';
 import { Settings, Check, AlertCircle } from 'lucide-react';
-import { OrderStatus } from '@prisma/client';
+// OrderStatus values duplicated here to avoid importing @prisma/client in a client component
+const OrderStatus = {
+  PENDING_PAYMENT: 'PENDING_PAYMENT',
+  CONFIRMED: 'CONFIRMED',
+  PROCESSING: 'PROCESSING',
+  PACKED: 'PACKED',
+  SHIPPED: 'SHIPPED',
+  DELIVERED: 'DELIVERED',
+  CANCELLED: 'CANCELLED',
+  RETURNED: 'RETURNED',
+  REFUNDED: 'REFUNDED',
+} as const;
+type OrderStatus = (typeof OrderStatus)[keyof typeof OrderStatus];
 import { MerchantOrderClient } from '@/lib/services/merchant-order-client';
 
 interface StatusUpdatePanelProps {

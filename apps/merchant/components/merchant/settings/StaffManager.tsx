@@ -3,7 +3,13 @@
 import React, { useState } from 'react';
 import { Users, Plus, Trash2, Edit2, ShieldAlert, CheckCircle2, UserCheck } from 'lucide-react';
 import { MerchantOperationsClient } from '@/lib/services/merchant-operations-client';
-import { UserStatus } from '@prisma/client';
+// UserStatus values duplicated here to avoid importing @prisma/client in a client component
+const UserStatus = {
+  ACTIVE: 'ACTIVE',
+  PENDING_VERIFICATION: 'PENDING_VERIFICATION',
+  SUSPENDED: 'SUSPENDED',
+} as const;
+type UserStatus = (typeof UserStatus)[keyof typeof UserStatus];
 import { cn } from '@corecart/shared';
 
 interface StaffManagerProps {

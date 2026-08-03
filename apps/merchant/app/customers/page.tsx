@@ -4,7 +4,13 @@ import React, { useEffect, useState } from 'react';
 import { MerchantCustomerClient } from '@/lib/services/merchant-customer-client';
 import { CustomerTable } from '@/components/merchant/customer/CustomerTable';
 import { RefreshCw, Search, X, ChevronRight, ArrowLeft, ArrowRight, CheckCircle2 } from 'lucide-react';
-import { UserStatus } from '@prisma/client';
+// UserStatus values duplicated here to avoid importing @prisma/client in a client component
+const UserStatus = {
+  ACTIVE: 'ACTIVE',
+  PENDING_VERIFICATION: 'PENDING_VERIFICATION',
+  SUSPENDED: 'SUSPENDED',
+} as const;
+type UserStatus = (typeof UserStatus)[keyof typeof UserStatus];
 import { cn } from '@corecart/shared';
 
 const SEGMENTS = [
