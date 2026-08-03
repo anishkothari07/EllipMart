@@ -4,7 +4,6 @@ import { AnimatePresence, motion } from 'framer-motion'
 import { LayoutGrid, List, PackageOpen, SlidersHorizontal, X } from 'lucide-react'
 import Image from 'next/image'
 import { useMemo, useState } from 'react'
-import type { Category } from '@corecart/database'
 import type { Product } from '@corecart/shared'
 import { cn } from '@corecart/shared'
 import { Container } from '@corecart/ui'
@@ -31,7 +30,7 @@ export function CategoryView({
   bannerImage,
   products,
 }: {
-  category?: Category
+  category?: any
   title: string
   description?: string
   bannerImage: string
