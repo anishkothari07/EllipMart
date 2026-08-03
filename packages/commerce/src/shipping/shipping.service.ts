@@ -30,7 +30,7 @@ export const shippingService = {
       }
     });
 
-    const options = [];
+    const options: { id: string; zoneId: string; providerName: string; methodName: string; cost: number; estDays: string }[] = [];
     for (const zone of zones) {
       for (const rate of zone.rates) {
         const cost = ShippingCalculator.calculate(subtotal, rate);

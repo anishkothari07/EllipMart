@@ -23,7 +23,7 @@ export class CheckoutValidationPipeline {
     }));
 
     // 3. Validate Address
-    let address = null;
+    let address: any = null;
     if (input.addressId) {
       address = await prisma.address.findUnique({ where: { id: input.addressId } });
       if (!address || address.userId !== userId) throw new AppError('Invalid shipping address', 400);

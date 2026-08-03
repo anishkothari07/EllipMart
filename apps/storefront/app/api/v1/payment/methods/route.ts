@@ -20,7 +20,7 @@ export async function GET(req: NextRequest) {
 
     const evaluatedMethods = methods.map(method => {
       let isAvailable = true;
-      let reason = undefined;
+      let reason: string | undefined = undefined;
 
       // Evaluate Rules
       if (method.rules && method.rules.length > 0) {

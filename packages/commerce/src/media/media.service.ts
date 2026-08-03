@@ -545,7 +545,7 @@ export class MediaService {
   }
 
   async bulkDelete(mediaIds: string[], force: boolean = false) {
-    const results = [];
+    const results: Array<{ id: string; success: boolean; res?: any; error?: string }> = [];
     for (const id of mediaIds) {
       try {
         const res = await this.deleteMedia(id, force);

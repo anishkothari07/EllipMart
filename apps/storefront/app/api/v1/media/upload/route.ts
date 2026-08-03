@@ -18,7 +18,7 @@ export async function POST(req: NextRequest) {
     const collectionsRaw = formData.get("collectionIds") as string;
     const collectionIds = collectionsRaw ? collectionsRaw.split(",").map(c => c.trim()).filter(Boolean) : [];
 
-    const results = [];
+    const results: any[] = [];
     for (const file of files) {
       const buffer = Buffer.from(await file.arrayBuffer());
       const res = await mediaService.uploadMedia({

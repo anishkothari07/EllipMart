@@ -214,7 +214,7 @@ export class AuthService {
     if (!isMatch) {
       console.log('[DEBUG] Password does not match. Incrementing failed login attempts.');
       const attempts = user.failedLoginAttempts + 1;
-      let lockedUntil = null;
+      let lockedUntil: Date | null = null;
       if (attempts >= env.MAX_LOGIN_ATTEMPTS) {
         lockedUntil = new Date(Date.now() + env.LOCK_DURATION_MINUTES * 60 * 1000);
         console.log('[DEBUG] Max attempts reached, locking account until:', lockedUntil);

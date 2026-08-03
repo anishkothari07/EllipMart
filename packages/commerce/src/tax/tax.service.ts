@@ -20,7 +20,7 @@ export const taxService = {
     });
 
     let totalTax = 0;
-    const summary = [];
+    const summary: { name: string; rate: number; amount: number }[] = [];
 
     for (const rule of rules) {
       const amount = TaxCalculator.calculate(subtotal, Number(rule.rate));
