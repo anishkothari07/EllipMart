@@ -130,7 +130,7 @@ export class MerchantDashboardService {
       },
     });
 
-    const items = lowStockItems.map((inv) => ({
+    const items = lowStockItems.map((inv: any) => ({
       sku: inv.variant.sku,
       productName: inv.variant.product.name,
       variantName: inv.variant.name,
