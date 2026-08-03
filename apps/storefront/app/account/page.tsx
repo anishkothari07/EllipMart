@@ -57,15 +57,15 @@ export default async function AccountDashboardPage() {
   })
 
   const activeOrder = orders.find(
-    (o) => o.status === 'SHIPPED' || o.status === 'PROCESSING' || o.status === 'PACKED' || o.status === 'CONFIRMED'
+    (o: typeof orders[number]) => o.status === 'SHIPPED' || o.status === 'PROCESSING' || o.status === 'PACKED' || o.status === 'CONFIRMED'
   )
   const recent = orders.slice(0, 3)
   
   // Lifetime spend = sum of all successful orders
   const excludedStatuses = ['CANCELLED', 'RETURNED', 'REFUNDED']
   const totalSpent = orders
-    .filter((o) => !excludedStatuses.includes(o.status))
-    .reduce((sum, o) => sum + Number(o.grandTotal), 0)
+    .filter((o: typeof orders[number]) => !excludedStatuses.includes(o.status))
+    .reduce((sum: number, o: typeof orders[number]) => sum + Number(o.grandTotal), 0)
 
   const stats = [
     { label: 'Total orders', value: orders.length, icon: Package },
@@ -165,7 +165,7 @@ export default async function AccountDashboardPage() {
           </div>
         ) : (
           <ul className="flex flex-col gap-4">
-            {recent.map((order) => {
+            {recent.map((order: typeof orders[number]) => {
               const image = getOrderProductImage(order.items[0]);
               const estDate = getEstimatedDeliveryDate(order.createdAt.toISOString(), order.estimatedDelivery);
               

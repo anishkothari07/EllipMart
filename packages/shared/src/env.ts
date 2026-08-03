@@ -11,11 +11,23 @@ const envSchema = z.object({
   LOCK_DURATION_MINUTES: z.coerce.number().default(30),
 });
 
-const _env = typeof window === 'undefined' ? envSchema.safeParse(process.env) : { success: true, data: process.env as any };
+export type Env = z.infer<typeof envSchema>;
 
-if (!_env.success) {
-  console.error('❌ Invalid environment variables:', _env.error.format());
-  throw new Error('Invalid environment variables');
+// On the client side, process.env won't have server-only vars — skip validation
+const isServer = typeof window === 'undefined';
+
+let _envData: Env;
+
+if (isServer) {
+  const _env = envSchema.safeParse(process.env);
+  if (!_env.success) {
+    console.error('❌ Invalid environment variables:', _env.error.format());
+    throw new Error('Invalid environment variables');
+  }
+  _envData = _env.data;
+} else {
+  // Client: return a best-effort object without throwing
+  _envData = process.env as unknown as Env;
 }
 
-export const env = _env.data as z.infer<typeof envSchema>;
+export const env = _envData;
