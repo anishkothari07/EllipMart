@@ -24,10 +24,10 @@ export class PrismaManifestRepository implements ManifestRepository {
     // Use activeVersionId if present, otherwise fall back to versions list
     let activeVersion = null;
     if (website.activeVersionId) {
-      activeVersion = website.versions.find((v) => v.id === website.activeVersionId);
+      activeVersion = website.versions.find((v: any) => v.id === website.activeVersionId);
     }
     if (!activeVersion) {
-      activeVersion = website.versions.find((v) => v.isLive);
+      activeVersion = website.versions.find((v: any) => v.isLive);
     }
     if (!activeVersion) return null;
 
