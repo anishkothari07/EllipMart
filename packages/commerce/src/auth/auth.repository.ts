@@ -1,6 +1,5 @@
 import { prisma } from '@corecart/database';
-import { TokenType } from '@prisma/client';
-import type { User, Token, UserSession, Prisma } from '@prisma/client';
+import type { User, Token, UserSession, Prisma, TokenType } from '@prisma/client';
 
 export class AuthRepository {
   async findUserByEmail(email: string): Promise<User | null> {
