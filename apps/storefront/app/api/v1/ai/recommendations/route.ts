@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma as db, Product } from '@corecart/database';
+import { prisma as db, Prisma } from '@corecart/database';
+
+type Product = Prisma.ProductGetPayload<Record<string, never>>;
 
 export async function GET(req: NextRequest) {
   try {
