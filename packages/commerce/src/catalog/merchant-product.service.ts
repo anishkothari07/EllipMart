@@ -1,6 +1,6 @@
 import { prisma } from '@corecart/database';
 import { AppError } from '@corecart/shared';
-import { Prisma } from '@prisma/client';
+import type { Prisma } from '@prisma/client';
 
 export interface MerchantProductListItem {
   id: string;
@@ -313,15 +313,15 @@ export class MerchantProductService {
           await tx.productPrice.upsert({
             where: { productVariantId: defaultVariant.id },
             update: {
-              mrp: new Prisma.Decimal(price.mrp || price.sellingPrice || 0),
-              sellingPrice: new Prisma.Decimal(price.sellingPrice || 0),
-              costPrice: price.costPrice ? new Prisma.Decimal(price.costPrice) : null,
+              mrp: price.mrp || price.sellingPrice || 0,
+              sellingPrice: price.sellingPrice || 0,
+              costPrice: price.costPrice ? price.costPrice : null,
             },
             create: {
               productVariantId: defaultVariant.id,
-              mrp: new Prisma.Decimal(price.mrp || price.sellingPrice || 0),
-              sellingPrice: new Prisma.Decimal(price.sellingPrice || 0),
-              costPrice: price.costPrice ? new Prisma.Decimal(price.costPrice) : null,
+              mrp: price.mrp || price.sellingPrice || 0,
+              sellingPrice: price.sellingPrice || 0,
+              costPrice: price.costPrice ? price.costPrice : null,
             },
           });
         }
@@ -394,15 +394,15 @@ export class MerchantProductService {
           await tx.productPrice.upsert({
             where: { productVariantId: firstVar.id },
             update: {
-              mrp: new Prisma.Decimal(price.mrp || price.sellingPrice || 0),
-              sellingPrice: new Prisma.Decimal(price.sellingPrice || 0),
-              costPrice: price.costPrice ? new Prisma.Decimal(price.costPrice) : null,
+              mrp: price.mrp || price.sellingPrice || 0,
+              sellingPrice: price.sellingPrice || 0,
+              costPrice: price.costPrice ? price.costPrice : null,
             },
             create: {
               productVariantId: firstVar.id,
-              mrp: new Prisma.Decimal(price.mrp || price.sellingPrice || 0),
-              sellingPrice: new Prisma.Decimal(price.sellingPrice || 0),
-              costPrice: price.costPrice ? new Prisma.Decimal(price.costPrice) : null,
+              mrp: price.mrp || price.sellingPrice || 0,
+              sellingPrice: price.sellingPrice || 0,
+              costPrice: price.costPrice ? price.costPrice : null,
             },
           });
         }

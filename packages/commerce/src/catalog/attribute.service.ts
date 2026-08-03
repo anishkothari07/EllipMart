@@ -1,7 +1,7 @@
 import { attributeRepository } from './attribute.repository';
 import { CreateAttributeInput, UpdateAttributeInput, AttributeSearchInput } from './attribute.dto';
 import { AppError } from '@corecart/shared';
-import { Prisma } from '@prisma/client';
+import type { Prisma } from '@prisma/client';
 
 export class AttributeService {
   async createAttribute(input: CreateAttributeInput) {

@@ -1,7 +1,7 @@
 import { brandRepository } from './brand.repository';
 import { CreateBrandInput, UpdateBrandInput, BrandSearchInput } from './brand.dto';
 import { AppError } from '@corecart/shared';
-import { Prisma } from '@prisma/client';
+import type { Prisma } from '@prisma/client';
 
 export class BrandService {
   async createBrand(input: CreateBrandInput) {

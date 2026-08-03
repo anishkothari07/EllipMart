@@ -1,7 +1,7 @@
 import { inventoryRepository } from './inventory.repository';
 import { CreateInventoryMovementInput, UpdateInventoryInput, InventorySearchInput } from './inventory.dto';
 import { AppError } from '@corecart/shared';
-import { Prisma } from '@prisma/client';
+import type { Prisma } from '@prisma/client';
 
 export class InventoryService {
   async getInventoryById(id: string) {

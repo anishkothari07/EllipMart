@@ -1,4 +1,5 @@
-import { Prisma, Category } from '@prisma/client';
+import { Category } from '@prisma/client';
+import type { Prisma } from '@prisma/client';
 import { prisma } from '@corecart/database';
 
 export class CategoryRepository {
