@@ -8,7 +8,7 @@ export class LocalStorageProvider implements IStorageProvider {
   private baseUrl: string;
 
   constructor(uploadDir?: string, baseUrl?: string) {
-    this.uploadDir = uploadDir || path.join(process.cwd(), "public", "uploads");
+    this.uploadDir = uploadDir || path.join(/*turbopackIgnore: true*/ process.cwd(), "public", "uploads");
     this.baseUrl = baseUrl || "/uploads";
   }
 

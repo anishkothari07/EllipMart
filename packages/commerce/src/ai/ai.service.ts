@@ -12,7 +12,7 @@ export class AIService {
 
     if (!requiredApiKey) {
       try {
-        const rootEnvPath = path.resolve(process.cwd(), '../../.env');
+        const rootEnvPath = path.resolve(/*turbopackIgnore: true*/ process.cwd(), '../../.env');
         if (fs.existsSync(rootEnvPath)) {
           const content = fs.readFileSync(rootEnvPath, 'utf8');
           const match = content.match(/GEMINI_API_KEY=["']?([^"'\n\r]+)["']?/);
@@ -21,7 +21,7 @@ export class AIService {
             process.env.GEMINI_API_KEY = requiredApiKey;
           }
         } else {
-          const fallbackEnvPath = path.resolve(process.cwd(), '.env');
+          const fallbackEnvPath = path.resolve(/*turbopackIgnore: true*/ process.cwd(), '.env');
           if (fs.existsSync(fallbackEnvPath)) {
             const content = fs.readFileSync(fallbackEnvPath, 'utf8');
             const match = content.match(/GEMINI_API_KEY=["']?([^"'\n\r]+)["']?/);

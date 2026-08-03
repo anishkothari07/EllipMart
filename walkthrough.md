@@ -75,3 +75,21 @@ Product API Response: {
 ```
 
 Everything compiled and executed successfully!
+
+---
+
+## Turbopack NFT Tracing Warnings Fix
+- **Files Modified**:
+  - [packages/commerce/src/media/storage/local.storage.ts](file:///c:/Users/Lenovo/Music/SmartGO/packages/commerce/src/media/storage/local.storage.ts)
+  - [packages/commerce/src/ai/ai.service.ts](file:///c:/Users/Lenovo/Music/SmartGO/packages/commerce/src/ai/ai.service.ts)
+- **Details**: Added `/*turbopackIgnore: true*/` comments inside the dynamic filesystem lookups (e.g., `path.join`/`path.resolve`) using `process.cwd()`.
+- **Why it was broken**: Dynamic filesystem operations referencing `process.cwd()` triggered Next.js/Turbopack's Next File Trace (NFT) scanner to trace the entire workspace directory, leading to compiler warnings about unexpected files tracked during builds.
+- **Why the fix is correct**: Instructing Turbopack to ignore tracing those specific dynamic directory paths prevents the scanner from mapping the whole project and successfully resolves the build warnings.
+
+### Prisma Client Generation Build Integration
+- **File Modified**: [packages/database/package.json](file:///c:/Users/Lenovo/Music/SmartGO/packages/database/package.json)
+- **Details**: Added a `"build": "prisma generate"` script.
+- **Why it was broken**: In fresh containers/clean environments (such as Vercel builds), the Prisma Client does not pre-exist. Since `@corecart/database` lacked a `build` task, Next.js build compilation ran without the generated Client, failing with a compilation error: `Type error: Module '"@prisma/client"' has no exported member 'Prisma'`.
+- **Why the fix is correct**: Because the main build task in Turborepo utilizes `"dependsOn": ["^build"]`, adding the build script guarantees that `@corecart/database` runs `prisma generate` before any application or library dependent on it starts compiling, resolving the build failure.
+
+
