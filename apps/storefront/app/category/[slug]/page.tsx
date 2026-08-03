@@ -35,6 +35,8 @@ export async function generateMetadata({
   }
 }
 
+export const dynamic = 'force-dynamic';
+
 export default async function CategoryPage({
   params,
 }: {
@@ -60,11 +62,11 @@ export default async function CategoryPage({
 
   const title = category?.name ?? special?.title ?? 'Shop'
   const description = category?.description ?? special?.description
-  const bannerImage = category?.banner?.url ?? special?.image ?? '/images/cat-fashion.png'
+  const bannerImage = category?.banner?.path ?? special?.image ?? '/images/cat-fashion.png'
 
   return (
     <CategoryView
-      category={category}
+      category={category || undefined}
       title={title}
       description={description}
       bannerImage={bannerImage}

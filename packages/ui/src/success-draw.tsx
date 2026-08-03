@@ -46,7 +46,7 @@ export function SuccessDraw({
           strokeLinejoin="round"
           initial={{ pathLength: 0 }}
           animate={{ pathLength: 1 }}
-          transition={{ duration: 0.4, delay: 0.45, ease: springs.snap.ease || "easeOut" }}
+          transition={{ duration: 0.4, delay: 0.45, ease: "easeOut" }}
         />
       </svg>
       

@@ -1,7 +1,7 @@
 'use client'
 
 import { CheckCircle2, ThumbsUp } from 'lucide-react'
-import type { Review } from '@corecart/types'
+import type { Review } from '@corecart/shared'
 import { StarRating } from '@corecart/ui'
 
 export function ProductReviews({

@@ -7,13 +7,18 @@ import { Testimonials } from '@/components/home/testimonials'
 import { Newsletter } from '@/components/home/newsletter'
 import { shoppingProductService } from '@corecart/commerce'
 
-export default async function HomePage() {
-  const result = await shoppingProductService.listProducts({ limit: 12 });
-  const products = result.items;
+export const dynamic = 'force-dynamic';
 
-  const bestSellers = products.filter((p) => p.isBestSeller).slice(0, 4)
-  const newArrivals = products.filter((p) => p.isNew).slice(0, 4)
-  const trending = [...products].sort((a, b) => b.reviewCount - a.reviewCount).slice(0, 8)
+export default async function HomePage() {
+  const [bestSellersRes, newArrivalsRes, trendingRes] = await Promise.all([
+    shoppingProductService.listProducts({ sort: 'sales_desc', limit: 4 }),
+    shoppingProductService.listProducts({ sort: 'newest', limit: 4 }),
+    shoppingProductService.listProducts({ sort: 'popular', limit: 8 }),
+  ]);
+
+  const bestSellers = bestSellersRes.items;
+  const newArrivals = newArrivalsRes.items;
+  const trending = trendingRes.items;
 
   return (
     <>

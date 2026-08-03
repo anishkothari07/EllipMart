@@ -1,4 +1,4 @@
-import { logger } from '@/lib/observability/logger';
+import { logger } from '../utils/logger';
 
 export interface RedisStatus {
   status: 'connected' | 'disconnected' | 'disabled';

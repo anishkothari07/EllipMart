@@ -2,6 +2,7 @@
 
 import { OrderStatus } from '@prisma/client';
 import { orderMerchantService, MerchantOrderListParams } from '@corecart/commerce/src/order/order-merchant.service';
+import { requireMerchantAccess } from '@corecart/shared/src/auth';
 import { revalidatePath } from 'next/cache';
 
 // ─────────────────────────────────────────────
@@ -10,6 +11,7 @@ import { revalidatePath } from 'next/cache';
 
 export async function fetchOrdersAction(params: MerchantOrderListParams) {
   try {
+    await requireMerchantAccess();
     const data = await orderMerchantService.listOrders(params);
     return { success: true, data: JSON.parse(JSON.stringify(data)) };
   } catch (error: any) {
@@ -19,6 +21,7 @@ export async function fetchOrdersAction(params: MerchantOrderListParams) {
 
 export async function fetchOrderStatusCountsAction() {
   try {
+    await requireMerchantAccess();
     const data = await orderMerchantService.getOrderStatusCounts();
     return { success: true, data };
   } catch (error: any) {
@@ -32,6 +35,7 @@ export async function fetchOrderStatusCountsAction() {
 
 export async function fetchOrderDetailAction(orderId: string) {
   try {
+    await requireMerchantAccess();
     const data = await orderMerchantService.getOrderDetail(orderId);
     return { success: true, data: JSON.parse(JSON.stringify(data)) };
   } catch (error: any) {
@@ -49,7 +53,9 @@ export async function updateOrderStatusAction(
   note?: string,
 ) {
   try {
-    await orderMerchantService.updateOrderStatus(orderId, status, note, 'MERCHANT');
+    const user = await requireMerchantAccess();
+    const actor = `${user.firstName} ${user.lastName} (Merchant)`;
+    await orderMerchantService.updateOrderStatus(orderId, status, note, actor);
     revalidatePath('/orders');
     revalidatePath(`/orders/${orderId}`);
     return { success: true };
@@ -73,7 +79,9 @@ export async function fulfillOrderAction(
   },
 ) {
   try {
-    await orderMerchantService.fulfillOrder(orderId, action, { ...payload, actor: 'MERCHANT' });
+    const user = await requireMerchantAccess();
+    const actor = `${user.firstName} ${user.lastName} (Merchant)`;
+    await orderMerchantService.fulfillOrder(orderId, action, { ...payload, actor });
     revalidatePath('/orders');
     revalidatePath(`/orders/${orderId}`);
     return { success: true };
@@ -86,9 +94,11 @@ export async function fulfillOrderAction(
 // NOTES
 // ─────────────────────────────────────────────
 
-export async function addOrderNoteAction(orderId: string, content: string, author: string = 'Merchant') {
+export async function addOrderNoteAction(orderId: string, content: string) {
   try {
-    const note = await orderMerchantService.addNote(orderId, content, author);
+    const user = await requireMerchantAccess();
+    const authorName = `${user.firstName} ${user.lastName} (Merchant)`;
+    const note = await orderMerchantService.addNote(orderId, content, authorName);
     revalidatePath(`/orders/${orderId}`);
     return { success: true, data: JSON.parse(JSON.stringify(note)) };
   } catch (error: any) {
@@ -106,7 +116,9 @@ export async function initiateRefundAction(
   reason: string,
 ) {
   try {
-    await orderMerchantService.initiateRefund(orderId, amount, reason, 'MERCHANT');
+    const user = await requireMerchantAccess();
+    const actor = `${user.firstName} ${user.lastName} (Merchant)`;
+    await orderMerchantService.initiateRefund(orderId, amount, reason, actor);
     revalidatePath('/orders');
     revalidatePath(`/orders/${orderId}`);
     return { success: true };
@@ -124,7 +136,9 @@ export async function bulkUpdateOrderStatusAction(
   status: OrderStatus,
 ) {
   try {
-    const result = await orderMerchantService.bulkUpdateStatus(orderIds, status, 'MERCHANT');
+    const user = await requireMerchantAccess();
+    const actor = `${user.firstName} ${user.lastName} (Merchant)`;
+    const result = await orderMerchantService.bulkUpdateStatus(orderIds, status, actor);
     revalidatePath('/orders');
     return { success: true, data: result };
   } catch (error: any) {
@@ -138,7 +152,9 @@ export async function bulkUpdateOrderStatusAction(
 
 export async function markCodPaymentCollectedAction(orderId: string) {
   try {
-    const result = await orderMerchantService.markCodPaymentCollected(orderId, 'MERCHANT');
+    const user = await requireMerchantAccess();
+    const actor = `${user.firstName} ${user.lastName} (Merchant)`;
+    const result = await orderMerchantService.markCodPaymentCollected(orderId, actor);
     revalidatePath('/orders');
     revalidatePath(`/orders/${orderId}`);
     return { success: true, data: result };

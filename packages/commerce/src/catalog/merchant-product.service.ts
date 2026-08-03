@@ -238,8 +238,22 @@ export class MerchantProductService {
         for (let i = 0; i < images.length; i++) {
           const imgPath = images[i];
           if (!imgPath) continue;
+          let cleanPath = imgPath;
+          if (typeof imgPath === 'string' && (imgPath.startsWith('http://') || imgPath.startsWith('https://'))) {
+            try {
+              const urlObj = new URL(imgPath);
+              cleanPath = urlObj.pathname;
+            } catch (e) {}
+          }
           const media = await tx.media.findFirst({
-            where: { OR: [{ path: imgPath }, { publicUrl: imgPath }] },
+            where: {
+              OR: [
+                { path: imgPath },
+                { publicUrl: imgPath },
+                { path: cleanPath },
+                { publicUrl: cleanPath }
+              ]
+            },
           });
           if (media) {
             await tx.productImage.create({
@@ -435,9 +449,22 @@ export class MerchantProductService {
         for (let i = 0; i < images.length; i++) {
           const imgPath = images[i];
           if (!imgPath) continue;
-          // Try to find matching Media record by path or publicUrl
+          let cleanPath = imgPath;
+          if (typeof imgPath === 'string' && (imgPath.startsWith('http://') || imgPath.startsWith('https://'))) {
+            try {
+              const urlObj = new URL(imgPath);
+              cleanPath = urlObj.pathname;
+            } catch (e) {}
+          }
           const media = await tx.media.findFirst({
-            where: { OR: [{ path: imgPath }, { publicUrl: imgPath }] },
+            where: {
+              OR: [
+                { path: imgPath },
+                { publicUrl: imgPath },
+                { path: cleanPath },
+                { publicUrl: cleanPath }
+              ]
+            },
           });
           if (media) {
             await tx.productImage.create({

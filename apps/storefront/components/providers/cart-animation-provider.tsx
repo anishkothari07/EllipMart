@@ -2,8 +2,6 @@
 
 import React, { createContext, useContext, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { useStore } from "@/components/providers/store-provider";
-
 interface CartAnimationContextType {
   registerCartIcon: (ref: React.RefObject<HTMLDivElement | null>) => void;
   animateAddToCart: (imageSrc: string, triggerRef: React.RefObject<HTMLElement | null>) => void;
@@ -26,7 +24,6 @@ export function CartAnimationProvider({ children }: { children: React.ReactNode 
   const [floatingItems, setFloatingItems] = useState<FloatingItem[]>([]);
   const cartIconRef = useRef<HTMLDivElement | null>(null);
   const nextId = useRef(0);
-  const { dispatch } = useStore();
 
   const registerCartIcon = (ref: React.RefObject<HTMLDivElement | null>) => {
     cartIconRef.current = ref.current;

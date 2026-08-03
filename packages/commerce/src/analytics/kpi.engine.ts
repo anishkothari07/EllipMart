@@ -63,7 +63,7 @@ export class KpiEngine {
       where: { createdAt: { gte: start, lte: end } },
       _sum: { amount: true },
     }) || { _sum: { amount: null } };
-    const refAmount = refunds._sum.amount || 0;
+    const refAmount = Number(refunds._sum.amount || 0);
     return (refAmount / rev) * 100;
   }
 }

@@ -4,7 +4,7 @@ import { successResponse } from '@corecart/shared';
 import { verifyRefreshToken } from '@corecart/shared';
 
 export async function POST(req: NextRequest) {
-  let refreshToken = req.cookies.get('refreshToken')?.value;
+  let refreshToken = req.cookies.get('smartgo_customer_refresh')?.value;
   
   if (!refreshToken) {
     try {
@@ -27,7 +27,7 @@ export async function POST(req: NextRequest) {
   }
 
   const response = successResponse(null, 'Logged out successfully');
-  response.cookies.delete('refreshToken');
+  response.cookies.delete('smartgo_customer_refresh');
   
   return response;
 }

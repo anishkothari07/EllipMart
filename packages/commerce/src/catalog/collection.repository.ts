@@ -5,27 +5,18 @@ export class CollectionRepository {
   async create(data: Prisma.CollectionCreateInput) {
     return prisma.collection.create({
       data,
-      include: {
-        seo: true,
-      },
     });
   }
 
   async findById(id: string) {
     return prisma.collection.findUnique({
       where: { id },
-      include: {
-        seo: true,
-      },
     });
   }
 
   async findBySlug(slug: string) {
     return prisma.collection.findUnique({
       where: { slug },
-      include: {
-        seo: true,
-      },
     });
   }
 
@@ -33,9 +24,6 @@ export class CollectionRepository {
     return prisma.collection.update({
       where: { id },
       data,
-      include: {
-        seo: true,
-      },
     });
   }
 
@@ -59,9 +47,6 @@ export class CollectionRepository {
         take,
         where,
         orderBy,
-        include: {
-          seo: true,
-        },
       }),
     ]);
   }

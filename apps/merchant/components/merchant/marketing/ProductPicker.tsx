@@ -22,7 +22,7 @@ export function ProductPicker({ sections, onChange }: ProductPickerProps) {
     async function load() {
       try {
         const pickerData = await MerchantMarketingClient.getPickersData();
-        setProducts(pickerData.products || []);
+        setProducts(pickerData?.products || []);
       } catch (err) {
         console.error('Failed to load products for picker:', err);
       } finally {

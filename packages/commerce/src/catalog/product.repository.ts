@@ -2,7 +2,7 @@ import { Prisma } from '@prisma/client';
 import { prisma } from '@corecart/database';
 
 export class ProductRepository {
-  async create(data: Prisma.ProductCreateInput) {
+  async create(data: Prisma.ProductUncheckedCreateInput | Prisma.ProductCreateInput) {
     return prisma.product.create({
       data,
       include: {
@@ -63,7 +63,7 @@ export class ProductRepository {
     });
   }
 
-  async update(id: string, data: Prisma.ProductUpdateInput) {
+  async update(id: string, data: Prisma.ProductUncheckedUpdateInput | Prisma.ProductUpdateInput) {
     return prisma.product.update({
       where: { id },
       data,

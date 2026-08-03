@@ -9,6 +9,8 @@ export const metadata: Metadata = {
   description: 'Search across the full SmartGO catalog.',
 }
 
+export const dynamic = 'force-dynamic';
+
 export default function SearchPage() {
   return (
     <Suspense

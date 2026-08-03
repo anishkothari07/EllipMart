@@ -269,7 +269,7 @@ export function MediaLibrary({ onSelect, onClose, isPicker = false }: MediaLibra
                 {mediaItems.map((item) => (
                   <div
                     key={item.id}
-                    onClick={() => onSelect?.(item.path)}
+                    onClick={() => onSelect?.(item.publicUrl || item.path)}
                     className={cn(
                       "group border border-border/80 bg-card rounded-2xl overflow-hidden hover:border-foreground/20 hover:shadow-soft transition-all duration-200 cursor-pointer relative",
                       onSelect && "active:scale-[0.98]"
@@ -278,7 +278,7 @@ export function MediaLibrary({ onSelect, onClose, isPicker = false }: MediaLibra
                     {/* Thumbnail preview */}
                     <div className="aspect-square bg-muted flex items-center justify-center relative overflow-hidden">
                       <img
-                        src={item.path}
+                        src={item.publicUrl || item.path}
                         alt={item.alt || item.filename}
                         className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                       />
@@ -297,7 +297,7 @@ export function MediaLibrary({ onSelect, onClose, isPicker = false }: MediaLibra
                       </div>
                       <div className="flex items-center shrink-0">
                         <a
-                          href={item.path}
+                          href={item.publicUrl || item.path}
                           target="_blank"
                           rel="noreferrer"
                           className="p-1 text-muted-foreground hover:text-foreground hover:bg-muted/50 rounded"

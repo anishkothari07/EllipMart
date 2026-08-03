@@ -141,6 +141,9 @@ importers:
       '@base-ui/react':
         specifier: ^1.5.0
         version: 1.5.0(@date-fns/tz@1.4.1)(@types/react@19.2.14)(date-fns@4.1.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+      '@corecart/commerce':
+        specifier: workspace:*
+        version: link:../../packages/commerce
       '@corecart/database':
         specifier: workspace:*
         version: link:../../packages/database

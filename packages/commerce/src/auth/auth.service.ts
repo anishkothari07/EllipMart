@@ -45,30 +45,35 @@ export class AuthService {
 
       if (payload.guestWishlist?.length) {
         console.log("Syncing guest wishlist...");
-        // In a real app we'd inject this after verification, but since we create the wishlist now, we can add them.
-        for (const productId of payload.guestWishlist) {
-          try {
-            await prisma.wishlistItem.upsert({
-              where: { wishlistId_productId: { wishlistId: user.wishlist?.id as string, productId } },
-              update: {},
-              create: { wishlistId: user.wishlist?.id as string, productId }
-            });
-          } catch(e) {}
+        const wishlist = await prisma.wishlist.findUnique({ where: { userId: user.id } });
+        if (wishlist) {
+          for (const productId of payload.guestWishlist) {
+            try {
+              await prisma.wishlistItem.upsert({
+                where: { wishlistId_productId: { wishlistId: wishlist.id, productId } },
+                update: {},
+                create: { wishlistId: wishlist.id, productId }
+              });
+            } catch(e) {}
+          }
         }
       }
 
       if (payload.guestCart?.length) {
         console.log("Syncing guest cart...");
-        for (const item of payload.guestCart) {
-          try {
-            if (item.variantId) {
-              await prisma.cartItem.upsert({
-                where: { cartId_variantId: { cartId: user.cart?.id as string, variantId: item.variantId } },
-                update: { quantity: { increment: item.quantity } },
-                create: { cartId: user.cart?.id as string, variantId: item.variantId, quantity: item.quantity }
-              });
-            }
-          } catch(e) {}
+        const cart = await prisma.cart.findUnique({ where: { userId: user.id } });
+        if (cart) {
+          for (const item of payload.guestCart) {
+            try {
+              if (item.variantId) {
+                await prisma.cartItem.upsert({
+                  where: { cartId_variantId: { cartId: cart.id, variantId: item.variantId } },
+                  update: { quantity: { increment: item.quantity } },
+                  create: { cartId: cart.id, variantId: item.variantId, quantity: item.quantity }
+                });
+              }
+            } catch(e) {}
+          }
         }
       }
 
@@ -85,8 +90,8 @@ export class AuthService {
         expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days
       });
 
-      const accessToken = await signAccessToken({ userId: user.id, role: user.role, sessionId: session.id });
-      const refreshToken = await signRefreshToken({ userId: user.id, role: user.role, sessionId: session.id });
+      const accessToken = await signAccessToken({ userId: user.id, role: user.role, email: user.email, sessionId: session.id });
+      const refreshToken = await signRefreshToken({ userId: user.id, role: user.role, email: user.email, sessionId: session.id });
 
       await authRepository.updateUser(user.id, { lastLoginAt: new Date() });
 
@@ -282,8 +287,8 @@ export class AuthService {
     let accessToken;
     let refreshToken;
     try {
-      accessToken = await signAccessToken({ userId: user.id, role: user.role, sessionId: session.id });
-      refreshToken = await signRefreshToken({ userId: user.id, role: user.role, sessionId: session.id });
+      accessToken = await signAccessToken({ userId: user.id, role: user.role, email: user.email, sessionId: session.id });
+      refreshToken = await signRefreshToken({ userId: user.id, role: user.role, email: user.email, sessionId: session.id });
       console.log('[DEBUG] JWTs generated successfully');
     } catch(e) {
       console.log('[DEBUG] Failed to generate JWTs:', e);
@@ -312,7 +317,7 @@ export class AuthService {
 
     await authRepository.updateSessionActivity(session.id);
 
-    const accessToken = await signAccessToken({ userId: user.id, role: user.role, sessionId: session.id });
+    const accessToken = await signAccessToken({ userId: user.id, role: user.role, email: user.email, sessionId: session.id });
     return { accessToken };
   }
 

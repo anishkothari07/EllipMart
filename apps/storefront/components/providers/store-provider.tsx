@@ -1,8 +1,7 @@
 'use client'
 
 import { createContext, useCallback, useContext, useMemo, useState, useEffect } from 'react'
-import type { CartItem, Product } from '@corecart/types'
-import { products as mockProducts } from '@corecart/shared'
+import type { CartItem, Product } from '@corecart/shared'
 
 type StoreContextValue = {
   // cart
@@ -76,9 +75,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
           }).filter(Boolean) || [];
           
           if (itemImages.length === 0) {
-            const charCode = productId ? productId.charCodeAt(0) + productId.charCodeAt(productId.length - 1) : 0;
-            const mockProduct = mockProducts[charCode % mockProducts.length];
-            itemImages = (mockProduct && mockProduct.images) ? [...mockProduct.images] : ['/images/p-headphones.png', '/images/p-earbuds.png'];
+            itemImages = ['/placeholder.jpg'];
           }
 
           return {

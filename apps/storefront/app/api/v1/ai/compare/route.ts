@@ -10,8 +10,8 @@ export async function POST(req: NextRequest) {
     }
 
     const [p1, p2] = await Promise.all([
-      db.product.findUnique({ where: { id: productId1 }, include: { specifications: true } }),
-      db.product.findUnique({ where: { id: productId2 }, include: { specifications: true } }),
+      db.product.findUnique({ where: { id: productId1 }, include: { specifications: { include: { spec: true } } } }),
+      db.product.findUnique({ where: { id: productId2 }, include: { specifications: { include: { spec: true } } } }),
     ]);
 
     if (!p1 || !p2) {
@@ -19,8 +19,8 @@ export async function POST(req: NextRequest) {
     }
 
     const context = `
-Product 1: ${p1.name} (Specs: ${p1.longDescription || "N/A"}, Specs relation: ${p1.specifications.map(s => `${s.name}: ${s.value}`).join(", ")})
-Product 2: ${p2.name} (Specs: ${p2.longDescription || "N/A"}, Specs relation: ${p2.specifications.map(s => `${s.name}: ${s.value}`).join(", ")})
+Product 1: ${p1.name} (Specs: ${p1.longDescription || "N/A"}, Specs relation: ${p1.specifications.map(s => `${s.spec.name}: ${s.value}`).join(", ")})
+Product 2: ${p2.name} (Specs: ${p2.longDescription || "N/A"}, Specs relation: ${p2.specifications.map(s => `${s.spec.name}: ${s.value}`).join(", ")})
 `;
 
     const schema = {

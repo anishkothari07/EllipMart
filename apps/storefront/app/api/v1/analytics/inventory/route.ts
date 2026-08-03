@@ -7,9 +7,6 @@ export async function GET(req: NextRequest) {
       select: {
         id: true,
         name: true,
-        sku: true,
-        stock: true,
-        price: true,
       },
       take: 50,
     });

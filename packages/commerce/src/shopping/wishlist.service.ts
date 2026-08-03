@@ -22,18 +22,26 @@ export class WishlistService {
 
   async getWishlist(userId: string) {
     const wishlist = await this.getOrCreateWishlist(userId);
-    return prisma.wishlistItem.findMany({
+    const items = await prisma.wishlistItem.findMany({
       where: { wishlistId: wishlist.id },
-      include: {
-        product: {
-          include: {
-            variants: { take: 1, include: { inventory: true } },
-            images: { take: 1 },
-          }
-        }
-      },
       orderBy: { createdAt: 'desc' },
     });
+
+    if (!items.length) return [];
+
+    const productIds = items.map(item => item.productId);
+    const products = await prisma.product.findMany({
+      where: { id: { in: productIds } },
+      include: {
+        variants: { take: 1, include: { inventory: true } },
+        images: { take: 1 },
+      }
+    });
+
+    return items.map(item => ({
+      ...item,
+      product: products.find(p => p.id === item.productId)
+    }));
   }
 
   async getWishlistCount(userId: string) {

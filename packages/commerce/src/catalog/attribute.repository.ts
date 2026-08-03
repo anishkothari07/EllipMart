@@ -22,9 +22,9 @@ export class AttributeRepository {
     });
   }
 
-  async findBySlug(slug: string) {
+  async findByName(name: string) {
     return prisma.attribute.findUnique({
-      where: { slug },
+      where: { name },
       include: {
         values: true,
       },

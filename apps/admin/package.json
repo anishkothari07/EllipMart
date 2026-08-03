@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "next dev -p 3003",
     "build": "next build",
-    "start": "next start -p 3003",
+    "start": "node -e \"const port = process.env.PORT || 3003; require('child_process').execSync('next start -p ' + port, { stdio: 'inherit' });\"",
     "lint": "echo 'Skipping lint (no ESLint configured)'"
   },
   "dependencies": {
@@ -22,6 +22,7 @@
     "@corecart/database": "workspace:*",
     "@corecart/types": "workspace:*",
     "@corecart/shared": "workspace:*",
-    "@corecart/ui": "workspace:*"
+    "@corecart/ui": "workspace:*",
+    "@corecart/commerce": "workspace:*"
   }
 }

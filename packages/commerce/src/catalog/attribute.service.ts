@@ -5,17 +5,17 @@ import { Prisma } from '@prisma/client';
 
 export class AttributeService {
   async createAttribute(input: CreateAttributeInput) {
-    const existing = await attributeRepository.findBySlug(input.slug);
+    const existing = await attributeRepository.findByName(input.name);
     if (existing) {
-      throw new AppError('Attribute with this slug already exists', 400);
+      throw new AppError('Attribute with this name already exists', 400);
     }
 
-    const { values, ...data } = input;
+    const { values, slug, isRequired, ...data } = input as any;
 
     const createData: Prisma.AttributeCreateInput = {
       ...data,
       values: values && values.length > 0 ? {
-        create: values.map(v => ({
+        create: values.map((v: any) => ({
           value: v.value,
           label: v.label,
           color: v.color,
@@ -35,8 +35,8 @@ export class AttributeService {
     return attribute;
   }
 
-  async getAttributeBySlug(slug: string) {
-    const attribute = await attributeRepository.findBySlug(slug);
+  async getAttributeByName(name: string) {
+    const attribute = await attributeRepository.findByName(name);
     if (!attribute) {
       throw new AppError('Attribute not found', 404);
     }
@@ -46,14 +46,14 @@ export class AttributeService {
   async updateAttribute(id: string, input: UpdateAttributeInput) {
     const attribute = await this.getAttributeById(id);
 
-    if (input.slug && input.slug !== attribute.slug) {
-      const existing = await attributeRepository.findBySlug(input.slug);
+    if (input.name && input.name !== attribute.name) {
+      const existing = await attributeRepository.findByName(input.name);
       if (existing) {
-        throw new AppError('Attribute with this slug already exists', 400);
+        throw new AppError('Attribute with this name already exists', 400);
       }
     }
 
-    const { values, ...data } = input;
+    const { values, slug, isRequired, ...data } = input as any;
 
     const updateData: Prisma.AttributeUpdateInput = {
       ...data,
@@ -64,11 +64,11 @@ export class AttributeService {
         // delete missing
         deleteMany: {
           id: {
-            notIn: values.filter(v => v.id).map(v => v.id as string)
+            notIn: values.filter((v: any) => v.id).map((v: any) => v.id as string)
           }
         },
         // update existing
-        update: values.filter(v => v.id).map(v => ({
+        update: values.filter((v: any) => v.id).map((v: any) => ({
           where: { id: v.id },
           data: {
             value: v.value,
@@ -78,7 +78,7 @@ export class AttributeService {
           }
         })),
         // create new
-        create: values.filter(v => !v.id).map(v => ({
+        create: values.filter((v: any) => !v.id).map((v: any) => ({
           value: v.value!,
           label: v.label!,
           color: v.color,

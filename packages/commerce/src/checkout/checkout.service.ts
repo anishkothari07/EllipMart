@@ -102,37 +102,67 @@ export const checkoutService = {
 
     const paymentMethodCode = input.paymentMethodCode || input.paymentProvider || 'UPI';
 
-    // 1. Create CheckoutSession
-    const session = await paymentService.createCheckoutSession({
-      userId,
-      cartId: cart.id,
-      shippingAddress: JSON.stringify(address),
-      billingAddress: JSON.stringify(address),
-      couponCode: validCoupon?.code,
-      shippingMethod: shippingRate.zone?.provider?.name || 'Standard',
-      subTotal: totals.subTotal,
-      taxTotal: totals.taxTotal,
-      shippingTotal: totals.shippingTotal,
-      discountTotal: totals.discountTotal,
-      grandTotal: totals.grandTotal,
-      paymentMethodCode
+    // 1. Try to Create/Find CheckoutSession with id = cart.id (Deterministic Identity)
+    let session;
+    try {
+      session = await paymentService.createCheckoutSession({
+        id: cart.id, // Enforce deterministic CheckoutSession identity matching cart.id
+        userId,
+        cartId: cart.id,
+        shippingAddress: JSON.stringify(address),
+        billingAddress: JSON.stringify(address),
+        couponCode: validCoupon?.code,
+        shippingMethod: shippingRate.zone?.provider?.name || 'Standard',
+        subTotal: totals.subTotal,
+        taxTotal: totals.taxTotal,
+        shippingTotal: totals.shippingTotal,
+        discountTotal: totals.discountTotal,
+        grandTotal: totals.grandTotal,
+        paymentMethodCode
+      });
+    } catch (err: any) {
+      // Catch unique key conflict (P2002) if concurrent request already created the session
+      if (err.code === 'P2002' || err.message?.includes('Unique constraint')) {
+        session = await prisma.checkoutSession.findUnique({
+          where: { id: cart.id }
+        });
+        if (!session) throw err;
+      } else {
+        throw err;
+      }
+    }
+
+    // 2. Check if Order already exists for this session (Idempotency)
+    const existingOrder = await prisma.order.findUnique({
+      where: { checkoutSessionId: session.id },
+      include: { payment: true }
     });
 
-    // 2. Initialize Order Payment
+    if (existingOrder) {
+      return {
+        orderNumber: existingOrder.orderNumber,
+        orderId: existingOrder.id,
+        paymentId: existingOrder.payment?.id || null,
+        providerOrderId: existingOrder.payment?.providerOrderId || null,
+        clientSecret: existingOrder.payment?.id || null,
+        paymentMethodCode,
+        session
+      };
+    }
+
+    // 3. Initialize Order Payment (reserves stock and maps payment)
     const paymentResult = await paymentService.initializeOrderPayment(session.id);
     const order = await prisma.order.findUnique({ where: { id: paymentResult.orderId } });
 
-    // 3. For COD: explicitly confirm the order (PENDING_PAYMENT → CONFIRMED)
-    //    Payment stays PENDING — cash is collected on delivery.
-    //    ORDER CONFIRMATION ≠ PAYMENT VERIFICATION for COD.
+    // 4. For COD: explicitly confirm the order (PENDING_PAYMENT → CONFIRMED)
     if (paymentMethodCode === 'COD') {
       await paymentService.confirmCodOrder(paymentResult.orderId, paymentResult.paymentId);
     }
 
-    // 4. Clear the cart (server-side) — cart is also cleared client-side on success
+    // 5. Clear the cart (server-side)
     await cartService.clearCart(userId);
 
-    // 5. Fire analytics
+    // 6. Fire analytics
     this.triggerAnalyticsHooks(cart.items);
 
     return {

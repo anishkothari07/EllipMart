@@ -20,7 +20,7 @@ export function apiHandler(handler: RouteHandler): RouteHandler {
       }
 
       if (error instanceof ZodError) {
-        return errorResponse('Validation Error', 'VALIDATION_ERROR', error.errors, 400);
+        return errorResponse('Validation Error', 'VALIDATION_ERROR', error.issues, 400);
       }
 
       return errorResponse('Internal Server Error', 'INTERNAL_SERVER_ERROR', undefined, 500);

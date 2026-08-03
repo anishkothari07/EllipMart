@@ -54,7 +54,7 @@ export function ProductForm({ initialProduct, brands, categories, collections, o
   useEffect(() => {
     if (initialProduct) {
       // Map existing relations to flat properties for the form
-      const images = initialProduct.images?.map((img: any) => img.media?.path || img.media?.publicUrl || '') .filter(Boolean) || [];
+      const images = initialProduct.images?.map((img: any) => img.media?.publicUrl || img.media?.path || '') .filter(Boolean) || [];
       const tags = initialProduct.tags?.map((t: any) => t.tag.name) || [];
       const collectionIds = initialProduct.collections?.map((c: any) => c.collectionId) || [];
       

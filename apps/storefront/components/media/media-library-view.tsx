@@ -459,7 +459,7 @@ export function MediaLibraryView({
                         </span>
                         <div className="flex items-center justify-between text-[10px] text-muted-foreground">
                           <span>{formatBytes(item.size)}</span>
-                          <span className="uppercase">{item.extension || 'file'}</span>
+                          <span className="uppercase">{item.originalName.split('.').pop() || 'file'}</span>
                         </div>
                       </div>
                     </div>

@@ -33,3 +33,4 @@ export * from './responsive/responsive-hooks';
 export * from './motion/presets';
 export * from './motion/tokens';
 export * from './utils/order';
+export * from './types';

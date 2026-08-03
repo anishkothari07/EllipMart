@@ -68,7 +68,10 @@ async function healthCheckHandler(req: NextRequest) {
     },
   };
 
-  return successResponse(healthData, isHealthy ? 200 : 503);
+  if (!isHealthy) {
+    return errorResponse('Service not healthy', 'SERVICE_UNAVAILABLE', healthData, 503);
+  }
+  return successResponse(healthData, 'Service is healthy');
 }
 
 export const GET = apiHandler(healthCheckHandler);

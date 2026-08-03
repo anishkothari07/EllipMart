@@ -26,7 +26,7 @@ export default function MerchantProductListPage() {
   const loadMetadata = async () => {
     try {
       const meta = await MerchantProductClient.getMetadata();
-      setCategories(meta.categories);
+      if (meta) setCategories(meta.categories);
     } catch (e) {
       console.error('Failed to load categories metadata:', e);
     }
@@ -45,13 +45,13 @@ export default function MerchantProductListPage() {
       });
 
       // Map details for the table thumbnail logic (first image if available)
-      const mapped = data.items.map((item: any) => ({
+      const mapped = (data?.items || []).map((item: any) => ({
         ...item,
         thumbnail: item.images?.[0] || '/placeholder-product.png',
       }));
 
       setProducts(mapped);
-      setTotalCount(data.total);
+      setTotalCount(data?.total || 0);
     } catch (e: any) {
       setStatusMsg({ type: 'error', text: e.message || 'Failed to retrieve products list.' });
     } finally {

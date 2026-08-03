@@ -30,7 +30,7 @@ export async function POST(req: NextRequest) {
       'Login successful'
     );
 
-    response.cookies.set('refreshToken', result.refreshToken, {
+    response.cookies.set('smartgo_customer_refresh', result.refreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',

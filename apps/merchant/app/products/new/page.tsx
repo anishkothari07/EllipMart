@@ -15,7 +15,7 @@ export default function NewProductPage() {
     async function loadMeta() {
       try {
         const data = await MerchantProductClient.getMetadata();
-        setMeta(data);
+        setMeta(data || null);
       } catch (err: any) {
         setError(err.message || 'Failed to retrieve catalog setup metadata.');
       } finally {

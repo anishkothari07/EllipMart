@@ -40,9 +40,8 @@ export class BrandRepository {
   }
 
   async delete(id: string) {
-    return prisma.brand.update({
+    return prisma.brand.delete({
       where: { id },
-      data: { deletedAt: new Date() },
     });
   }
 

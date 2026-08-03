@@ -23,7 +23,7 @@ export default function EditProductPage() {
         MerchantProductClient.getMetadata(),
       ]);
       setProduct(prodData);
-      setMeta(metaData);
+      setMeta(metaData || null);
     } catch (err: any) {
       setError(err.message || 'Failed to retrieve product details.');
     } finally {

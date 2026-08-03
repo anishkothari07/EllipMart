@@ -7,17 +7,22 @@ export class HistoryService {
       where: { userId },
       orderBy: { viewedAt: 'desc' },
       take: 20,
+    });
+
+    if (!history.length) return [];
+
+    const productIds = history.map(h => h.productId);
+
+    const products = await prisma.product.findMany({
+      where: { id: { in: productIds } },
       include: {
-        product: {
-          include: {
-            variants: { take: 1, include: { inventory: true } },
-            images: { take: 1 },
-          }
-        }
+        variants: { take: 1, include: { inventory: true } },
+        images: { take: 1 },
       }
     });
 
-    return history.map(h => h.product);
+    // Restore the sorted order from history
+    return history.map(h => products.find(p => p.id === h.productId)).filter(Boolean);
   }
 
   async addRecentlyViewed(userId: string, productId: string) {
@@ -56,11 +61,11 @@ export class HistoryService {
     // Handle viewCount increment with 30-min cooldown
     const sessionCacheKey = `view:${userId}:${productId}`;
     const hasViewedRecently = await cache.get(sessionCacheKey);
-    
+
     if (!hasViewedRecently) {
       // Set cooldown cache for 30 minutes (1800 seconds)
       await cache.set(sessionCacheKey, true, 1800);
-      
+
       // Increment product viewCount safely
       await prisma.product.update({
         where: { id: productId },

@@ -10,14 +10,11 @@ export class CollectionService {
       throw new AppError('Collection with this slug already exists', 400);
     }
 
-    const { seo, rules, ...data } = input;
+    const { seo, rules, ...data } = input as any;
 
     const createData: Prisma.CollectionCreateInput = {
       ...data,
-      rules: rules ?? Prisma.JsonNull,
-      seo: seo ? {
-        create: seo
-      } : undefined
+      rules: typeof rules === 'string' ? rules : rules ? JSON.stringify(rules) : undefined,
     };
 
     return collectionRepository.create(createData);
@@ -25,7 +22,7 @@ export class CollectionService {
 
   async getCollectionById(id: string) {
     const collection = await collectionRepository.findById(id);
-    if (!collection || collection.deletedAt) {
+    if (!collection) {
       throw new AppError('Collection not found', 404);
     }
     return collection;
@@ -33,7 +30,7 @@ export class CollectionService {
 
   async getCollectionBySlug(slug: string) {
     const collection = await collectionRepository.findBySlug(slug);
-    if (!collection || collection.deletedAt) {
+    if (!collection) {
       throw new AppError('Collection not found', 404);
     }
     return collection;
@@ -49,20 +46,14 @@ export class CollectionService {
       }
     }
 
-    const { seo, rules, ...data } = input;
+    const { seo, rules, ...data } = input as any;
 
     const updateData: Prisma.CollectionUpdateInput = {
       ...data,
-      seo: seo ? {
-        upsert: {
-          create: seo,
-          update: seo,
-        }
-      } : undefined
     };
 
     if (rules !== undefined) {
-      updateData.rules = rules ?? Prisma.JsonNull;
+      updateData.rules = typeof rules === 'string' ? rules : rules ? JSON.stringify(rules) : null;
     }
 
     return collectionRepository.update(id, updateData);
@@ -77,9 +68,7 @@ export class CollectionService {
     const { page, limit, search, type, isActive } = params;
     const skip = (page - 1) * limit;
 
-    const where: Prisma.CollectionWhereInput = {
-      deletedAt: null,
-    };
+    const where: Prisma.CollectionWhereInput = {};
 
     if (search) {
       where.OR = [
@@ -88,9 +77,7 @@ export class CollectionService {
       ];
     }
 
-    if (type) {
-      where.type = type;
-    }
+
 
     if (isActive !== undefined) {
       where.isActive = isActive;

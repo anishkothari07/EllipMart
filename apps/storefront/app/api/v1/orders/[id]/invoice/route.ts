@@ -132,7 +132,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
         <div class="clear"></div>
         
         <div style="margin-top: 40px; font-size: 12px; color: #777; text-align: center;">
-          <p>Payment Method: ${order.paymentMethod || 'N/A'}</p>
+
           <p>Thank you for your business!</p>
         </div>
       </div>

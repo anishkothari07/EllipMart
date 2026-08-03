@@ -1,5 +1,5 @@
 import { PaymentStatus } from "@prisma/client";
-import { IPaymentProvider, InitializePaymentOptions, InitializePaymentResult, VerifyPaymentOptions, VerifyPaymentResult } from '@corecart/types';
+import { IPaymentProvider, InitializePaymentOptions, InitializePaymentResult, VerifyPaymentOptions, VerifyPaymentResult } from '../types';
 
 export class CodProvider implements IPaymentProvider {
   id = "COD";

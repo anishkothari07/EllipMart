@@ -4,7 +4,7 @@ import { motion } from 'framer-motion'
 import { Container } from '@corecart/ui'
 import { SectionHeader } from '@corecart/ui'
 import { ProductCard } from '@/components/product/product-card'
-import type { Product } from '@corecart/types'
+import type { Product } from '@corecart/shared'
 
 interface ProductRailProps {
   eyebrow?: string

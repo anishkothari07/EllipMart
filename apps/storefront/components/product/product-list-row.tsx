@@ -3,7 +3,7 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { Heart, Plus, Truck } from 'lucide-react'
-import type { Product } from '@corecart/types'
+import type { Product } from '@corecart/shared'
 import { cn } from '@corecart/shared'
 import { StarRating } from '@corecart/ui'
 import { Price } from '@corecart/ui'

@@ -14,7 +14,7 @@ import {
   Truck,
 } from 'lucide-react'
 import { useState } from 'react'
-import type { Product } from '@corecart/types'
+import type { Product } from '@corecart/shared'
 import { cn } from '@corecart/shared'
 import { formatPrice, discountPct } from '@corecart/shared'
 import { Container } from '@corecart/ui'

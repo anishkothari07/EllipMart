@@ -1,5 +1,6 @@
-import { Product as UIProduct, ProductVariant, Review } from '@corecart/types';
-import { products as mockProducts } from '@corecart/shared';
+
+
+import { Product as UIProduct, ProductVariant, Review } from '@corecart/shared';
 
 export function mapProductToUI(
   product: any, // Fully hydrated Prisma product
@@ -38,14 +39,7 @@ export function mapProductToUI(
     .filter(Boolean) || [];
 
   if (images.length === 0) {
-    // Fallback to mock images to preserve the premium UI animations during development
-    const charCode = product.id ? product.id.charCodeAt(0) + product.id.charCodeAt(product.id.length - 1) : 0;
-    const mockProduct = mockProducts[charCode % mockProducts.length];
-    if (mockProduct && mockProduct.images) {
-      images.push(...mockProduct.images);
-    } else {
-      images.push('/images/p-headphones.png', '/images/p-earbuds.png');
-    }
+    images.push('/placeholder.jpg');
   }
 
   // Price from first active variant's pricing

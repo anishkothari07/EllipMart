@@ -40,7 +40,7 @@ export function CollectionForm({ initialCollection, onSave }: CollectionFormProp
       setLoadingProducts(true);
       try {
         const data = await MerchantProductClient.listProducts({ limit: 100 });
-        setProductsList(data.items);
+        setProductsList(data?.items || []);
       } catch (e) {
         console.error('Failed to load products list:', e);
       } finally {

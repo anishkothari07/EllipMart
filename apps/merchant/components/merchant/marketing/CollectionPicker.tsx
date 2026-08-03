@@ -19,7 +19,7 @@ export function CollectionPicker({ selected, onChange }: CollectionPickerProps) 
     async function load() {
       try {
         const pickerData = await MerchantMarketingClient.getPickersData();
-        setCollections(pickerData.collections || []);
+        setCollections(pickerData?.collections || []);
       } catch (err) {
         console.error('Failed to load collections for picker:', err);
       } finally {

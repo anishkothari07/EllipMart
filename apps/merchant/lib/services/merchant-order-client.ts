@@ -53,7 +53,7 @@ export class MerchantOrderClient {
   }
 
   static async addNote(orderId: string, content: string, author?: string) {
-    const res = await addOrderNoteAction(orderId, content, author);
+    const res = await addOrderNoteAction(orderId, content);
     if (!res.success) throw new Error(res.error);
     return res.data;
   }

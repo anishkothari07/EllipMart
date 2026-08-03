@@ -4,6 +4,7 @@ import { env } from '../env';
 export interface TokenPayload extends JWTPayload {
   userId: string;
   role: string;
+  email?: string; // Included for email-based role check in middleware
   sessionId?: string; // Included for access tokens to map to a specific session
 }
 

@@ -2,7 +2,7 @@
 
 import { AnimatePresence, motion } from 'framer-motion'
 import { useEffect, useState } from 'react'
-import type { Category, MegaMenuSection, NavLink } from '@corecart/types'
+import type { Category, MegaMenuSection, NavLink } from '@corecart/shared'
 import { Header } from './header'
 import { Footer } from './footer'
 import { CartDrawer } from './cart-drawer'

@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma as db } from '@corecart/database';
+import { prisma as db, Product } from '@corecart/database';
 
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
     const productId = searchParams.get("productId");
 
-    let products = [];
+    let products: Product[] = [];
     if (productId) {
       const activeProd = await db.product.findUnique({ where: { id: productId } });
       if (activeProd) {

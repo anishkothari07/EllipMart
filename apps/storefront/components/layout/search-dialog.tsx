@@ -7,7 +7,7 @@ import { useRouter } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
 import { formatPrice } from '@corecart/shared'
 import { cn } from '@corecart/shared'
-import type { Product } from '@corecart/types'
+import type { Product } from '@corecart/shared'
 
 import { motionPresets } from '@corecart/shared/src/motion/presets'
 

@@ -28,7 +28,11 @@ export class RecommendationService {
     } else if (params.type === 'similar') {
       // Basic similar items logic (Same category or brand)
       if (params.categoryId) {
-        where.categoryId = params.categoryId;
+        if (params.categoryId.length === 36) {
+          where.categoryId = params.categoryId;
+        } else {
+          where.category = { slug: params.categoryId };
+        }
       }
       if (params.brandId) {
         where.brandId = params.brandId;

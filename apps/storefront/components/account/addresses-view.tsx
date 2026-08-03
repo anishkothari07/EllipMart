@@ -160,7 +160,7 @@ export function AddressesView({ initialAddresses }: { initialAddresses: any[] })
                 <Field label="Full name" defaultValue={editing?.name} placeholder="Your Name" />
               </div>
               <Field label="Address line 1" defaultValue={editing?.line1} placeholder="Street address" />
-              <Field label="Address line 2" defaultValue={editing?.line2} placeholder="Apt, suite (optional)" />
+              <Field label="Address line 2" defaultValue={editing?.line2 ?? ''} placeholder="Apt, suite (optional)" />
               <div className="grid gap-4 sm:grid-cols-3">
                 <Field label="City" defaultValue={editing?.city} />
                 <Field label="State" defaultValue={editing?.state} />

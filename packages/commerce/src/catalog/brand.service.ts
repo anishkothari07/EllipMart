@@ -24,7 +24,7 @@ export class BrandService {
 
   async getBrandById(id: string) {
     const brand = await brandRepository.findById(id);
-    if (!brand || brand.deletedAt) {
+    if (!brand) {
       throw new AppError('Brand not found', 404);
     }
     return brand;
@@ -32,7 +32,7 @@ export class BrandService {
 
   async getBrandBySlug(slug: string) {
     const brand = await brandRepository.findBySlug(slug);
-    if (!brand || brand.deletedAt) {
+    if (!brand) {
       throw new AppError('Brand not found', 404);
     }
     return brand;
@@ -72,9 +72,7 @@ export class BrandService {
     const { page, limit, search, isActive } = params;
     const skip = (page - 1) * limit;
 
-    const where: Prisma.BrandWhereInput = {
-      deletedAt: null,
-    };
+    const where: Prisma.BrandWhereInput = {};
 
     if (search) {
       where.OR = [

@@ -63,13 +63,14 @@ export const cartService = {
   },
 
   async addItem(userId: string, variantId: string, quantity: number = 1) {
-    const cart = await prisma.cart.findUnique({ where: { userId } });
+    let cart = await prisma.cart.findUnique({ where: { userId } });
     console.log('[CART_DEBUG] Existing cart found?', !!cart);
     if (!cart) {
       console.log('[CART_DEBUG] Creating new cart...');
       await this.getCart(userId); // ensure cart exists
-      return this.addItem(userId, variantId, quantity);
+      cart = await prisma.cart.findUnique({ where: { userId } });
     }
+    if (!cart) throw new AppError('Could not create cart', 500);
     console.log('[CART_DEBUG] Cart ID:', cart.id);
 
     let variant = await prisma.productVariant.findUnique({

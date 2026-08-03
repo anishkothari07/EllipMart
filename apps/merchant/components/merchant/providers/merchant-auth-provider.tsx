@@ -1,20 +1,20 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { getMerchantSessionAction, loginMerchantAction, logoutMerchantAction } from '../../../app/actions';
 
 export interface MerchantUser {
   id: string;
-  name: string;
+  firstName: string;
+  lastName: string;
   email: string;
   role: string;
-  organizationId: string;
-  permissions: string[];
 }
 
 interface MerchantSessionContextValue {
   user: MerchantUser | null;
   loading: boolean;
-  login: (email: string) => Promise<void>;
+  login: (payload: any) => Promise<{ success: boolean; error?: string }>;
   logout: () => Promise<void>;
 }
 
@@ -25,50 +25,64 @@ export function MerchantAuthProvider({ children }: { children: React.ReactNode }
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Check localStorage or cookies for mock session
-    const mockSession = localStorage.getItem('mock_merchant_session');
-    if (mockSession) {
+    async function checkSession() {
       try {
-        setUser(JSON.parse(mockSession));
+        const sessionUser = await getMerchantSessionAction();
+        if (sessionUser) {
+          setUser({
+            id: sessionUser.id,
+            firstName: sessionUser.firstName,
+            lastName: sessionUser.lastName,
+            email: sessionUser.email,
+            role: sessionUser.role,
+          });
+        } else {
+          setUser(null);
+        }
       } catch (e) {
-        localStorage.removeItem('mock_merchant_session');
+        setUser(null);
+      } finally {
+        setLoading(false);
       }
-    } else {
-      // Seed default active mock session on first visit for layout verification
-      const defaultMockUser: MerchantUser = {
-        id: 'm1',
-        name: 'Ani Kothari',
-        email: 'merchant@smartgo.in',
-        role: 'OWNER',
-        organizationId: 'org-1',
-        permissions: ['*'],
-      };
-      setUser(defaultMockUser);
-      localStorage.setItem('mock_merchant_session', JSON.stringify(defaultMockUser));
     }
-    setLoading(false);
+    checkSession();
   }, []);
 
-  const login = async (email: string) => {
+  const login = async (payload: any) => {
     setLoading(true);
-    const mockUser: MerchantUser = {
-      id: 'm1',
-      name: 'Ani Kothari',
-      email: email || 'merchant@smartgo.in',
-      role: 'OWNER',
-      organizationId: 'org-1',
-      permissions: ['*'],
-    };
-    setUser(mockUser);
-    localStorage.setItem('mock_merchant_session', JSON.stringify(mockUser));
-    setLoading(false);
+    try {
+      const res = await loginMerchantAction(payload);
+      if (res.success && res.user) {
+        setUser({
+          id: res.user.id,
+          firstName: (res.user as any).firstName || 'Admin',
+          lastName: (res.user as any).lastName || '',
+          email: res.user.email,
+          role: res.user.role,
+        });
+        return { success: true };
+      } else {
+        setUser(null);
+        return { success: false, error: res.error || 'Authentication failed' };
+      }
+    } catch (e: any) {
+      setUser(null);
+      return { success: false, error: e.message || 'An unexpected error occurred' };
+    } finally {
+      setLoading(false);
+    }
   };
 
   const logout = async () => {
     setLoading(true);
-    setUser(null);
-    localStorage.removeItem('mock_merchant_session');
-    setLoading(false);
+    try {
+      await logoutMerchantAction();
+      setUser(null);
+    } catch (e) {
+      console.error('Failed to log out:', e);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (

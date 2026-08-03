@@ -1,5 +1,6 @@
 import { prisma as db } from '@corecart/database';
 import { OrderStatus, PaymentStatus, PaymentEventStatus } from "@prisma/client";
+import { AppError } from '@corecart/shared';
 import { paymentRegistry } from "./registry";
 import { MockProvider } from "./providers/mock.provider";
 import { CodProvider } from "./providers/cod.provider";
@@ -15,7 +16,7 @@ paymentRegistry.register("INTERNAL", (config) => new CodProvider(config));
 paymentRegistry.register("RAZORPAY", (config) => new RazorpayProvider(config));
 
 export class PaymentService {
-  
+
   async createCheckoutSession(data: any) {
     // Basic Rule Evaluation for COD or other limits
     if (data.paymentMethodCode) {
@@ -38,6 +39,7 @@ export class PaymentService {
 
     return await db.checkoutSession.create({
       data: {
+        id: data.id, // Support deterministic session ID
         userId: data.userId,
         cartId: data.cartId,
         shippingAddress: data.shippingAddress,
@@ -81,10 +83,10 @@ export class PaymentService {
     // Pick highest priority provider
     const mapped = method.providers[0];
     const providerRecord = mapped.provider;
-    
+
     // Pass the active config to the factory
     const config = providerRecord.configs[0] || {};
-    
+
     return {
       provider: paymentRegistry.resolve(providerRecord.code, config),
       providerCode: providerRecord.code
@@ -96,7 +98,7 @@ export class PaymentService {
       where: { code: providerCode },
       include: { configs: { where: { isActive: true } } }
     });
-    
+
     if (!providerRecord) {
       return paymentRegistry.resolve(providerCode); // Try raw factory if DB not populated (tests)
     }
@@ -109,12 +111,33 @@ export class PaymentService {
     const session = await db.checkoutSession.findUnique({
       where: { id: sessionId },
     });
-    
+
     if (!session) throw new Error("Checkout session not found");
     if (session.expiresAt < new Date()) throw new Error("Checkout session expired");
-    
+
+    // Idempotency: Check if Order already exists for this session
+    const existingOrder = await db.order.findUnique({
+      where: { checkoutSessionId: sessionId },
+      include: { payment: true }
+    });
+    if (existingOrder) {
+      const payment = existingOrder.payment;
+      if (payment) {
+        const attempt = await db.paymentAttempt.findFirst({
+          where: { paymentId: payment.id },
+          orderBy: { createdAt: 'desc' }
+        });
+        return {
+          orderId: existingOrder.id,
+          paymentId: payment.id,
+          providerOrderId: payment.providerOrderId || attempt?.providerPaymentId || `rzp_mock_${existingOrder.id}`,
+          clientSecret: payment.id,
+        };
+      }
+    }
+
     const methodCode = session.paymentMethodCode || "MOCK";
-    
+
     const { provider, providerCode } = await this.resolveProviderInstance(methodCode);
 
     // 1. Parse address snapshot
@@ -127,7 +150,7 @@ export class PaymentService {
     let igstDecimal: number | null = null;
     let invoiceType = "RETAIL_INVOICE";
     let addrObj: any = null;
-    
+
     try {
       if (session.shippingAddress) {
         addrObj = JSON.parse(session.shippingAddress);
@@ -144,6 +167,9 @@ export class PaymentService {
     }
 
     // 2. Fetch cart items to build order items snapshot
+    if (!session.cartId) {
+      throw new AppError('Cannot create order from session without cartId', 400);
+    }
     const cartItems = await db.cartItem.findMany({
       where: { cartId: session.cartId, isSaved: false },
       include: {
@@ -174,101 +200,124 @@ export class PaymentService {
       };
     });
 
-    // 3. Create Order + OrderItems atomically via orderService
-    const order = await orderService.createOrder({
-      orderNumber,
-      userId: session.userId || "guest",
-      checkoutSessionId: session.id,
-      subTotal: session.subTotal,
-      discountTotal: session.discountTotal,
-      taxTotal: session.taxTotal,
-      shippingTotal: session.shippingTotal,
-      grandTotal: session.grandTotal,
-      status: OrderStatus.PENDING_PAYMENT,
-      shippingCost: session.shippingTotal,
-      shippingProvider: session.shippingMethod,
-      couponCode: session.couponCode,
-      isBusinessOrder,
-      gstin,
-      companyName,
-      cgstDecimal,
-      sgstDecimal,
-      igstDecimal,
-      invoiceType,
-      // Address snapshot (flat fields)
-      shippingName: addrObj?.fullName ?? null,
-      shippingPhone: addrObj?.phone ?? null,
-      shippingEmail: addrObj?.email ?? null,
-      shippingStreet: addrObj?.street ?? null,
-      shippingCity: addrObj?.city ?? null,
-      shippingState: addrObj?.state ?? null,
-      shippingCountry: addrObj?.country ?? null,
-      shippingPostalCode: addrObj?.postalCode ?? null,
-      billingAddr: session.billingAddress,
-      items: orderItemsData,
-    });
+    try {
+      // 3. Create Order + OrderItems atomically via orderService
+      const order = await orderService.createOrder({
+        orderNumber,
+        userId: session.userId || "guest",
+        checkoutSessionId: session.id,
+        subTotal: session.subTotal,
+        discountTotal: session.discountTotal,
+        taxTotal: session.taxTotal,
+        shippingTotal: session.shippingTotal,
+        grandTotal: session.grandTotal,
+        status: OrderStatus.PENDING_PAYMENT,
+        shippingCost: session.shippingTotal,
+        shippingProvider: session.shippingMethod,
+        couponCode: session.couponCode,
+        isBusinessOrder,
+        gstin,
+        companyName,
+        cgstDecimal,
+        sgstDecimal,
+        igstDecimal,
+        invoiceType,
+        // Address snapshot (flat fields)
+        shippingName: addrObj?.fullName ?? null,
+        shippingPhone: addrObj?.phone ?? null,
+        shippingEmail: addrObj?.email ?? null,
+        shippingStreet: addrObj?.street ?? null,
+        shippingCity: addrObj?.city ?? null,
+        shippingState: addrObj?.state ?? null,
+        shippingCountry: addrObj?.country ?? null,
+        shippingPostalCode: addrObj?.postalCode ?? null,
+        billingAddr: session.billingAddress,
+        items: orderItemsData,
+      });
 
-    // 4. Reserve inventory for each item
-    for (const item of orderItemsData) {
-      if (item.variantId) {
-        try {
-          await inventoryService.reserve(
-            item.variantId,
-            item.quantity,
-            order.id,
-            `Reserved for order ${orderNumber}`
-          );
-        } catch (err: any) {
-          console.error(`[Inventory] Reserve failed for variant ${item.variantId}:`, err.message);
-          // Non-fatal — stock was validated at checkout time; proceed
+      // 4. Reserve inventory for each item
+      for (const item of orderItemsData) {
+        if (item.variantId) {
+          try {
+            await inventoryService.reserve(
+              item.variantId,
+              item.quantity,
+              order.id,
+              `Reserved for order ${orderNumber}`
+            );
+          } catch (err: any) {
+            console.error(`[Inventory] Reserve failed for variant ${item.variantId}:`, err.message);
+          }
         }
       }
-    }
 
-    // 5. Create Payment record
-    const payment = await db.payment.create({
-      data: {
+      // 5. Create Payment record
+      const payment = await db.payment.create({
+        data: {
+          orderId: order.id,
+          amount: order.grandTotal,
+          paymentMethodCode: methodCode,
+          provider: providerCode,
+          status: PaymentStatus.PENDING,
+        }
+      });
+
+      // Immutable Event: CREATED
+      await this.logEvent(payment.id, PaymentEventStatus.CREATED, null, null);
+
+      // 6. Initialize with provider
+      const initResult = await provider.initializePayment({
+        amount: Number(order.grandTotal),
+        currency: "INR",
         orderId: order.id,
-        amount: order.grandTotal,
-        paymentMethodCode: methodCode,
-        provider: providerCode,
-        status: PaymentStatus.PENDING,
-      }
-    });
-
-    // Immutable Event: CREATED
-    await this.logEvent(payment.id, PaymentEventStatus.CREATED, null, null);
-
-    // 6. Initialize with provider
-    const initResult = await provider.initializePayment({
-      amount: Number(order.grandTotal),
-      currency: "INR",
-      orderId: order.id,
-      paymentId: payment.id,
-    });
-
-    // 7. Update Payment with provider info
-    await db.payment.update({
-      where: { id: payment.id },
-      data: {
-        providerOrderId: initResult.providerOrderId,
-      }
-    });
-    
-    // Immutable Event: AUTHORIZED / PENDING attempt
-    await db.paymentAttempt.create({
-      data: {
         paymentId: payment.id,
-        providerPaymentId: initResult.providerOrderId,
-        status: PaymentStatus.PENDING,
-      }
-    });
+      });
 
-    return {
-      orderId: order.id,
-      paymentId: payment.id,
-      ...initResult
-    };
+      // 7. Update Payment with provider info
+      await db.payment.update({
+        where: { id: payment.id },
+        data: {
+          providerOrderId: initResult.providerOrderId,
+        }
+      });
+
+      // Immutable Event: AUTHORIZED / PENDING attempt
+      await db.paymentAttempt.create({
+        data: {
+          paymentId: payment.id,
+          providerPaymentId: initResult.providerOrderId,
+          status: PaymentStatus.PENDING,
+        }
+      });
+
+      return {
+        orderId: order.id,
+        paymentId: payment.id,
+        ...initResult
+      };
+
+    } catch (err: any) {
+      // In case of concurrent uniqueness conflict, retrieve the winning request's order
+      if (err.code === 'P2002' || err.message?.includes('Unique constraint')) {
+        const winningOrder = await db.order.findUnique({
+          where: { checkoutSessionId: session.id },
+          include: { payment: true }
+        });
+        if (winningOrder && winningOrder.payment) {
+          const attempt = await db.paymentAttempt.findFirst({
+            where: { paymentId: winningOrder.payment.id },
+            orderBy: { createdAt: 'desc' }
+          });
+          return {
+            orderId: winningOrder.id,
+            paymentId: winningOrder.payment.id,
+            providerOrderId: winningOrder.payment.providerOrderId || attempt?.providerPaymentId || `rzp_mock_${winningOrder.id}`,
+            clientSecret: winningOrder.payment.id,
+          };
+        }
+      }
+      throw err;
+    }
   }
 
   /**
@@ -278,6 +327,11 @@ export class PaymentService {
    * Converts reserved inventory to sold inventory exactly once.
    */
   async confirmCodOrder(orderId: string, paymentId: string) {
+    const orderCheck = await db.order.findUnique({ where: { id: orderId } });
+    if (orderCheck && orderCheck.status === OrderStatus.CONFIRMED) {
+      return; // Already confirmed, return immediately to ensure idempotency
+    }
+
     const payment = await db.payment.findUnique({ where: { id: paymentId } });
     if (!payment) throw new Error('Payment not found for COD order');
     if (payment.paymentMethodCode !== 'COD') {
@@ -322,11 +376,11 @@ export class PaymentService {
     const payment = await db.payment.findUnique({
       where: { id: paymentId },
     });
-    
+
     if (!payment) throw new Error("Payment not found");
-    
+
     const provider = await this.resolveProviderByCode(payment.provider);
-    
+
     const verifyResult = await provider.verifyPayment({
       orderId,
       paymentId,
@@ -367,7 +421,7 @@ export class PaymentService {
     } else {
       newOrderStatus = OrderStatus.CANCELLED;
     }
-      
+
     await orderService.updateOrderStatus(
       orderId,
       newOrderStatus,
@@ -429,7 +483,7 @@ export class PaymentService {
     const existingWebhook = await db.paymentWebhook.findUnique({
       where: { eventId: result.eventId }
     });
-    
+
     if (existingWebhook && existingWebhook.processed) {
       return { status: "already_processed" };
     }
@@ -466,9 +520,9 @@ export class PaymentService {
           where: { id: paymentId },
           data: { status: result.status }
         });
-        
+
         await this.logEvent(paymentId, PaymentEventStatus.WEBHOOK_RECEIVED, result.providerPaymentId || null, JSON.parse(rawPayload));
-        
+
         // Update Order if captured
         if (result.status === PaymentStatus.CAPTURED) {
            await db.order.update({
@@ -485,17 +539,17 @@ export class PaymentService {
   async cancelPayment(paymentId: string) {
     const payment = await db.payment.findUnique({ where: { id: paymentId } });
     if (!payment) throw new Error("Payment not found");
-    
+
     const provider = await this.resolveProviderByCode(payment.provider);
     if (!provider.cancelPayment) throw new Error("Provider does not support cancel");
 
     const result = await provider.cancelPayment(payment.providerPaymentId || paymentId);
-    
+
     await db.payment.update({
       where: { id: paymentId },
       data: { status: PaymentStatus.CANCELLED }
     });
-    
+
     await this.logEvent(paymentId, PaymentEventStatus.FAILED, payment.providerPaymentId, result);
     return result;
   }

@@ -1,10 +1,12 @@
 'use server';
 
 import { MerchantCategoryService } from '@corecart/commerce/src/catalog/merchant-category.service';
+import { requireMerchantAccess } from '@corecart/shared/src/auth';
 import { revalidatePath } from 'next/cache';
 
 export async function fetchCategoryTreeAction() {
   try {
+    await requireMerchantAccess();
     const data = await MerchantCategoryService.listCategoriesTree();
     return { success: true, data: JSON.parse(JSON.stringify(data)) };
   } catch (error: any) {
@@ -14,6 +16,7 @@ export async function fetchCategoryTreeAction() {
 
 export async function fetchCategoryByIdAction(id: string) {
   try {
+    await requireMerchantAccess();
     const data = await MerchantCategoryService.getCategory(id);
     return { success: true, data: JSON.parse(JSON.stringify(data)) };
   } catch (error: any) {
@@ -23,6 +26,7 @@ export async function fetchCategoryByIdAction(id: string) {
 
 export async function createCategoryAction(input: any) {
   try {
+    await requireMerchantAccess();
     const data = await MerchantCategoryService.createCategory(input);
     revalidatePath('/categories');
     revalidatePath('/products');
@@ -34,6 +38,7 @@ export async function createCategoryAction(input: any) {
 
 export async function updateCategoryAction(id: string, input: any) {
   try {
+    await requireMerchantAccess();
     await MerchantCategoryService.updateCategory(id, input);
     revalidatePath('/categories');
     revalidatePath(`/categories/${id}`);
@@ -46,6 +51,7 @@ export async function updateCategoryAction(id: string, input: any) {
 
 export async function deleteCategoryAction(id: string) {
   try {
+    await requireMerchantAccess();
     await MerchantCategoryService.deleteCategory(id);
     revalidatePath('/categories');
     revalidatePath('/products');
@@ -57,6 +63,7 @@ export async function deleteCategoryAction(id: string) {
 
 export async function moveCategoryAction(id: string, parentId: string | null, sortOrder: number) {
   try {
+    await requireMerchantAccess();
     await MerchantCategoryService.moveCategory(id, parentId, sortOrder);
     revalidatePath('/categories');
     return { success: true };

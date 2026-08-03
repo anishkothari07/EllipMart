@@ -1,5 +1,6 @@
 import { IStorageProvider } from "./storage.interface";
 import { LocalStorageProvider } from "./local.storage";
+import { CloudinaryStorageProvider } from "./cloudinary.storage";
 
 export type StorageFactory = (config?: any) => IStorageProvider;
 
@@ -10,6 +11,7 @@ class StorageRegistry {
   constructor() {
     // Register default LocalStorageProvider
     this.register("LOCAL", (config) => new LocalStorageProvider(config?.uploadDir, config?.baseUrl));
+    this.register("CLOUDINARY", () => new CloudinaryStorageProvider());
   }
 
   register(id: string, factory: StorageFactory) {

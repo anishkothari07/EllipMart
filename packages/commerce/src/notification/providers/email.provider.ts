@@ -9,10 +9,9 @@ export class EmailProvider implements INotificationProvider {
   async send(options: ProviderDispatchOptions): Promise<ProviderDispatchResult> {
     const start = Date.now();
     try {
-      const res = await emailService.sendEmail({
+      await emailService.sendEmail({
         to: options.recipient,
         subject: options.subject || `${process.env.NEXT_PUBLIC_APP_NAME || 'Store'} Notification`,
-        text: options.body,
         html: options.html || `<p>${options.body}</p>`,
       });
 
@@ -20,8 +19,8 @@ export class EmailProvider implements INotificationProvider {
         providerName: this.id,
         channel: this.channel,
         success: true,
-        messageId: res.messageId || `email_${Date.now()}`,
-        responseRaw: res,
+        messageId: `email_${Date.now()}`,
+        responseRaw: null,
         latencyMs: Date.now() - start,
       };
     } catch (err: any) {

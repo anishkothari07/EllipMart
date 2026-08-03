@@ -7,4 +7,4 @@ export const ErrorCodes = {
   BAD_REQUEST: 'BAD_REQUEST',
 } as const;
 
-export type ErrorCode = keyof typeof ErrorCodes;
+export type ErrorCode = keyof typeof ErrorCodes | (string & {});

@@ -1,18 +1,30 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   typescript: {
-    ignoreBuildErrors: true,
+    ignoreBuildErrors: false,
   },
   images: {
     unoptimized: true,
     remotePatterns: [
       {
         protocol: 'https',
-        hostname: '**',
+        hostname: 'res.cloudinary.com',
+        pathname: '/**',
       },
       {
         protocol: 'http',
-        hostname: '**',
+        hostname: 'localhost',
+        pathname: '/**',
+      },
+      {
+        protocol: 'http',
+        hostname: '127.0.0.1',
+        pathname: '/**',
+      },
+      {
+        protocol: 'http',
+        hostname: 'localhost',
+        port: '3002',
       },
     ],
   },

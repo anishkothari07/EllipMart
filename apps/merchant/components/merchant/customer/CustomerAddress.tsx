@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import { cn } from '@corecart/shared';
 import { MapPin, Plus, Trash2, Home, Check, X, CheckSquare, Edit } from 'lucide-react';
 import { MerchantCustomerClient } from '@/lib/services/merchant-customer-client';
 import type { CustomerAddress as AddressType } from '@corecart/commerce';

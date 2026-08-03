@@ -162,13 +162,15 @@ export function getPaymentPresentation(
 }
 
 export function getOrderProductImage(item: any): string {
-  if (!item) return '/placeholder.svg';
+  if (!item) return '/placeholder.jpg';
   
   const media = item.variant?.product?.images?.[0]?.media;
-  if (media?.publicUrl) return media.publicUrl;
-  if (media?.path) return media.path;
+  let src = media?.publicUrl || media?.path || null;
+  if (typeof src === 'string' && src.startsWith('/uploads/')) {
+    src = `${process.env.NEXT_PUBLIC_MERCHANT_URL || 'http://localhost:3002'}${src}`;
+  }
   
-  return '/placeholder.svg';
+  return src || '/placeholder.jpg';
 }
 
 export function getOrderProductName(item: any): string {

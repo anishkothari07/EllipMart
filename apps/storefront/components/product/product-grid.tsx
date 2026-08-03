@@ -1,7 +1,7 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import type { Product } from '@corecart/types'
+import type { Product } from '@corecart/shared'
 import { cn } from '@corecart/shared'
 import { ProductCard } from './product-card'
 import { ProductListRow } from './product-list-row'

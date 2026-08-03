@@ -16,7 +16,7 @@ import {
 import Image from 'next/image'
 import Link from 'next/link'
 import { useEffect, useRef, useState } from 'react'
-import type { Category, MegaMenuSection, NavLink } from '@corecart/types'
+import type { Category, MegaMenuSection, NavLink } from '@corecart/shared'
 import { cn } from '@corecart/shared'
 import { NotificationCenterDrawer } from '@/components/notifications/notification-center-drawer'
 import { Container } from '@corecart/ui'

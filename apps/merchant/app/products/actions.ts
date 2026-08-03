@@ -1,6 +1,7 @@
 'use server';
 
 import { MerchantProductService } from '@corecart/commerce/src/catalog/merchant-product.service';
+import { requireMerchantAccess } from '@corecart/shared/src/auth';
 import { prisma } from '@corecart/database';
 import { revalidatePath } from 'next/cache';
 
@@ -14,6 +15,7 @@ export async function fetchProductsAction(params: {
   sort?: string;
 }) {
   try {
+    await requireMerchantAccess();
     const data = await MerchantProductService.listMerchantProducts(params);
     return { success: true, data };
   } catch (error: any) {
@@ -23,6 +25,7 @@ export async function fetchProductsAction(params: {
 
 export async function fetchProductByIdAction(id: string) {
   try {
+    await requireMerchantAccess();
     const data = await MerchantProductService.getMerchantProduct(id);
     return { success: true, data: JSON.parse(JSON.stringify(data)) };
   } catch (error: any) {
@@ -32,6 +35,7 @@ export async function fetchProductByIdAction(id: string) {
 
 export async function fetchBrandsAndCategoriesAction() {
   try {
+    await requireMerchantAccess();
     const [brands, categories, collections] = await Promise.all([
       prisma.brand.findMany({ select: { id: true, name: true } }),
       prisma.category.findMany({ select: { id: true, name: true } }),
@@ -53,6 +57,7 @@ export async function fetchBrandsAndCategoriesAction() {
 
 export async function createProductAction(input: any) {
   try {
+    await requireMerchantAccess();
     const product = await MerchantProductService.createMerchantProduct(input);
     revalidatePath('/products');
     return { success: true, data: JSON.parse(JSON.stringify(product)) };
@@ -63,6 +68,7 @@ export async function createProductAction(input: any) {
 
 export async function updateProductAction(id: string, input: any) {
   try {
+    await requireMerchantAccess();
     await MerchantProductService.updateMerchantProduct(id, input);
     revalidatePath('/products');
     revalidatePath(`/products/${id}`);
@@ -74,6 +80,7 @@ export async function updateProductAction(id: string, input: any) {
 
 export async function deleteProductAction(id: string) {
   try {
+    await requireMerchantAccess();
     await MerchantProductService.deleteMerchantProduct(id);
     revalidatePath('/products');
     return { success: true };
@@ -84,6 +91,7 @@ export async function deleteProductAction(id: string) {
 
 export async function bulkUpdateStatusAction(ids: string[], status: 'ACTIVE' | 'ARCHIVED') {
   try {
+    await requireMerchantAccess();
     await MerchantProductService.bulkUpdateStatus(ids, status);
     revalidatePath('/products');
     return { success: true };
@@ -94,6 +102,7 @@ export async function bulkUpdateStatusAction(ids: string[], status: 'ACTIVE' | '
 
 export async function bulkDeleteAction(ids: string[]) {
   try {
+    await requireMerchantAccess();
     await MerchantProductService.bulkDelete(ids);
     revalidatePath('/products');
     return { success: true };

@@ -163,12 +163,12 @@ export class MerchantInventoryService {
     return movements.map((m) => {
       let audit = { source: 'Merchant', notes: '', prevQty: 0, newQty: 0 };
       try {
-        if (m.description) {
-          audit = JSON.parse(m.description);
+        if (m.notes) {
+          audit = JSON.parse(m.notes);
         }
       } catch (e) {
         // Fallback for raw descriptions
-        audit.notes = m.description || '';
+        audit.notes = m.notes || '';
       }
 
       return {

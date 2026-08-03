@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { motion } from 'framer-motion'
 import { Eye, Heart, Plus, Truck } from 'lucide-react'
 import { useState } from 'react'
-import type { Product } from '@corecart/types'
+import type { Product } from '@corecart/shared'
 import { cn } from '@corecart/shared'
 import { StarRating } from '@corecart/ui'
 import { Price } from '@corecart/ui'
@@ -42,7 +42,7 @@ export function ProductCard({
       className={cn('group flex flex-col', className)}
     >
       <div ref={imageContainerRef} className="relative aspect-[4/5] overflow-hidden rounded-2xl bg-card shadow-soft transition-shadow duration-300 group-hover:shadow-float">
-        <Link href={`/product/${product.slug}`} prefetch={false} aria-label={product.name} className="block h-full">
+        <Link href={`/product/${product.slug}`} prefetch={false} aria-label={product.name} className="relative block h-full">
           <Image
             src={product.images[0] || '/placeholder.svg'}
             alt={product.name}

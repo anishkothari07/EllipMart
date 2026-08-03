@@ -16,7 +16,7 @@ export async function POST(req: NextRequest) {
     if (productId) {
       const prod = await db.product.findUnique({
         where: { id: productId },
-        include: { brand: true, category: true, specifications: true, reviews: true }
+        include: { brand: true, category: true, specifications: { include: { spec: true } }, reviews: true }
       });
       if (prod) {
         sources.push("Product Specifications");
@@ -33,7 +33,7 @@ Reviews Average Rating: ${prod.ratingAverage}/5 (Count: ${prod.reviewCount})
 User Reviews List:
 ${prod.reviews.map((r, i) => `${i + 1}. Rating: ${r.rating}, Review: "${r.comment}"`).join("\n")}
 Technical Specs:
-${prod.specifications.map(s => `- ${s.name}: ${s.value}`).join("\n")}
+${prod.specifications.map(s => `- ${s.spec.name}: ${s.value}`).join("\n")}
 `;
       }
     }

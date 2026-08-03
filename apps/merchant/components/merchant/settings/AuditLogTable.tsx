@@ -27,9 +27,9 @@ export function AuditLogTable() {
         action: action || undefined,
         entityType: entityType || undefined,
       });
-      setLogs(data.items || []);
-      setTotalCount(data.total);
-      setTotalPages(data.totalPages);
+      setLogs(data?.items || []);
+      setTotalCount(data?.total || 0);
+      setTotalPages(data?.totalPages || 0);
     } catch (err) {
       console.error('Failed to load audit logs:', err);
     } finally {

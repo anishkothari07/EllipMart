@@ -12,8 +12,8 @@ export class ProductService {
 
     const { seo, variants, tagIds, specifications, ...data } = input;
 
-    const createData: Prisma.ProductCreateInput = {
-      ...data,
+    const createData: Prisma.ProductUncheckedCreateInput = {
+      ...(data as any),
       seo: seo ? { create: seo } : undefined,
       tags: tagIds ? {
         create: tagIds.map(tagId => ({
@@ -31,17 +31,11 @@ export class ProductService {
           const { price, attributes, mediaIds, ...variantData } = v;
           return {
             ...variantData,
-            price: price ? { create: price } : undefined,
+            pricing: price ? { create: price as any } : undefined,
             attributes: attributes ? {
               create: attributes.map(attr => ({
                 attribute: { connect: { id: attr.attributeId } },
                 attributeValue: { connect: { id: attr.attributeValueId } }
-              }))
-            } : undefined,
-            media: mediaIds ? {
-              create: mediaIds.map((mediaId, idx) => ({
-                media: { connect: { id: mediaId } },
-                sortOrder: idx
               }))
             } : undefined
           };
@@ -80,8 +74,8 @@ export class ProductService {
 
     const { seo, variants, tagIds, specifications, ...data } = input;
 
-    const updateData: Prisma.ProductUpdateInput = {
-      ...data,
+    const updateData: Prisma.ProductUncheckedUpdateInput = {
+      ...(data as any),
       seo: seo ? {
         upsert: {
           create: seo,
@@ -121,8 +115,8 @@ export class ProductService {
             where: { id: v.id },
             data: {
               ...vData,
-              price: price ? {
-                upsert: { create: price, update: price }
+              pricing: price ? {
+                upsert: { create: price as any, update: price as any }
               } : undefined,
               // further nested updates like attributes/media omitted for brevity in partial update
             }
@@ -132,7 +126,7 @@ export class ProductService {
           const { price, attributes, mediaIds, ...vData } = v;
           return {
             ...vData,
-            price: price ? { create: price } : undefined,
+            pricing: price ? { create: price as any } : undefined,
             attributes: attributes ? {
               create: attributes.map(attr => ({
                 attribute: { connect: { id: attr.attributeId } },
@@ -188,7 +182,7 @@ export class ProductService {
         ...where.variants,
         some: {
           ...where.variants?.some,
-          price: {
+          pricing: {
             sellingPrice: {
               gte: minPrice,
               lte: maxPrice,

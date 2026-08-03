@@ -1,7 +1,7 @@
 import Razorpay from "razorpay";
 import crypto from "crypto";
 import { PaymentStatus } from "@prisma/client";
-import { IPaymentProvider, InitializePaymentOptions, InitializePaymentResult, VerifyPaymentOptions, VerifyPaymentResult, WebhookResult } from '@corecart/types';
+import { IPaymentProvider, InitializePaymentOptions, InitializePaymentResult, VerifyPaymentOptions, VerifyPaymentResult, WebhookResult } from '../types';
 
 export class RazorpayProvider implements IPaymentProvider {
   id = "RAZORPAY";
