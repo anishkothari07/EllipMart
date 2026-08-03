@@ -44,7 +44,7 @@ export default async function OrdersPage() {
   })
 
   // Convert Date objects to strings for serialization to Client Component
-  const serializedOrders = orders.map(o => ({
+  const serializedOrders = orders.map((o: typeof orders[number]) => ({
     ...o,
     subTotal: o.subTotal.toString(),
     discountTotal: o.discountTotal.toString(),
