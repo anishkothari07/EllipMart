@@ -28,7 +28,7 @@ export function CategoryView({
   title,
   description,
   bannerImage,
-  products,
+  products = [],
 }: {
   category?: any
   title: string
