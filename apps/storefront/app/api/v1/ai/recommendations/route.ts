@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma as db, Prisma } from '@corecart/database';
+import { prisma as db } from '@corecart/database';
+import type { Prisma } from '@prisma/client';
 
 type Product = Prisma.ProductGetPayload<Record<string, never>>;
 
