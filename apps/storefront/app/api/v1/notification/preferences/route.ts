@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma as db } from '@corecart/database';
-import { NotificationCategory, NotificationChannel } from "@prisma/client";
 
 export async function GET(req: NextRequest) {
   try {
@@ -33,15 +32,15 @@ export async function PATCH(req: NextRequest) {
       where: {
         userId_category_channel: {
           userId,
-          category: category as NotificationCategory,
-          channel: channel as NotificationChannel,
+          category: category as any,
+          channel: channel as any,
         },
       },
       update: { enabled: !!enabled },
       create: {
         userId,
-        category: category as NotificationCategory,
-        channel: channel as NotificationChannel,
+        category: category as any,
+        channel: channel as any,
         enabled: !!enabled,
       },
     });

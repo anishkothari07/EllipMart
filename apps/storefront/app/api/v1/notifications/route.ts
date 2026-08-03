@@ -1,12 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma as db } from '@corecart/database';
-import { NotificationCategory } from "@prisma/client";
 
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
     const userId = searchParams.get("userId") || undefined;
-    const category = (searchParams.get("category") as NotificationCategory) || undefined;
+    const category = (searchParams.get("category") as any) || undefined;
     const unreadOnly = searchParams.get("unreadOnly") === "true";
     const page = Number(searchParams.get("page")) || 1;
     const limit = Number(searchParams.get("limit")) || 20;
