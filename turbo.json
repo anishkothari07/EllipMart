@@ -3,7 +3,25 @@
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
-      "outputs": [".next/**", "dist/**"]
+      "outputs": [".next/**", "dist/**"],
+      "env": [
+        "DATABASE_URL",
+        "NODE_ENV",
+        "JWT_ACCESS_SECRET",
+        "JWT_REFRESH_SECRET",
+        "JWT_ACCESS_EXPIRES",
+        "JWT_REFRESH_EXPIRES",
+        "MAX_LOGIN_ATTEMPTS",
+        "LOCK_DURATION_MINUTES",
+        "STORAGE_PROVIDER",
+        "CLOUDINARY_CLOUD_NAME",
+        "CLOUDINARY_API_KEY",
+        "CLOUDINARY_API_SECRET",
+        "NEXT_PUBLIC_STOREFRONT_URL",
+        "NEXT_PUBLIC_MERCHANT_URL",
+        "NEXT_PUBLIC_API_URL",
+        "GEMINI_API_KEY"
+      ]
     },
     "dev": {
       "cache": false,

@@ -20,7 +20,7 @@ export default async function AddressesPage() {
   })
 
   // Convert dates to string for client component
-  const serializedAddresses = addresses.map((addr: any) => ({
+  const serializedAddresses = addresses.map((addr: typeof addresses[number]) => ({
     ...addr,
     createdAt: addr.createdAt.toISOString(),
     updatedAt: addr.updatedAt.toISOString(),
