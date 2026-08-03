@@ -9,12 +9,12 @@ export class ReportService {
     let content = "";
     if (format === "CSV" || format === "EXCEL") {
       content = "Event ID,Event Type,User ID,Session ID,Created At\n";
-      events.forEach((ev) => {
+      events.forEach((ev: any) => {
         content += `${ev.id},${ev.event},${ev.userId || "guest"},${ev.sessionId || "none"},${ev.createdAt.toISOString()}\n`;
       });
     } else {
       content = `--- SMARTGO BI ANALYTICS PDF REPORT ---\nMetric: ${metric}\nGenerated At: ${new Date().toISOString()}\n\n`;
-      events.forEach((ev) => {
+      events.forEach((ev: any) => {
         content += `[${ev.createdAt.toISOString()}] Event: ${ev.event} | User: ${ev.userId || "guest"}\n`;
       });
     }
