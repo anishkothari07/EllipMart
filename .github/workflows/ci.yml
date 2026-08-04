@@ -48,11 +48,31 @@ jobs:
         env:
           DATABASE_URL: "mysql://root:root@127.0.0.1:3306/smartgo_test"
 
+      - name: Run Lint
+        run: pnpm lint
+
+      - name: Run Typecheck
+        run: pnpm typecheck
+
+      - name: Run Tests with Coverage
+        run: pnpm test:coverage
+
+      - name: Run Integration Tests
+        run: pnpm test:integration
+
       - name: Production Build Check
         run: pnpm build
         env:
           DATABASE_URL: "mysql://root:root@127.0.0.1:3306/smartgo_test"
           REDIS_URL: "redis://127.0.0.1:6379"
+
+      - name: Install Playwright Browsers
+        run: pnpm exec playwright install --with-deps
+
+      - name: Run Playwright End-to-End Tests
+        run: pnpm test:e2e
+        env:
+          DATABASE_URL: "mysql://root:root@127.0.0.1:3306/smartgo_test"
 
       - name: Start Next.js Server & Verify Endpoints
         run: |

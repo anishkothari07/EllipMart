@@ -22,9 +22,10 @@ export function Hero() {
   useEffect(() => {
     async function loadCampaign() {
       try {
-        const res = await fetch('/api/v1/festivals')
-        const json = await res.json()
-        if (json.success && json.data) {
+        const res = await fetch('/api/v1/festivals').catch(() => null)
+        if (!res || !res.ok) return
+        const json = await res.json().catch(() => null)
+        if (json && json.success && json.data) {
           const campaign = json.data
           setActiveCampaign(campaign)
           
@@ -58,7 +59,11 @@ export function Hero() {
 
   useEffect(() => {
     if (count === 0) return
-    const t = setInterval(() => setIndex((i) => (i + 1) % count), 6000)
+    const t = setInterval(() => {
+      if (typeof document !== 'undefined' && document.visibilityState === 'visible') {
+        setIndex((i) => (i + 1) % count)
+      }
+    }, 6000)
     return () => clearInterval(t)
   }, [count])
 
@@ -69,7 +74,7 @@ export function Hero() {
       {activeCampaign && (
         <div className="w-full bg-gradient-to-r from-amber-500 via-orange-600 to-red-600 text-white py-2.5 px-4 text-center text-xs font-semibold tracking-wide shadow-md flex items-center justify-center gap-2">
           <span>✨🪔</span>
-          <span>{activeCampaign.name} is LIVE: {JSON.parse(activeCampaign.themeJson || '{}').bannerText || 'Diwali deals on select models!'}</span>
+          <span>{activeCampaign.name} is LIVE! Diwali deals on select models!</span>
           <span>🪔✨</span>
         </div>
       )}

@@ -1,3 +1,4 @@
+import { Suspense } from 'react'
 import { Hero } from '@/components/home/hero'
 import { TrustBar } from '@/components/home/trust-bar'
 import { CategoryShowcase } from '@/components/home/category-showcase'
@@ -7,18 +8,20 @@ import { Testimonials } from '@/components/home/testimonials'
 import { Newsletter } from '@/components/home/newsletter'
 import { shoppingProductService } from '@corecart/commerce'
 
-export const dynamic = 'force-dynamic';
+// Revalidate every 60 seconds — new products appear within 1 minute
+// without forcing a full DB round-trip on every request
+export const revalidate = 60;
 
 export default async function HomePage() {
-  const [bestSellersRes, newArrivalsRes, trendingRes] = await Promise.all([
-    shoppingProductService.listProducts({ sort: 'sales_desc', limit: 4 }),
-    shoppingProductService.listProducts({ sort: 'newest', limit: 4 }),
-    shoppingProductService.listProducts({ sort: 'popular', limit: 8 }),
-  ]);
+  // Single DB query, then slice client-side — 3x fewer round trips
+  const { items: allProducts } = await shoppingProductService.listProducts({
+    sort: 'newest',
+    limit: 16,
+  });
 
-  const bestSellers = bestSellersRes.items;
-  const newArrivals = newArrivalsRes.items;
-  const trending = trendingRes.items;
+  const bestSellers = allProducts.slice(0, 4);
+  const newArrivals = allProducts.slice(4, 8);
+  const trending = allProducts.slice(8, 16);
 
   return (
     <>

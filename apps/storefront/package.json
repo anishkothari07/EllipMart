@@ -9,22 +9,25 @@
     "lint": "echo 'Skipping lint (no ESLint configured)'"
   },
   "dependencies": {
+    "@base-ui/react": "^1.5.0",
+    "@corecart/commerce": "workspace:*",
+    "@corecart/compiler": "workspace:*",
+    "@corecart/database": "workspace:*",
+    "@corecart/runtime": "workspace:*",
+    "@corecart/shared": "workspace:*",
+    "@corecart/types": "workspace:*",
+    "@corecart/ui": "workspace:*",
+    "bcryptjs": "^3.0.3",
+    "clsx": "^2.1.1",
+    "framer-motion": "^12.42.2",
+    "lucide-react": "^1.16.0",
     "next": "16.2.6",
     "react": "^19",
     "react-dom": "^19",
-    "lucide-react": "^1.16.0",
-    "clsx": "^2.1.1",
     "tailwind-merge": "^3.3.1",
-    "framer-motion": "^12.42.2",
-    "zod": "^4.4.3",
-    "bcryptjs": "^3.0.3",
-    "@base-ui/react": "^1.5.0",
-    "@corecart/database": "workspace:*",
-    "@corecart/types": "workspace:*",
-    "@corecart/shared": "workspace:*",
-    "@corecart/ui": "workspace:*",
-    "@corecart/commerce": "workspace:*",
-    "@corecart/runtime": "workspace:*",
-    "@corecart/compiler": "workspace:*"
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@types/swagger-ui-react": "^5.18.0"
   }
 }

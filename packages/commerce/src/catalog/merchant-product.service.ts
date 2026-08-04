@@ -204,8 +204,14 @@ export class MerchantProductService {
 
       // Tags association
       if (tags && tags.length > 0) {
-        for (const tName of tags) {
-          const tSlug = tName.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+        for (const rawTag of tags) {
+          if (!rawTag) continue;
+          const tName = typeof rawTag === 'string' ? rawTag : (rawTag.name || rawTag.label || String(rawTag));
+          if (!tName || typeof tName !== 'string') continue;
+
+          const tSlug = tName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+          if (!tSlug) continue;
+
           const tag = await tx.tag.upsert({
             where: { slug: tSlug },
             update: {},
@@ -224,10 +230,12 @@ export class MerchantProductService {
       // Collections association
       if (collectionIds && collectionIds.length > 0) {
         for (const colId of collectionIds) {
+          const cId = typeof colId === 'string' ? colId : colId?.id;
+          if (!cId) continue;
           await tx.collectionProduct.create({
             data: {
               productId: product.id,
-              collectionId: colId,
+              collectionId: cId,
             },
           });
         }
@@ -236,7 +244,7 @@ export class MerchantProductService {
       // Product Images association
       if (images && images.length > 0) {
         for (let i = 0; i < images.length; i++) {
-          const imgPath = images[i];
+          const imgPath = typeof images[i] === 'string' ? images[i] : images[i]?.url || images[i]?.path;
           if (!imgPath) continue;
           let cleanPath = imgPath;
           if (typeof imgPath === 'string' && (imgPath.startsWith('http://') || imgPath.startsWith('https://'))) {
@@ -274,8 +282,8 @@ export class MerchantProductService {
           const newVariant = await tx.productVariant.create({
             data: {
               productId: product.id,
-              sku: v.sku,
-              name: v.name,
+              sku: v.sku || `SKU-${slug.toUpperCase()}-${Math.floor(Math.random()*1000)}`,
+              name: v.name || 'Variant',
               isActive: true,
             },
           });
@@ -284,8 +292,21 @@ export class MerchantProductService {
           await tx.inventory.create({
             data: {
               variantId: newVariant.id,
-              quantityAvailable: v.quantity || 0,
-              status: (v.quantity || 0) > 0 ? 'IN_STOCK' : 'OUT_OF_STOCK',
+              quantityAvailable: v.quantity || v.stock || 0,
+              status: (v.quantity || v.stock || 0) > 0 ? 'IN_STOCK' : 'OUT_OF_STOCK',
+            },
+          });
+
+          // Price record for variant
+          const vSelling = Number(v.price?.sellingPrice || v.price || price?.sellingPrice || 0);
+          const vMrp = Number(v.price?.mrp || price?.mrp || vSelling);
+          await tx.productPrice.create({
+            data: {
+              productVariantId: newVariant.id,
+              mrp: vMrp,
+              sellingPrice: vSelling,
+              costPrice: v.price?.costPrice ? Number(v.price.costPrice) : null,
+              currency: 'INR',
             },
           });
         }
@@ -328,7 +349,7 @@ export class MerchantProductService {
       }
 
       return product;
-    });
+    }, { timeout: 30000 });
   }
 
   static async updateMerchantProduct(id: string, input: any) {

@@ -1,8 +1,6 @@
-'use client'
-
+// Server Component — no 'use client' needed for static category grid
 import Image from 'next/image'
 import Link from 'next/link'
-import { motion } from 'framer-motion'
 import { ArrowUpRight } from 'lucide-react'
 import { Container } from '@corecart/ui'
 import { SectionHeader } from '@corecart/ui'
@@ -19,12 +17,8 @@ export function CategoryShowcase() {
         />
         <div className="mt-10 grid grid-cols-2 gap-4 lg:grid-cols-3">
           {categories.map((cat, i) => (
-            <motion.div
+            <div
               key={cat.slug}
-              initial={{ opacity: 0, y: 24 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: '-80px' }}
-              transition={{ duration: 0.5, delay: i * 0.05 }}
               className={i === 0 ? 'col-span-2 lg:col-span-2 lg:row-span-2' : ''}
             >
               <Link
@@ -60,7 +54,7 @@ export function CategoryShowcase() {
                   </span>
                 </div>
               </Link>
-            </motion.div>
+            </div>
           ))}
         </div>
       </Container>

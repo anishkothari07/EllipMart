@@ -32,7 +32,7 @@ export function ProductForm({ initialProduct, brands, categories, collections, o
     longDescription: '',
     brandId: null,
     categoryId: categories[0]?.id || '',
-    status: 'DRAFT',
+    status: 'ACTIVE',
     visibility: 'PUBLIC',
     price: { mrp: 0, sellingPrice: 0, costPrice: null },
     inventory: { quantity: 0, lowStockThreshold: 5 },

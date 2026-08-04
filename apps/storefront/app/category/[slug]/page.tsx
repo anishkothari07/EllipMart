@@ -35,7 +35,8 @@ export async function generateMetadata({
   }
 }
 
-export const dynamic = 'force-dynamic';
+// ISR: revalidate category pages every 60 seconds
+export const revalidate = 60;
 
 export default async function CategoryPage({
   params,
@@ -43,22 +44,16 @@ export default async function CategoryPage({
   params: Promise<{ slug: string }>
 }) {
   const { slug } = await params
-  const category = await prisma.category.findUnique({ where: { slug }, include: { banner: true } })
-  const special = specialTitles[slug]
-  
-  // Call the real service
-  // If special slug like 'all', we don't pass category filter
-  // If 'sale' or 'new-arrivals', we could pass tags or specific filters. 
-  // For now, if it's not a special slug, pass as category filter
-  const filterParams: any = { limit: 50 };
-  if (!specialTitles[slug]) {
-    filterParams.category = slug;
-  } else if (slug === 'new-arrivals') {
-    filterParams.sort = 'newest';
-  }
-
-  const result = await shoppingProductService.listProducts(filterParams);
+  const [category, result] = await Promise.all([
+    prisma.category.findUnique({ where: { slug }, include: { banner: true } }),
+    shoppingProductService.listProducts({
+      limit: 24,
+      ...(specialTitles[slug] === undefined ? { category: slug } : {}),
+      ...(slug === 'new-arrivals' ? { sort: 'newest' } : {}),
+    }),
+  ]);
   const products = result.items;
+  const special = specialTitles[slug];
 
   const title = category?.name ?? special?.title ?? 'Shop'
   const description = category?.description ?? special?.description

@@ -19,4 +19,3 @@ export const prisma =
 if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma;
 
 export * from '@prisma/client';
-export { Role, UserStatus, OrderStatus, ProductStatus, ProductVisibility } from '@prisma/client';

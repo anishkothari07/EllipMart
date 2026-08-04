@@ -1,6 +1,25 @@
 import { prisma } from '@corecart/database';
 import { AppError } from '@corecart/shared';
 
+const CART_QUERY_INCLUDE = {
+  items: {
+    include: {
+      variant: {
+        include: {
+          product: {
+            include: { 
+              images: { include: { media: true } },
+              brand: true,
+              category: true
+            }
+          },
+          pricing: true
+        }
+      }
+    }
+  }
+};
+
 export const cartService = {
   async getCart(userId: string) {
     const user = await prisma.user.findUnique({ where: { id: userId } });
@@ -8,47 +27,13 @@ export const cartService = {
 
     let cart = await prisma.cart.findUnique({
       where: { userId },
-      include: {
-        items: {
-          include: {
-            variant: {
-              include: {
-                product: {
-                  include: { 
-                    images: { include: { media: true } },
-                    brand: true,
-                    category: true
-                  }
-                },
-                pricing: true
-              }
-            }
-          }
-        }
-      }
+      include: CART_QUERY_INCLUDE
     });
 
     if (!cart) {
       cart = await prisma.cart.create({
         data: { userId },
-        include: {
-          items: {
-            include: {
-              variant: {
-                include: {
-                  product: {
-                    include: { 
-                      images: { include: { media: true } },
-                      brand: true,
-                      category: true
-                    }
-                  },
-                  pricing: true
-                }
-              }
-            }
-          }
-        }
+        include: CART_QUERY_INCLUDE
       });
     }
 

@@ -1,6 +1,5 @@
 'use client'
 
-import { motion } from 'framer-motion'
 import { Container } from '@corecart/ui'
 import { SectionHeader } from '@corecart/ui'
 import { ProductCard } from '@/components/product/product-card'
@@ -32,17 +31,14 @@ export function ProductRail({
           description={description}
           href={href}
         />
+        {/* CSS stagger via animation-delay, no per-item IntersectionObserver */}
         <div className="mt-10 grid grid-cols-2 gap-x-4 gap-y-8 md:grid-cols-3 lg:grid-cols-4">
           {products.map((product, i) => (
-            <motion.div
+            <ProductCard
               key={product.id}
-              initial={{ opacity: 0, y: 24 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: '-60px' }}
-              transition={{ duration: 0.45, delay: (i % 4) * 0.05 }}
-            >
-              <ProductCard product={product} />
-            </motion.div>
+              product={product}
+              style={{ animationDelay: `${i * 50}ms` } as React.CSSProperties}
+            />
           ))}
         </div>
       </Container>

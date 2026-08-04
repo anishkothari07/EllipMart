@@ -1,3 +1,11 @@
+# build & cache artifacts
+*.tsbuildinfo
+build.log
+.turbo
+coverage/
+dist/
+.next/
+
 # Dependencies
 node_modules/
 **/node_modules/

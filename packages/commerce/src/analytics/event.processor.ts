@@ -5,11 +5,16 @@ import { AnalyticsEventType } from "@prisma/client";
 export class AnalyticsEventProcessor {
   static init() {
     // Subscribe to all events using wildcard subscribeAll
-    domainEventBus.subscribeAll(async (event: string, data: any) => {
+    domainEventBus.subscribeAll(async (event) => {
       try {
-        await this.processEvent(event, data);
+        const data = {
+          ...(event.payload || {}),
+          organizationId: event.organizationId,
+          websiteId: event.websiteId,
+        };
+        await this.processEvent(event.eventName, data);
       } catch (err) {
-        console.error(`[AnalyticsEventProcessor] Error processing event ${event}:`, err);
+        console.error(`[AnalyticsEventProcessor] Error processing event:`, err);
       }
     });
   }

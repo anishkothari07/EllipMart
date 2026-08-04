@@ -60,6 +60,8 @@ export async function createProductAction(input: any) {
     await requireMerchantAccess();
     const product = await MerchantProductService.createMerchantProduct(input);
     revalidatePath('/products');
+    revalidatePath('/');
+    revalidatePath('/search');
     return { success: true, data: JSON.parse(JSON.stringify(product)) };
   } catch (error: any) {
     return { success: false, error: error.message || 'Failed to create product' };
@@ -72,6 +74,8 @@ export async function updateProductAction(id: string, input: any) {
     await MerchantProductService.updateMerchantProduct(id, input);
     revalidatePath('/products');
     revalidatePath(`/products/${id}`);
+    revalidatePath('/');
+    revalidatePath('/search');
     return { success: true };
   } catch (error: any) {
     return { success: false, error: error.message || 'Failed to update product' };
@@ -83,6 +87,8 @@ export async function deleteProductAction(id: string) {
     await requireMerchantAccess();
     await MerchantProductService.deleteMerchantProduct(id);
     revalidatePath('/products');
+    revalidatePath('/');
+    revalidatePath('/search');
     return { success: true };
   } catch (error: any) {
     return { success: false, error: error.message || 'Failed to delete product' };

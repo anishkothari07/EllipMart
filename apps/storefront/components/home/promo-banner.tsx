@@ -1,39 +1,51 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { memo, useEffect, useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { motion } from 'framer-motion'
 import { ArrowRight } from 'lucide-react'
 import { Container } from '@corecart/ui'
 
-function useCountdown(target: number) {
+const CountdownDigits = memo(function CountdownDigits({ target }: { target: number }) {
   const [now, setNow] = useState(() => Date.now())
+
   useEffect(() => {
     const t = setInterval(() => setNow(Date.now()), 1000)
     return () => clearInterval(t)
   }, [])
+
   const diff = Math.max(0, target - now)
   const hours = Math.floor(diff / 3_600_000)
   const minutes = Math.floor((diff % 3_600_000) / 60_000)
   const seconds = Math.floor((diff % 60_000) / 1000)
-  return { hours, minutes, seconds }
-}
+
+  const units = [
+    { label: 'Hours', value: hours },
+    { label: 'Minutes', value: minutes },
+    { label: 'Seconds', value: seconds },
+  ]
+
+  return (
+    <div className="flex gap-4 lg:justify-end">
+      {units.map((u) => (
+        <div
+          key={u.label}
+          className="flex min-w-[84px] flex-col items-center rounded-[var(--radius-lg)] bg-background/10 px-4 py-5 backdrop-blur"
+        >
+          <span className="font-mono text-3xl font-semibold tabular-nums text-background sm:text-4xl">
+            {String(u.value).padStart(2, '0')}
+          </span>
+          <span className="mt-1 text-xs uppercase tracking-widest text-background/60">
+            {u.label}
+          </span>
+        </div>
+      ))}
+    </div>
+  )
+})
 
 export function PromoBanner() {
   const [target] = useState(() => Date.now() + 1000 * 60 * 60 * 8 + 1000 * 60 * 23)
-  const { hours, minutes, seconds } = useCountdown(target)
-  const [mounted, setMounted] = useState(false)
-  
-  useEffect(() => {
-    setMounted(true)
-  }, [])
-
-  const units = [
-    { label: 'Hours', value: mounted ? hours : 0 },
-    { label: 'Minutes', value: mounted ? minutes : 0 },
-    { label: 'Seconds', value: mounted ? seconds : 0 },
-  ]
 
   return (
     <section className="py-16 sm:py-20">
@@ -48,12 +60,7 @@ export function PromoBanner() {
           />
           <div className="absolute inset-0 bg-gradient-to-r from-foreground via-foreground/80 to-foreground/30" />
           <div className="relative grid gap-8 p-8 sm:p-12 lg:grid-cols-2 lg:items-center lg:p-16">
-            <motion.div
-              initial={{ opacity: 0, x: -24 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6 }}
-            >
+            <div>
               <span className="inline-flex items-center rounded-full bg-primary px-3 py-1 text-xs font-semibold uppercase tracking-widest text-primary-foreground">
                 Flash sale
               </span>
@@ -71,22 +78,8 @@ export function PromoBanner() {
                 Shop the sale
                 <ArrowRight className="ml-1 size-4" />
               </Link>
-            </motion.div>
-            <div className="flex gap-4 lg:justify-end">
-              {units.map((u) => (
-                <div
-                  key={u.label}
-                  className="flex min-w-[84px] flex-col items-center rounded-[var(--radius-lg)] bg-background/10 px-4 py-5 backdrop-blur"
-                >
-                  <span className="font-mono text-3xl font-semibold tabular-nums text-background sm:text-4xl">
-                    {String(u.value).padStart(2, '0')}
-                  </span>
-                  <span className="mt-1 text-xs uppercase tracking-widest text-background/60">
-                    {u.label}
-                  </span>
-                </div>
-              ))}
             </div>
+            <CountdownDigits target={target} />
           </div>
         </div>
       </Container>

@@ -17,6 +17,7 @@ export async function POST(req: NextRequest) {
     return successResponse(result);
   } catch (error: any) {
     if (error.isOperational) return errorResponse(error.message, error.errorCode, undefined, error.statusCode);
+    console.error('[CHECKOUT 500 TRACE]', error.stack);
     return errorResponse(error.message || 'Internal Server Error', 'INTERNAL_SERVER_ERROR', undefined, 500);
   }
 }

@@ -2,67 +2,62 @@
 
 import Image from 'next/image'
 import Link from 'next/link'
-import { motion } from 'framer-motion'
 import { Eye, Heart, Plus, Truck } from 'lucide-react'
-import { useState } from 'react'
+import { useRef } from 'react'
 import type { Product } from '@corecart/shared'
 import { cn } from '@corecart/shared'
 import { StarRating } from '@corecart/ui'
-import { Price } from '@corecart/ui'
 import { useStore } from '@/components/providers/store-provider'
 import { useCartAnimation } from '@/components/providers/cart-animation-provider'
-import { useRef } from 'react'
-
 import { formatPrice } from '@corecart/shared'
 
 export function ProductCard({
   product,
   onQuickView,
   className,
+  style,
 }: {
   product: Product
   onQuickView?: (product: Product) => void
   className?: string
+  style?: React.CSSProperties
 }) {
   const { addToCart, toggleWishlist, isWishlisted } = useStore()
   const { animateAddToCart } = useCartAnimation()
   const imageContainerRef = useRef<HTMLDivElement>(null)
-  const [hovered, setHovered] = useState(false)
   const wishlisted = isWishlisted(product.id)
   const secondImage = product.images[1] ?? product.images[0]
 
   return (
-    <motion.article
-      initial={{ opacity: 0, y: 16 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: '-40px' }}
-      transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-      className={cn('group flex flex-col', className)}
+    // CSS-only fade-in instead of Framer Motion viewport observer per card
+    <article
+      style={style}
+      className={cn(
+        'group flex flex-col animate-fadeInUp',
+        className,
+      )}
     >
-      <div ref={imageContainerRef} className="relative aspect-[4/5] overflow-hidden rounded-2xl bg-card shadow-soft transition-shadow duration-300 group-hover:shadow-float">
+      <div
+        ref={imageContainerRef}
+        className="relative aspect-[4/5] overflow-hidden rounded-2xl bg-card shadow-soft transition-shadow duration-300 group-hover:shadow-float"
+      >
         <Link href={`/product/${product.slug}`} prefetch={false} aria-label={product.name} className="relative block h-full">
+          {/* Primary image — fades out on hover via CSS group */}
           <Image
             src={product.images[0] || '/placeholder.svg'}
             alt={product.name}
             fill
             sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 20vw"
-            className={cn(
-              'object-cover transition-all duration-700 ease-out',
-              hovered ? 'scale-105 opacity-0' : 'scale-100 opacity-100',
-            )}
+            className="object-cover transition-all duration-700 ease-out scale-100 opacity-100 group-hover:scale-105 group-hover:opacity-0"
           />
+          {/* Secondary image — fades in on hover via CSS group */}
           <Image
             src={secondImage || '/placeholder.svg'}
             alt=""
             aria-hidden
             fill
             sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 20vw"
-            className={cn(
-              'object-cover transition-all duration-700 ease-out',
-              hovered ? 'scale-105 opacity-100' : 'scale-110 opacity-0',
-            )}
+            className="object-cover transition-all duration-700 ease-out scale-110 opacity-0 group-hover:scale-105 group-hover:opacity-100"
           />
         </Link>
 
@@ -91,13 +86,8 @@ export function ProductCard({
           <Heart className={cn('size-4', wishlisted && 'fill-accent text-accent')} />
         </button>
 
-        {/* Hover actions */}
-        <div
-          className={cn(
-            'absolute inset-x-3 bottom-3 flex items-center gap-2 transition-all duration-300',
-            hovered ? 'translate-y-0 opacity-100' : 'translate-y-3 opacity-0',
-          )}
-        >
+        {/* Hover actions — CSS group-hover transition */}
+        <div className="absolute inset-x-3 bottom-3 flex items-center gap-2 translate-y-3 opacity-0 transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100">
           <button
             type="button"
             disabled={!product.inStock}
@@ -168,6 +158,6 @@ export function ProductCard({
           </span>
         )}
       </div>
-    </motion.article>
+    </article>
   )
 }

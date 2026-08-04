@@ -5,6 +5,70 @@ import { successResponse, errorResponse } from '@corecart/shared';
 import { checkRateLimit } from '@corecart/shared';
 import { AppError } from '@corecart/shared';
 
+/**
+ * @swagger
+ * /api/v1/auth/login:
+ *   post:
+ *     summary: Authenticate a user and create a session
+ *     description: Accepts email and password, verifies credentials, and returns a JWT access token and user profile. Sets a secure HTTP-only refresh token cookie.
+ *     tags:
+ *       - Authentication
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *               - password
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 format: email
+ *                 example: user@example.com
+ *               password:
+ *                 type: string
+ *                 format: password
+ *                 example: Password123!
+ *     responses:
+ *       200:
+ *         description: Login successful
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: Login successful
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     accessToken:
+ *                       type: string
+ *                       example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+ *                     user:
+ *                       type: object
+ *                       properties:
+ *                         id:
+ *                           type: string
+ *                         email:
+ *                           type: string
+ *                         role:
+ *                           type: string
+ *       400:
+ *         description: Validation error
+ *       401:
+ *         description: Invalid credentials
+ *       429:
+ *         description: Too many login attempts
+ *       500:
+ *         description: Internal server error
+ */
 export async function POST(req: NextRequest) {
   try {
     const ip = req.headers.get('x-forwarded-for') || 'unknown';
@@ -42,7 +106,8 @@ export async function POST(req: NextRequest) {
   } catch (error: any) {
     console.log('[DEBUG] Error in login route:', error.message);
     if (error.name === 'ZodError') {
-      return errorResponse(error.errors[0].message, 'VALIDATION_ERROR', error.errors, 400);
+      const issues = error.issues || error.errors;
+      return errorResponse(issues[0].message, 'VALIDATION_ERROR', issues, 400);
     }
     
     if (error.isOperational) {

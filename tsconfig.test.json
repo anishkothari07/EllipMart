@@ -1,0 +1,15 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": true
+  },
+  "include": [
+    "packages/commerce/src/**/*.ts",
+    "packages/shared/src/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "packages/**/*.spec.ts",
+    "packages/**/*.test.ts"
+  ]
+}

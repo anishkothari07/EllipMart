@@ -106,59 +106,101 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     fetchCart();
   }, [fetchCart]);
 
-  const addToCart = useCallback<StoreContextValue['addToCart']>(async (product, opts) => {
-    try {
-      let variantId = product.id; // Fallback
-      if (product.rawVariants && product.rawVariants.length > 0) {
-        // Try to match color/size, or just pick the first one
-        const matched = product.rawVariants.find(v => v.color === opts?.color && v.size === opts?.size);
-        variantId = matched ? matched.id : product.rawVariants[0].id;
+  const addToCart = useCallback<StoreContextValue['addToCart']>((product, opts) => {
+    const qty = opts?.quantity || 1;
+    let variantId = product.id;
+    if (product.rawVariants && product.rawVariants.length > 0) {
+      const matched = product.rawVariants.find(v => v.color === opts?.color && v.size === opts?.size);
+      variantId = matched ? matched.id : product.rawVariants[0].id;
+    }
+
+    // 1. INSTANT (0ms) OPTIMISTIC UI UPDATE
+    setCart((prev) => {
+      const existingIdx = prev.findIndex(item => item.product.id === variantId || item.product.id === product.id);
+      if (existingIdx >= 0) {
+        const copy = [...prev];
+        copy[existingIdx] = {
+          ...copy[existingIdx],
+          quantity: copy[existingIdx].quantity + qty
+        };
+        return copy;
       }
+      return [
+        ...prev,
+        {
+          quantity: qty,
+          selectedColor: opts?.color,
+          selectedSize: opts?.size,
+          product: {
+            ...product,
+            id: variantId
+          }
+        }
+      ];
+    });
 
-      const res = await fetch('/api/v1/cart', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'x-user-id': 'mock-user-id' },
-        body: JSON.stringify({ variantId, quantity: opts?.quantity || 1 })
-      });
-      if (res.ok) {
-        fetchCart();
-        setCartOpen(true);
-      } else {
-        console.error('Failed to add to cart:', await res.json());
+    // 2. Open cart drawer IMMEDIATELY (0ms)
+    setCartOpen(true);
+
+    // 3. Background DB Sync
+    fetch('/api/v1/cart', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-user-id': 'mock-user-id' },
+      body: JSON.stringify({ variantId, quantity: qty })
+    }).then(res => {
+      if (res.ok) fetchCart();
+    }).catch(() => {});
+  }, [fetchCart]);
+
+  const removeFromCart = useCallback((productId: string) => {
+    // 1. INSTANT OPTIMISTIC UPDATE
+    setCart(prev => prev.filter(i => i.product.id !== productId));
+
+    // 2. Background DB Sync
+    fetch(`/api/v1/cart?variantId=${productId}`, {
+      method: 'DELETE',
+      headers: { 'x-user-id': 'mock-user-id' }
+    }).then(res => {
+      if (res.ok) fetchCart();
+    }).catch(() => {});
+  }, [fetchCart]);
+
+  const updateQuantity = useCallback((productId: string, quantity: number) => {
+    if (quantity <= 0) {
+      removeFromCart(productId);
+      return;
+    }
+
+    // 1. INSTANT OPTIMISTIC UPDATE
+    setCart(prev => prev.map(item => {
+      if (item.product.id === productId) {
+        return { ...item, quantity };
       }
-    } catch (e) {}
-  }, [fetchCart])
+      return item;
+    }));
 
-  const removeFromCart = useCallback(async (productId: string) => {
-    try {
-      await fetch(`/api/v1/cart?variantId=${productId}`, {
-        method: 'DELETE',
-        headers: { 'x-user-id': 'mock-user-id' }
-      });
-      fetchCart();
-    } catch (e) {}
-  }, [fetchCart])
+    // 2. Background DB Sync
+    fetch(`/api/v1/cart`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json', 'x-user-id': 'mock-user-id' },
+      body: JSON.stringify({ variantId: productId, quantity })
+    }).then(res => {
+      if (res.ok) fetchCart();
+    }).catch(() => {});
+  }, [fetchCart, removeFromCart]);
 
-  const updateQuantity = useCallback(async (productId: string, quantity: number) => {
-    try {
-      await fetch(`/api/v1/cart`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json', 'x-user-id': 'mock-user-id' },
-        body: JSON.stringify({ variantId: productId, quantity })
-      });
-      fetchCart();
-    } catch (e) {}
-  }, [fetchCart])
+  const clearCart = useCallback(() => {
+    // 1. INSTANT OPTIMISTIC UPDATE
+    setCart([]);
 
-  const clearCart = useCallback(async () => {
-    try {
-      await fetch(`/api/v1/cart`, {
-        method: 'DELETE',
-        headers: { 'x-user-id': 'mock-user-id' }
-      });
-      fetchCart();
-    } catch (e) {}
-  }, [fetchCart])
+    // 2. Background DB Sync
+    fetch(`/api/v1/cart`, {
+      method: 'DELETE',
+      headers: { 'x-user-id': 'mock-user-id' }
+    }).then(res => {
+      if (res.ok) fetchCart();
+    }).catch(() => {});
+  }, [fetchCart]);
 
   const isInCart = useCallback(
     (productId: string) => cart.some((i) => i.product.id === productId),
@@ -192,7 +234,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     [cart],
   )
 
-  const value: StoreContextValue = {
+  const value: StoreContextValue = useMemo(() => ({
     cart,
     cartCount,
     cartSubtotal,
@@ -209,7 +251,11 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     cartOpen,
     setCartOpen,
     notifications: 3,
-  }
+  }), [
+    cart, cartCount, cartSubtotal, addToCart, removeFromCart,
+    updateQuantity, clearCart, isInCart, wishlist, toggleWishlist,
+    isWishlisted, moveToCart, cartOpen, setCartOpen,
+  ])
 
   return <StoreContext.Provider value={value}>{children}</StoreContext.Provider>
 }

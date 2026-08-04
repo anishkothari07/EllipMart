@@ -20,13 +20,13 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      data: activeCampaign,
+      data: activeCampaign || null,
     });
   } catch (error: any) {
-    console.error("Failed to fetch active festival campaign:", error);
-    return NextResponse.json(
-      { success: false, error: error.message },
-      { status: 500 }
-    );
+    console.error("Festival campaign endpoint fallback:", error.message);
+    return NextResponse.json({
+      success: true,
+      data: null,
+    });
   }
 }

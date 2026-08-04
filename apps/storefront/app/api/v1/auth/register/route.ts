@@ -45,8 +45,8 @@ export async function POST(req: NextRequest) {
     console.error("Registration error caught in route handler:", error);
     
     if (error.name === 'ZodError') {
-      console.error("Zod Validation Error:", JSON.stringify(error.errors, null, 2));
-      return errorResponse(error.errors[0].message, 'VALIDATION_ERROR', error.errors, 400);
+      const issues = error.issues || error.errors;
+      return errorResponse(issues[0].message, 'VALIDATION_ERROR', issues, 400);
     }
     
     if (error.isOperational) {
