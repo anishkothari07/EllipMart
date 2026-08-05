@@ -27,11 +27,16 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>
 }): Promise<Metadata> {
   const { slug } = await params
-  const category = await prisma.category.findUnique({ where: { slug } })
-  const title = category?.name ?? specialTitles[slug]?.title ?? 'Shop'
-  return {
-    title: `${title} — SmartGO`,
-    description: category?.description ?? specialTitles[slug]?.description,
+  try {
+    const category = await prisma.category.findUnique({ where: { slug } })
+    const title = category?.name ?? specialTitles[slug]?.title ?? 'Shop'
+    return {
+      title: `${title} — SmartGO`,
+      description: category?.description ?? specialTitles[slug]?.description,
+    }
+  } catch {
+    const title = specialTitles[slug]?.title ?? 'Shop'
+    return { title: `${title} — SmartGO` }
   }
 }
 
@@ -44,17 +49,26 @@ export default async function CategoryPage({
   params: Promise<{ slug: string }>
 }) {
   const { slug } = await params
-  const [category, result] = await Promise.all([
-    prisma.category.findUnique({ where: { slug }, include: { banner: true } }),
-    shoppingProductService.listProducts({
-      limit: 24,
-      ...(specialTitles[slug] === undefined ? { category: slug } : {}),
-      ...(slug === 'new-arrivals' ? { sort: 'newest' } : {}),
-    }),
-  ]);
-  const products = result.items;
-  const special = specialTitles[slug];
 
+  let category: any = null;
+  let products: any[] = [];
+
+  try {
+    const [cat, result] = await Promise.all([
+      prisma.category.findUnique({ where: { slug }, include: { banner: true } }),
+      shoppingProductService.listProducts({
+        limit: 24,
+        ...(specialTitles[slug] === undefined ? { category: slug } : {}),
+        ...(slug === 'new-arrivals' ? { sort: 'newest' } : {}),
+      }),
+    ]);
+    category = cat;
+    products = result.items;
+  } catch (err) {
+    console.error('[CategoryPage] DB unavailable:', (err as Error).message);
+  }
+
+  const special = specialTitles[slug];
   const title = category?.name ?? special?.title ?? 'Shop'
   const description = category?.description ?? special?.description
   const bannerImage = category?.banner?.path ?? special?.image ?? '/images/cat-fashion.png'
@@ -69,4 +83,3 @@ export default async function CategoryPage({
     />
   )
 }
-

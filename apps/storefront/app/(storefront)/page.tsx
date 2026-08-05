@@ -13,11 +13,21 @@ import { shoppingProductService } from '@corecart/commerce'
 export const revalidate = 0;
 
 export default async function HomePage() {
-  // Single DB query, then slice client-side — 3x fewer round trips
-  const { items: allProducts } = await shoppingProductService.listProducts({
-    sort: 'newest',
-    limit: 16,
-  });
+  // Single DB query — wrapped in try/catch so that Railway TCP proxy drops
+  // (which happen intermittently on the free tier) don't trigger the error
+  // boundary; the page simply renders without product rails instead of crashing.
+  let allProducts: any[] = [];
+  try {
+    const result = await shoppingProductService.listProducts({
+      sort: 'newest',
+      limit: 16,
+    });
+    allProducts = result.items;
+  } catch (err) {
+    // Railway connection drop — Prisma singleton has been reset; next request
+    // will reconnect automatically. Render the page without products.
+    console.error('[HomePage] DB unavailable — rendering without products:', (err as Error).message);
+  }
 
   const bestSellers = allProducts.slice(0, 4);
   const newArrivals = allProducts.slice(4, 8);
