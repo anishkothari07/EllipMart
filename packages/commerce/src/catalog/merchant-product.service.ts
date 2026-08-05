@@ -14,6 +14,7 @@ export interface MerchantProductListItem {
   sku: string; // SKU of the first variant or default
   price: number; // selling price of the first variant or default
   inventory: number; // total stock across all variants
+  thumbnail: string | null;
 }
 
 export class MerchantProductService {
@@ -66,6 +67,11 @@ export class MerchantProductService {
         include: {
           category: true,
           brand: true,
+          images: {
+            take: 1,
+            orderBy: { sortOrder: 'asc' },
+            include: { media: true },
+          },
           variants: {
             where: { deletedAt: null },
             include: {
@@ -90,6 +96,8 @@ export class MerchantProductService {
         return acc + (v.inventory?.quantityAvailable || 0);
       }, 0);
 
+      const thumbnail = p.images?.[0]?.media?.publicUrl || null;
+
       return {
         id: p.id,
         name: p.name,
@@ -102,6 +110,7 @@ export class MerchantProductService {
         sku,
         price,
         inventory,
+        thumbnail,
       };
     });
 

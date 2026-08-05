@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import { NextRequest } from 'next/server';
 import { orderService } from '@corecart/commerce';
 import { successResponse, errorResponse } from '@corecart/shared';

@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import { NextRequest } from 'next/server';
 import { MerchantInventoryService } from '@corecart/commerce';
 import { inventorySearchSchema } from '@corecart/commerce';
@@ -18,3 +19,4 @@ export async function GET(req: NextRequest) {
   
   return successResponse(result, 'Inventory retrieved successfully');
 }
+

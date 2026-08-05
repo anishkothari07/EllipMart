@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import { NextRequest } from 'next/server';
 import { brandService } from '@corecart/commerce';
 import { createBrandSchema, brandSearchSchema } from '@corecart/commerce';
@@ -27,3 +28,4 @@ export async function GET(req: NextRequest) {
   
   return successResponse(result, 'Brands retrieved successfully');
 }
+

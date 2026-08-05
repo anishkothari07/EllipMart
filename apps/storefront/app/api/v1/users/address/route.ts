@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import { NextRequest } from 'next/server';
 import { userService } from '@corecart/commerce';
 import { createAddressSchema } from '@corecart/commerce';
@@ -14,3 +15,4 @@ export async function POST(req: NextRequest) {
   const address = await userService.addAddress(userId, parsed);
   return successResponse(address, 'Address added successfully', 201);
 }
+

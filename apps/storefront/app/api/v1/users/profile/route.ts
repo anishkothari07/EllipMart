@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import { NextRequest } from 'next/server';
 import { userService } from '@corecart/commerce';
 import { updateProfileSchema } from '@corecart/commerce';
@@ -22,3 +23,4 @@ export async function PATCH(req: NextRequest) {
   const updated = await userService.updateProfile(userId, parsed);
   return successResponse(updated, 'Profile updated successfully');
 }
+

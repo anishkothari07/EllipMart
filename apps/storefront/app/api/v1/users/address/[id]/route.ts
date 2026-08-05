@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import { NextRequest } from 'next/server';
 import { userService } from '@corecart/commerce';
 import { updateAddressSchema } from '@corecart/commerce';

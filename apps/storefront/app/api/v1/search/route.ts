@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import { NextRequest } from 'next/server';
 import { historyService } from '@corecart/commerce';
 import { shoppingProductService } from '@corecart/commerce';
@@ -53,3 +54,4 @@ export async function GET(req: NextRequest) {
     meta: result.meta,
   });
 }
+

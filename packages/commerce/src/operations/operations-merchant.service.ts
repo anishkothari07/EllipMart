@@ -380,7 +380,9 @@ export const operationsMerchantService = {
       where: { id: { in: items.map((i) => i.userId).filter(Boolean) as string[] } },
       select: { id: true, firstName: true, lastName: true, email: true },
     });
-    const userMap = new Map(users.map((u) => [u.id, u]));
+    const userMap = new Map<string, { id: string; firstName: string; lastName: string; email: string }>(
+      users.map((u) => [u.id, u as any])
+    );
 
     const formatted = items.map((item) => {
       const u = item.userId ? userMap.get(item.userId) : null;

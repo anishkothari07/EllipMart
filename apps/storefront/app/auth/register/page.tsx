@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
+import { Suspense } from 'react'
 import { AuthShell } from '@/components/auth/auth-shell'
 import { RegisterForm } from '@/components/auth/register-form'
 
@@ -23,7 +24,9 @@ export default function RegisterPage() {
         </>
       }
     >
-      <RegisterForm />
+      <Suspense fallback={<div>Loading form...</div>}>
+        <RegisterForm />
+      </Suspense>
     </AuthShell>
   )
 }

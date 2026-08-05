@@ -37,8 +37,8 @@ export const cartService = {
       });
     }
 
-    const activeItems = cart.items.filter(item => !item.isSaved);
-    const savedItems = cart.items.filter(item => item.isSaved);
+    const activeItems = cart.items.filter((item: { isSaved: boolean }) => !item.isSaved);
+    const savedItems = cart.items.filter((item: { isSaved: boolean }) => item.isSaved);
 
     return {
       ...cart,

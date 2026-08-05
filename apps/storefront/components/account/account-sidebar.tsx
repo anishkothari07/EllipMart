@@ -11,7 +11,8 @@ import {
   User,
 } from 'lucide-react'
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
+import { useState } from 'react'
 import { cn } from '@corecart/shared'
 
 const links = [
@@ -26,6 +27,27 @@ const links = [
 
 export function AccountSidebar({ user }: { user: any }) {
   const pathname = usePathname()
+  const router = useRouter()
+  const [signingOut, setSigningOut] = useState(false)
+
+  const handleSignOut = async () => {
+    if (signingOut) return
+    setSigningOut(true)
+    try {
+      // Step 1: Call logout API — revokes session in DB and deletes the HttpOnly cookie server-side
+      await fetch('/api/v1/auth/logout', { method: 'POST' })
+      // Step 2: Clear client-side access token
+      localStorage.removeItem('smartgo_access_token')
+      // Step 3: Navigate to login. router.replace so back-button doesn't return to /account
+      router.replace('/auth/login')
+    } catch (err) {
+      console.error('[SignOut] Logout request failed:', err)
+      // Still navigate even if the API call fails — worst case is an orphaned session
+      router.replace('/auth/login')
+    } finally {
+      setSigningOut(false)
+    }
+  }
 
   return (
     <aside className="lg:sticky lg:top-24 lg:self-start">
@@ -59,13 +81,15 @@ export function AccountSidebar({ user }: { user: any }) {
             </Link>
           )
         })}
-        <Link
-          href="/auth/login"
-          className="flex shrink-0 items-center gap-2.5 rounded-xl px-3.5 py-2.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-destructive"
+        <button
+          type="button"
+          onClick={handleSignOut}
+          disabled={signingOut}
+          className="flex shrink-0 items-center gap-2.5 rounded-xl px-3.5 py-2.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-destructive disabled:opacity-50"
         >
           <LogOut className="size-[18px]" />
-          Sign out
-        </Link>
+          {signingOut ? 'Signing out…' : 'Sign out'}
+        </button>
       </nav>
     </aside>
   )

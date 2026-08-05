@@ -14,6 +14,10 @@ export class ProductRepository {
         },
         tags: true,
         specifications: true,
+        images: {
+          orderBy: { sortOrder: 'asc' },
+          include: { media: true },
+        },
       },
     });
   }
@@ -25,6 +29,10 @@ export class ProductRepository {
         seo: true,
         category: true,
         brand: true,
+        images: {
+          orderBy: { sortOrder: 'asc' },
+          include: { media: true },
+        },
         variants: {
           include: {
             attributes: true,
@@ -47,6 +55,10 @@ export class ProductRepository {
         seo: true,
         category: true,
         brand: true,
+        images: {
+          orderBy: { sortOrder: 'asc' },
+          include: { media: true },
+        },
         variants: {
           where: { isActive: true },
           include: {
@@ -76,6 +88,10 @@ export class ProductRepository {
         },
         tags: true,
         specifications: true,
+        images: {
+          orderBy: { sortOrder: 'asc' },
+          include: { media: true },
+        },
       },
     });
   }
@@ -104,6 +120,10 @@ export class ProductRepository {
         include: {
           category: true,
           brand: true,
+          images: {
+            orderBy: { sortOrder: 'asc' },
+            include: { media: true },
+          },
           variants: {
             take: 1, // useful for listing to get a default price/image
           },

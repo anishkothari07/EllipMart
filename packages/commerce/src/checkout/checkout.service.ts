@@ -15,12 +15,19 @@ export class CheckoutValidationPipeline {
     if (!cart || cart.items.length === 0) throw new AppError('Cart is empty', 400);
 
     // 2. Validate Inventory
-    const stockChecks = await Promise.all(cart.items.map(async item => {
-       const variant = await prisma.productVariant.findUnique({ where: { id: item.variantId }, include: { inventory: true } });
+    const variantIds = cart.items.map(item => item.variantId);
+    const variants = await prisma.productVariant.findMany({
+      where: { id: { in: variantIds } },
+      include: { inventory: true }
+    });
+    const variantMap = new Map(variants.map(v => [v.id, v]));
+
+    const stockChecks = cart.items.map(item => {
+       const variant = variantMap.get(item.variantId);
        const available = variant?.inventory ? (variant.inventory.quantityAvailable - variant.inventory.quantityReserved) : 0;
        if (item.quantity > available) throw new AppError(`Insufficient stock for ${variant?.name}`, 400);
        return { item, variant };
-    }));
+    });
 
     // 3. Validate Address
     let address: any = null;

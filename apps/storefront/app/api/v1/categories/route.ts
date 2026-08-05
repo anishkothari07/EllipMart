@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import { NextRequest } from 'next/server';
 import { categoryService } from '@corecart/commerce';
 import { createCategorySchema, categorySearchSchema } from '@corecart/commerce';
@@ -29,3 +30,4 @@ export async function GET(req: NextRequest) {
   
   return successResponse(result, 'Categories retrieved successfully');
 }
+

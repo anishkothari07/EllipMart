@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import { NextRequest } from 'next/server';
 import { wishlistService } from '@corecart/commerce';
 import { addToWishlistSchema, bulkDeleteWishlistSchema } from '@corecart/commerce';
@@ -44,3 +45,4 @@ export async function DELETE(req: NextRequest) {
 
   return successResponse(null, 'Items removed from wishlist');
 }
+

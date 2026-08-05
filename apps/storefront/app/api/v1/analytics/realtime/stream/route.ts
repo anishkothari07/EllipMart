@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import { NextRequest } from "next/server";
 import { RealtimeService } from '@corecart/commerce';
 
@@ -29,3 +30,4 @@ export async function GET(req: NextRequest) {
     },
   });
 }
+

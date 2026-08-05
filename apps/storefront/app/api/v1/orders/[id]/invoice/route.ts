@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import { NextResponse } from 'next/server';
 import { orderService } from '@corecart/commerce';
 import { formatPrice } from '@corecart/shared';

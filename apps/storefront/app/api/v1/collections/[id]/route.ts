@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import { NextRequest } from 'next/server';
 import { collectionService } from '@corecart/commerce';
 import { updateCollectionSchema } from '@corecart/commerce';

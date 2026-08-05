@@ -207,6 +207,11 @@ export class AuthService {
       throw new AppError('Account locked due to multiple failed attempts', 403, 'ACCOUNT_LOCKED');
     }
 
+    if (!user.passwordHash) {
+      console.log('[DEBUG] Login rejected because user has no passwordHash (likely OAuth account)');
+      throw new AppError('Invalid credentials', 401, 'INVALID_CREDENTIALS');
+    }
+
     console.log('[DEBUG] Calling bcrypt.compare with incoming password and stored hash...');
     const isMatch = await comparePassword(payload.password, user.passwordHash);
     console.log('[DEBUG] bcrypt.compare() result:', isMatch);

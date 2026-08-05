@@ -14,6 +14,7 @@ import {
   Truck,
 } from 'lucide-react'
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import type { Product } from '@corecart/shared'
 import { cn } from '@corecart/shared'
 import { formatPrice, discountPct } from '@corecart/shared'
@@ -60,6 +61,7 @@ export function ProductDetail({
   categoryName: string
 }) {
   const { addToCart, toggleWishlist, isWishlisted, setCartOpen } = useStore()
+  const router = useRouter()
   const colorVariant = product.variants?.find((v) => v.type === 'color')
   const sizeVariant = product.variants?.find((v) => v.type === 'size')
 
@@ -299,6 +301,7 @@ export function ProductDetail({
                   if (typeof navigator !== 'undefined' && navigator.vibrate) {
                     navigator.vibrate([80, 50, 80])
                   }
+                  router.push('/checkout')
                 }}
                 className="mt-3 flex h-12 w-full items-center justify-center rounded-full border border-foreground text-sm font-medium transition-colors hover:bg-foreground hover:text-background"
               >
@@ -342,6 +345,7 @@ export function ProductDetail({
                     if (typeof navigator !== 'undefined' && navigator.vibrate) {
                       navigator.vibrate([80, 50, 80])
                     }
+                    router.push('/checkout')
                   }}
                   className="flex h-12 flex-1 items-center justify-center rounded-full bg-primary text-xs font-semibold text-primary-foreground"
                 >

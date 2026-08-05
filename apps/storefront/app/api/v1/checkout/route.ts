@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import { NextRequest } from 'next/server';
 import { checkoutService } from '@corecart/commerce';
 import { successResponse, errorResponse } from '@corecart/shared';
@@ -21,3 +22,4 @@ export async function POST(req: NextRequest) {
     return errorResponse(error.message || 'Internal Server Error', 'INTERNAL_SERVER_ERROR', undefined, 500);
   }
 }
+

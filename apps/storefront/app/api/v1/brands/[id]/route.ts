@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import { NextRequest } from 'next/server';
 import { brandService } from '@corecart/commerce';
 import { updateBrandSchema } from '@corecart/commerce';

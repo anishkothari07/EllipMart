@@ -11,11 +11,8 @@ export interface EmailProvider {
 }
 
 export class SMTPProvider implements EmailProvider {
-  private transporter: nodemailer.Transporter;
-
-  constructor() {
-    // Basic fallback or load from env
-    this.transporter = nodemailer.createTransport({
+  private getTransporter(): nodemailer.Transporter {
+    return nodemailer.createTransport({
       host: process.env.SMTP_HOST || 'smtp.ethereal.email',
       port: Number(process.env.SMTP_PORT) || 587,
       auth: {
@@ -43,7 +40,7 @@ export class SMTPProvider implements EmailProvider {
     console.log("----------------------------");
 
     try {
-      await this.transporter.sendMail({
+      await this.getTransporter().sendMail({
         from,
         to: options.to,
         subject: options.subject,

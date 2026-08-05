@@ -1,22 +1,12 @@
 import { Analytics } from '@vercel/analytics/next'
 import type { Metadata, Viewport } from 'next'
 import { Geist, Geist_Mono, Instrument_Serif } from 'next/font/google'
-import { Suspense } from 'react'
 import './globals.css'
 import { ThemeProvider } from '@/components/providers/theme-provider'
 import { StoreProvider } from '@/components/providers/store-provider'
-import { SiteChrome } from '@/components/layout/site-chrome'
-import { ShoppingAssistant } from '@/components/ai/shopping-assistant'
 import { MotionProvider } from '@/components/providers/motion-provider'
 import { CartAnimationProvider } from '@/components/providers/cart-animation-provider'
 import { PwaProvider } from '@/components/providers/pwa-provider'
-import {
-  banners,
-  categories,
-  megaMenu,
-  navLinks,
-  trendingSearches,
-} from '@corecart/shared'
 
 const geistSans = Geist({ subsets: ['latin'], variable: '--font-geist-sans' })
 const geistMono = Geist_Mono({ subsets: ['latin'], variable: '--font-geist-mono' })
@@ -29,7 +19,7 @@ const instrumentSerif = Instrument_Serif({
 export const metadata: Metadata = {
   title: 'SmartGO — Elevated everyday commerce',
   description:
-    'SmartGO is an ultra-premium storefront for modern living. Discover curated collections, luxury essentials, and the season’s best across every category.',
+    'SmartGO is an ultra-premium storefront for modern living. Discover curated collections, luxury essentials, and the season\'s best across every category.',
   generator: 'v0.app',
   keywords: ['SmartGO', 'ecommerce', 'shopping', 'premium', 'fashion', 'lifestyle'],
   manifest: '/manifest.json',
@@ -44,7 +34,7 @@ export const metadata: Metadata = {
   },
   openGraph: {
     title: 'SmartGO — Elevated everyday commerce',
-    description: 'Curated collections, luxury essentials, and the season’s best.',
+    description: 'Curated collections, luxury essentials, and the season\'s best.',
     type: 'website',
   },
 }
@@ -57,6 +47,11 @@ export const viewport: Viewport = {
   ],
 }
 
+/**
+ * Root layout — only html/body structure and universal providers.
+ * SiteChrome (header/nav/cart) lives in app/(storefront)/layout.tsx.
+ * Auth pages in app/(auth)/ get NO storefront chrome.
+ */
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -74,18 +69,7 @@ export default function RootLayout({
             <MotionProvider>
               <CartAnimationProvider>
                 <PwaProvider>
-                  <Suspense fallback={null}>
-                    <SiteChrome
-                      navLinks={navLinks}
-                      megaMenu={megaMenu}
-                      categories={categories}
-                      trendingSearches={trendingSearches}
-                      announcements={banners.announcements}
-                    >
-                      {children}
-                    </SiteChrome>
-                    <ShoppingAssistant />
-                  </Suspense>
+                  {children}
                 </PwaProvider>
               </CartAnimationProvider>
             </MotionProvider>

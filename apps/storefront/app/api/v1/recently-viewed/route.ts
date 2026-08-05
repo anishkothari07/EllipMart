@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import { NextRequest } from 'next/server';
 import { historyService } from '@corecart/commerce';
 import { successResponse } from '@corecart/shared';
@@ -22,3 +23,4 @@ export async function POST(req: NextRequest) {
   await historyService.addRecentlyViewed(user.id, body.productId);
   return successResponse(null, 'Added to recently viewed');
 }
+

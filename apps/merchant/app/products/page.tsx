@@ -44,10 +44,10 @@ export default function MerchantProductListPage() {
         sort: sortOrder,
       });
 
-      // Map details for the table thumbnail logic (first image if available)
+      // Map details for the table thumbnail logic
       const mapped = (data?.items || []).map((item: any) => ({
         ...item,
-        thumbnail: item.images?.[0] || '/placeholder-product.png',
+        thumbnail: item.thumbnail || '/placeholder.jpg',
       }));
 
       setProducts(mapped);

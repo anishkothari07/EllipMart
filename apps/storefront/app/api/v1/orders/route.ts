@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import { NextRequest } from 'next/server';
 import { orderService } from '@corecart/commerce';
 import { successResponse, errorResponse } from '@corecart/shared';
@@ -18,3 +19,4 @@ export async function GET(req: NextRequest) {
 
 // NOTE: Creating an order manually via API is usually reserved for Admin or Checkout flow
 // We don't expose POST /orders to users directly unless required by specific design
+

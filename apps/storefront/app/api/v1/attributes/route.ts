@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import { NextRequest } from 'next/server';
 import { attributeService } from '@corecart/commerce';
 import { createAttributeSchema, attributeSearchSchema } from '@corecart/commerce';
@@ -26,3 +27,4 @@ export async function GET(req: NextRequest) {
   
   return successResponse(result, 'Attributes retrieved successfully');
 }
+

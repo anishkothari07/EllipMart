@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import { NextRequest } from 'next/server';
 import { cartService } from '@corecart/commerce';
 import { successResponse, errorResponse } from '@corecart/shared';
@@ -91,3 +92,4 @@ export async function DELETE(req: NextRequest) {
     return errorResponse(error.message || 'Internal Server Error', 'INTERNAL_SERVER_ERROR', undefined, 500);
   }
 }
+

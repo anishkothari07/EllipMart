@@ -35,14 +35,14 @@ class DomainEventBus extends EventEmitter {
     };
 
     // Asynchronously dispatch event to avoid blocking calling business logic
-    setImmediate(() => {
+    setTimeout(() => {
       try {
         this.emit(eventName, eventData);
         this.emit("*", eventData); // Wildcard subscriber for audit/analytics
       } catch (err) {
         console.error(`[DomainEventBus] Error dispatching event '${eventName}':`, err);
       }
-    });
+    }, 0);
 
     return eventData;
   }

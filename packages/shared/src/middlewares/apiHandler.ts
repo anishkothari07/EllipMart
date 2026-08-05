@@ -6,10 +6,31 @@ import { ZodError } from 'zod';
 
 export type RouteHandler = (req: NextRequest, ...args: any[]) => Promise<Response>;
 
-export function apiHandler(handler: RouteHandler): RouteHandler {
+export interface ApiHandlerOptions {
+  requireAuth?: boolean;
+  allowedRoles?: string[];
+}
+
+export function apiHandler(handler: RouteHandler, options: ApiHandlerOptions = {}): RouteHandler {
   return async (req: NextRequest, ...args: any[]) => {
     try {
       logger.info({ method: req.method, url: req.url }, 'Incoming request');
+
+      if (options.requireAuth || (options.allowedRoles && options.allowedRoles.length > 0)) {
+        const userId = req.headers.get('x-user-id');
+        const role = req.headers.get('x-user-role');
+        
+        if (!userId) {
+          throw new AppError('Unauthorized', 401, 'UNAUTHORIZED');
+        }
+
+        if (options.allowedRoles && options.allowedRoles.length > 0) {
+          if (!role || !options.allowedRoles.includes(role)) {
+            throw new AppError('Forbidden: Insufficient role', 403, 'FORBIDDEN');
+          }
+        }
+      }
+
       const response = await handler(req, ...args);
       return response;
     } catch (error: any) {

@@ -9,7 +9,7 @@
 
 */
 -- DropForeignKey
-ALTER TABLE `authtoken` DROP FOREIGN KEY `AuthToken_userId_fkey`;
+ALTER TABLE `AuthToken` DROP FOREIGN KEY `AuthToken_userId_fkey`;
 
 -- AlterTable
 ALTER TABLE `address` ADD COLUMN `addressType` ENUM('HOME', 'OFFICE', 'OTHER') NOT NULL DEFAULT 'HOME',
@@ -42,7 +42,7 @@ ALTER TABLE `usersession` DROP COLUMN `ipAddress`,
     ADD COLUMN `revokedAt` DATETIME(3) NULL;
 
 -- DropTable
-DROP TABLE `authtoken`;
+DROP TABLE `AuthToken`;
 
 -- CreateTable
 CREATE TABLE `Token` (

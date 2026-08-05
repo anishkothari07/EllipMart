@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import { NextRequest } from 'next/server';
 import { recommendationService } from '@corecart/commerce';
 import { successResponse } from '@corecart/shared';
@@ -17,3 +18,4 @@ export async function GET(req: NextRequest) {
 
   return successResponse(products);
 }
+

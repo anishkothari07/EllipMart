@@ -6,7 +6,7 @@
     "dev": "next dev -p 3002",
     "build": "next build",
     "start": "node -e \"const port = process.env.PORT || 3002; require('child_process').execSync('next start -p ' + port, { stdio: 'inherit' });\"",
-    "lint": "echo 'Skipping lint (no ESLint configured)'"
+    "lint": "next lint"
   },
   "dependencies": {
     "next": "16.2.6",

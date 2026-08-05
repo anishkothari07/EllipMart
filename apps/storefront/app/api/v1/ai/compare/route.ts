@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from "next/server";
 import { prisma as db } from '@corecart/database';
 import { AIService } from '@corecart/commerce';
@@ -60,3 +61,4 @@ Product 2: ${p2.name} (Specs: ${p2.longDescription || "N/A"}, Specs relation: ${
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
 }
+

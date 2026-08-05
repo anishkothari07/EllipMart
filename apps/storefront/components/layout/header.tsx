@@ -73,8 +73,8 @@ export function Header({
     <>
       <header
         className={cn(
-          'sticky top-0 z-50 w-full transition-all duration-300',
-          scrolled ? 'glass border-b border-border' : 'bg-background',
+          'sticky top-0 z-50 w-full isolate bg-background transition-all duration-300',
+          scrolled && 'border-b border-border shadow-sm',
         )}
         onMouseLeave={() => setActiveMenu(null)}
       >

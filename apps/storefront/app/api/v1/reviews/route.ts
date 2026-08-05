@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import { NextRequest } from 'next/server';
 import { reviewService } from '@corecart/commerce';
 import { createReviewSchema } from '@corecart/commerce';
@@ -27,3 +28,4 @@ export async function POST(req: NextRequest) {
   const review = await reviewService.createReview(user.id, parsed);
   return successResponse(review, 'Review created successfully', 201);
 }
+

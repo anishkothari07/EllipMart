@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import { NextRequest } from 'next/server';
 import { successResponse, errorResponse } from '@corecart/shared';
 
@@ -17,3 +18,4 @@ export async function GET(req: NextRequest) {
 
   return successResponse({ otp }, 'Latest OTP retrieved successfully');
 }
+

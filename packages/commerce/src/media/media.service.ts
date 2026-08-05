@@ -73,6 +73,20 @@ export class MediaService {
       metadata: customMetadata,
     } = input;
 
+    // --- Security Phase 9: File Upload Hardening ---
+    const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+    if (buffer.length > MAX_FILE_SIZE) {
+      throw new AppError('File size exceeds the 5MB limit.', 400);
+    }
+
+    const ALLOWED_MIME_TYPES = [
+      'image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/svg+xml',
+      'video/mp4', 'application/pdf'
+    ];
+    if (!ALLOWED_MIME_TYPES.includes(mimeType)) {
+      throw new AppError(`File type ${mimeType} is not allowed.`, 400);
+    }
+
     // 1. Calculate File Hash (SHA-256)
     const fileHash = ImageProcessor.calculateFileHash(buffer);
 
@@ -275,6 +289,20 @@ export class MediaService {
         createdById: createdById || null,
       },
     });
+
+    // --- Security Phase 9: File Upload Hardening ---
+    const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+    if (buffer.length > MAX_FILE_SIZE) {
+      throw new AppError('File size exceeds the 5MB limit.', 400);
+    }
+
+    const ALLOWED_MIME_TYPES = [
+      'image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/svg+xml',
+      'video/mp4', 'application/pdf'
+    ];
+    if (!ALLOWED_MIME_TYPES.includes(mimeType)) {
+      throw new AppError(`File type ${mimeType} is not allowed.`, 400);
+    }
 
     // 2. Upload replacement file
     const fileHash = ImageProcessor.calculateFileHash(buffer);

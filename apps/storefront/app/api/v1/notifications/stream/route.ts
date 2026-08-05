@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import { NextRequest } from "next/server";
 import { sseManager } from '@corecart/commerce';
 
@@ -32,3 +33,4 @@ export async function GET(req: NextRequest) {
     },
   });
 }
+

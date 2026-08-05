@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import { NextRequest } from 'next/server';
 import { MerchantInventoryService } from '@corecart/commerce';
 import { createInventoryMovementSchema } from '@corecart/commerce';

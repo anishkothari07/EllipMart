@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import { NextRequest } from 'next/server';
 import { apiHandler } from '@corecart/shared/src/middlewares/apiHandler';
 import { successResponse, errorResponse } from '@corecart/shared';
@@ -75,3 +76,4 @@ async function healthCheckHandler(req: NextRequest) {
 }
 
 export const GET = apiHandler(healthCheckHandler);
+

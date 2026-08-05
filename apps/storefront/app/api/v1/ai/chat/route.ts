@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from "next/server";
 import { prisma as db } from '@corecart/database';
 import { AIService } from '@corecart/commerce';
@@ -171,3 +172,4 @@ Return only the raw JSON.
     }, { status: 500 });
   }
 }
+

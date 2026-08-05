@@ -1,14 +1,6 @@
 import 'dotenv/config';
 import { PrismaClient } from "@prisma/client";
-import { PrismaMariaDb } from "@prisma/adapter-mariadb";
-
-const databaseUrl = process.env.DATABASE_URL;
-if (!databaseUrl) {
-  throw new Error("DATABASE_URL environment variable is required to run seed-localization.");
-}
-const adapter = new PrismaMariaDb(databaseUrl.replace("mysql://", "mariadb://"));
-const prisma = new PrismaClient({ adapter });
-
+const prisma = new PrismaClient();
 async function main() {
   console.log("Seeding localization data...");
 

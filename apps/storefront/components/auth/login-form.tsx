@@ -76,26 +76,6 @@ export function LoginForm() {
       </label>
       <SubmitButton loading={loading}>Sign in</SubmitButton>
 
-      <div className="relative my-2 flex items-center gap-3 text-xs text-muted-foreground">
-        <span className="h-px flex-1 bg-border" />
-        or continue with
-        <span className="h-px flex-1 bg-border" />
-      </div>
-
-      <div className="grid grid-cols-2 gap-3">
-        <button
-          type="button"
-          className="flex h-11 items-center justify-center gap-2 rounded-full border border-border text-sm font-medium transition-colors hover:bg-accent"
-        >
-          Google
-        </button>
-        <button
-          type="button"
-          className="flex h-11 items-center justify-center gap-2 rounded-full border border-border text-sm font-medium transition-colors hover:bg-accent"
-        >
-          Apple
-        </button>
-      </div>
     </form>
   )
 }
