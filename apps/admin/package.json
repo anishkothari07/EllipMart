@@ -6,7 +6,7 @@
     "dev": "next dev -p 3003",
     "build": "next build",
     "start": "node -e \"const port = process.env.PORT || 3003; require('child_process').execSync('next start -p ' + port, { stdio: 'inherit' });\"",
-    "lint": "next lint"
+    "lint": "eslint ."
   },
   "dependencies": {
     "next": "16.2.6",

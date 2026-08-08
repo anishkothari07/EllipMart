@@ -43,6 +43,10 @@ describe('CheckoutService', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    mockPrisma.productVariant.findMany = vi.fn().mockImplementation(async () => {
+      const variant = await mockPrisma.productVariant.findUnique();
+      return variant ? [variant] : [];
+    });
     vi.spyOn(cartService, 'getCart').mockResolvedValue({ id: 'cart_123', items: [] });
     vi.spyOn(cartService, 'clearCart').mockResolvedValue(undefined as any);
     vi.spyOn(couponService, 'validateAndApply').mockResolvedValue(null);

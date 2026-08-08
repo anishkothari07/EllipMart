@@ -24,18 +24,3 @@ vi.mock('razorpay', () => {
     },
   };
 });
-
-// Import Prisma client after mocks to add query monitor
-import { PrismaClient } from '@prisma/client';
-const prisma = new PrismaClient({
-  log: [
-    { emit: 'event', level: 'query' },
-  ],
-});
-
-prisma.$on('query', (e) => {
-  if (e.duration > 100) {
-    console.warn(`[SLOW QUERY WARNING] ${e.duration}ms - ${e.query}`);
-  }
-});
-

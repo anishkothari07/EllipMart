@@ -47,6 +47,13 @@ describe('Checkout API Route (Layer 1)', () => {
       inventory: { quantityAvailable: 50, quantityReserved: 0 },
       pricing: { sellingPrice: 100 }
     });
+    mockPrisma.productVariant.findMany.mockResolvedValue([
+      {
+        id: 'var-1',
+        name: 'Default Size',
+        inventory: { quantityAvailable: 50, quantityReserved: 0 },
+      },
+    ]);
 
     // Mock order creation
     mockPrisma.order.create = vi.fn().mockResolvedValue({

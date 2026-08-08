@@ -8,11 +8,9 @@
     "build": "prisma generate"
   },
   "dependencies": {
-    "@prisma/adapter-mariadb": "^7.9.1",
-    "@prisma/client": "^6.19.3",
-    "mariadb": "^3.5.3"
+    "@prisma/client": "6.19.3"
   },
   "devDependencies": {
-    "prisma": "^6.19.3"
+    "prisma": "6.19.3"
   }
 }

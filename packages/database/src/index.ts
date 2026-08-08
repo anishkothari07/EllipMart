@@ -3,24 +3,27 @@ import { PrismaClient } from '@prisma/client';
 // ============================================================
 // Resilient Prisma singleton for Railway MySQL (free tier)
 //
-// Railway's TCP proxy drops idle connections every ~10 min.
-// This proxy wraps every async call: if it gets a "Can't reach
-// database" error it nullifies the singleton so the NEXT call
-// gets a fresh PrismaClient with a brand-new TCP socket.
+// connection_limit=3 prevents Railway free-tier pool exhaustion.
+// The proxy wraps every async call: on connection drop errors it
+// resets the singleton so the next request gets a fresh client.
 // ============================================================
 
 const globalForPrisma = global as unknown as { prisma: PrismaClient | null };
 
 const databaseUrl = process.env.DATABASE_URL;
 if (!databaseUrl) {
-  throw new Error('DATABASE_URL environment variable is required to initialize the database client.');
+  throw new Error('DATABASE_URL environment variable is required.');
+}
+
+// Append connection_limit to keep pool small on Railway free tier
+if (!databaseUrl.includes('connection_limit')) {
+  const sep = databaseUrl.includes('?') ? '&' : '?';
+  process.env.DATABASE_URL = `${databaseUrl}${sep}connection_limit=3&pool_timeout=10`;
 }
 
 function createPrismaClient(): PrismaClient {
   return new PrismaClient({
-    // Keep 'query' logging off in dev — it's very noisy and slows Turbopack
     log: process.env.NODE_ENV === 'development' ? ['error', 'warn'] : ['error'],
-    datasources: { db: { url: databaseUrl! } },
   });
 }
 
@@ -31,14 +34,15 @@ function getPrismaClient(): PrismaClient {
   return globalForPrisma.prisma;
 }
 
-// Railway-drop error signatures
+// Error patterns that indicate a lost/exhausted connection
 const CONN_ERROR_PATTERNS = [
   "Can't reach database server",
   'ECONNREFUSED',
   'Connection timed out',
   'Server has closed the connection',
-  'P1001', // Prisma: unreachable
-  'P1002', // Prisma: timeout
+  'pool timeout',
+  'P1001',
+  'P1002',
   'ETIMEDOUT',
 ];
 
@@ -57,19 +61,14 @@ export const prisma = new Proxy({} as PrismaClient, {
     return (...args: any[]) => {
       const result: unknown = value.apply(client, args);
 
-      // Only wrap thenables (async methods)
       if (result && typeof (result as any).then === 'function') {
         return (result as Promise<unknown>).catch((err: unknown) => {
           if (isConnectionError(err)) {
-            console.warn(
-              '[DB] Railway TCP connection lost — resetting Prisma singleton for next request.'
-            );
-            try {
-              globalForPrisma.prisma?.$disconnect();
-            } catch {}
+            console.warn('[DB] Connection error — resetting Prisma singleton for next request.');
+            try { globalForPrisma.prisma?.$disconnect(); } catch {}
             globalForPrisma.prisma = null;
           }
-          throw err; // always re-throw so callers can handle / log
+          throw err;
         });
       }
 

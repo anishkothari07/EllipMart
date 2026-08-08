@@ -1,6 +1,11 @@
 packages:
   - 'apps/*'
   - 'packages/*'
+
+# Moved from package.json pnpm.overrides (ignored in pnpm 10+)
+overrides:
+  hono: '4.12.25'
+
 allowBuilds:
   '@prisma/client': true
   '@prisma/engines': true

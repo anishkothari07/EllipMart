@@ -23,7 +23,7 @@ export default defineConfig({
       'packages/commerce/src/index.ts',
       'packages/shared/src/index.ts',
       'packages/database/**',
-      'node_modules'
+      '**/node_modules/**'
     ],
     testTimeout: 20000,
   },

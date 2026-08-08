@@ -57,20 +57,25 @@ export function AddressCard({ title, address, rawAddress }: AddressCardProps) {
 }
 
 function BillingAddressDisplay({ raw }: { raw: string }) {
+  let parsed: Record<string, string> | null = null;
+
   try {
-    const parsed = JSON.parse(raw);
-    return (
-      <div className="space-y-1.5">
-        <AddressLine label="Name" value={parsed.name} />
-        <AddressLine label="Phone" value={parsed.phone} />
-        <AddressLine label="Street" value={parsed.street ?? parsed.address1} />
-        <AddressLine label="City" value={parsed.city} />
-        <AddressLine label="State" value={parsed.state} />
-        <AddressLine label="Country" value={parsed.country} />
-        <AddressLine label="PIN" value={parsed.postalCode ?? parsed.zip} />
-      </div>
-    );
+    parsed = JSON.parse(raw) as Record<string, string>;
   } catch {
-    return <p className="text-xs text-muted-foreground">{raw}</p>;
+    parsed = null;
   }
+
+  if (!parsed) return <p className="text-xs text-muted-foreground">{raw}</p>;
+
+  return (
+    <div className="space-y-1.5">
+      <AddressLine label="Name" value={parsed.name} />
+      <AddressLine label="Phone" value={parsed.phone} />
+      <AddressLine label="Street" value={parsed.street ?? parsed.address1} />
+      <AddressLine label="City" value={parsed.city} />
+      <AddressLine label="State" value={parsed.state} />
+      <AddressLine label="Country" value={parsed.country} />
+      <AddressLine label="PIN" value={parsed.postalCode ?? parsed.zip} />
+    </div>
+  );
 }
