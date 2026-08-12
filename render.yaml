@@ -14,9 +14,9 @@ services:
         value: production
       - key: DATABASE_URL
         sync: false
-      - key: NEXTAUTH_SECRET
+      - key: JWT_ACCESS_SECRET
         sync: false
-      - key: NEXTAUTH_URL
+      - key: JWT_REFRESH_SECRET
         sync: false
       - key: NEXT_PUBLIC_API_URL
         sync: false
@@ -27,11 +27,11 @@ services:
       - key: CLOUDINARY_API_SECRET
         sync: false
 
-  # ── Admin ───────────────────────────────────────────────────
+  # ── Merchant Admin ───────────────────────────────────────────
   - type: web
-    name: smartgo-admin
+    name: smartgo-merchant
     runtime: docker
-    dockerfilePath: ./apps/admin/Dockerfile
+    dockerfilePath: ./apps/merchant/Dockerfile
     dockerContext: .
     plan: free
     envVars:
@@ -39,10 +39,9 @@ services:
         value: production
       - key: DATABASE_URL
         sync: false
-      - key: NEXTAUTH_SECRET
+      - key: JWT_ACCESS_SECRET
         sync: false
-      - key: NEXTAUTH_URL
+      - key: JWT_REFRESH_SECRET
         sync: false
       - key: NEXT_PUBLIC_API_URL
         sync: false
-
