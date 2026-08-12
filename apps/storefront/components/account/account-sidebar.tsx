@@ -8,7 +8,9 @@ import {
   MapPin,
   Package,
   Settings,
+  Star,
   User,
+  Wallet,
 } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
@@ -19,6 +21,8 @@ const links = [
   { href: '/account', label: 'Dashboard', icon: LayoutDashboard, exact: true },
   { href: '/account/orders', label: 'Orders', icon: Package },
   { href: '/account/wishlist', label: 'Wishlist', icon: Heart },
+  { href: '/account/wallet', label: 'Wallet', icon: Wallet },
+  { href: '/account/loyalty', label: 'Loyalty Points', icon: Star },
   { href: '/account/addresses', label: 'Addresses', icon: MapPin },
   { href: '/account/payments', label: 'Payment methods', icon: CreditCard },
   { href: '/account/profile', label: 'Profile', icon: User },

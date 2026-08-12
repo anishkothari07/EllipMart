@@ -266,6 +266,8 @@ model User {
   lockedUntil         DateTime?
   emailVerifiedAt     DateTime?
   lastLoginAt         DateTime?
+  referralCode        String?    @unique
+  referredByCode      String?
   createdAt           DateTime   @default(now())
   updatedAt           DateTime   @updatedAt
   deletedAt           DateTime?
@@ -275,6 +277,8 @@ model User {
   orders         Order[]
   cart           Cart?
   wishlist       Wishlist?
+  wallet         Wallet?
+  loyaltyAccount LoyaltyAccount?
   reviews               Review[]
   notifications         Notification[]          @relation("NotificationRecipient")
   notificationSettings  NotificationSetting[]
@@ -285,6 +289,8 @@ model User {
   sessions              UserSession[]
   tokens                Token[]
   identities            UserIdentity[]
+  referralsSent         Referral[]              @relation("Referrer")
+  referralsReceived     Referral?               @relation("Referee")
 }
 
 enum Role {
@@ -812,6 +818,173 @@ model WishlistItem {
   @@unique([wishlistId, productId])
 }
 
+// ═══════════════════════════════════════════════
+//  WALLET
+// ═══════════════════════════════════════════════
+
+enum HoldStatus {
+  PENDING    // reserved, balance locked
+  FINALIZED  // converted to a debit transaction
+  RELEASED   // payment failed or session expired — balance returned
+}
+
+enum WalletTxType {
+  TOPUP       // customer adds money via Razorpay (webhook-verified)
+  PURCHASE    // finalized debit when hold is converted after payment success
+  REFUND      // refund for the wallet-funded portion of a cancelled/returned order
+  ADJUSTMENT  // admin manual credit or debit — always a NEW row, never edit existing
+}
+
+model Wallet {
+  id        String   @id @default(uuid())
+  userId    String   @unique
+  balance   Decimal  @default(0.00) @db.Decimal(12, 2)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user         User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  transactions WalletTransaction[]
+  holds        WalletHold[]
+}
+
+model WalletTransaction {
+  id          String       @id @default(uuid())
+  walletId    String
+  type        WalletTxType
+  amount      Decimal      @db.Decimal(12, 2) // positive = credit, negative = debit
+  balance     Decimal      @db.Decimal(12, 2) // running balance AFTER this transaction
+  description String?
+  orderId     String?
+  order       Order?       @relation(fields: [orderId], references: [id], onDelete: SetNull)
+  paymentId   String?      // Razorpay paymentId — used for TOPUP idempotency
+  holdId      String?      // WalletHold that was finalized into this transaction
+  createdAt   DateTime     @default(now())
+
+  wallet Wallet @relation(fields: [walletId], references: [id], onDelete: Cascade)
+
+  @@index([walletId, createdAt])
+  @@index([orderId])
+  @@index([paymentId])
+  @@unique([walletId, paymentId], name: "unique_wallet_topup")
+  @@unique([walletId, orderId, type], name: "unique_wallet_order_debit")
+}
+
+// Reservation model — prevents concurrent-checkout race conditions
+model WalletHold {
+  id        String     @id @default(uuid())
+  walletId  String
+  orderId   String?    // populated after order is created
+  sessionId String     @unique // CheckoutSession.id
+  amount    Decimal    @db.Decimal(12, 2)
+  status    HoldStatus @default(PENDING)
+  expiresAt DateTime   // background job releases holds past this time
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  wallet Wallet @relation(fields: [walletId], references: [id], onDelete: Cascade)
+
+  @@index([walletId, status])
+  @@index([sessionId])
+  @@index([expiresAt, status])
+}
+
+// ═══════════════════════════════════════════════
+//  LOYALTY POINTS
+// ═══════════════════════════════════════════════
+
+enum LoyaltyTxType {
+  EARN          // points credited after order delivered (idempotent per orderId)
+  REDEEM        // points debited; finalized from a LoyaltyHold
+  ADJUSTMENT    // admin manual correction — new offsetting row, never edit
+  WELCOME_BONUS // bonus awarded on new user registration/first login
+  REFERRAL      // bonus awarded for referring friends or signing up via referral
+}
+
+enum ReferralStatus {
+  PENDING_FIRST_ORDER
+  COMPLETED
+  EXPIRED
+}
+
+model LoyaltyAccount {
+  id               String @id @default(uuid())
+  userId           String @unique
+  points               Int      @default(0) // current redeemable balance
+  lifetimeEarned       Int      @default(0)
+  lifetimeRedeemed     Int      @default(0)
+  welcomeBonusClaimed  Boolean  @default(false)
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  user         User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  transactions LoyaltyTransaction[]
+  holds        LoyaltyHold[]
+}
+
+model LoyaltyTransaction {
+  id               String        @id @default(uuid())
+  loyaltyAccountId String
+  type             LoyaltyTxType
+  points           Int           // positive = earn/add, negative = redeem/deduct
+  pointsBalance    Int           // snapshot AFTER this transaction
+  monetaryValue    Decimal?      @db.Decimal(12, 2) // ₹ value at time of transaction
+  description      String?
+  orderId          String?
+  order            Order?        @relation(fields: [orderId], references: [id], onDelete: SetNull)
+  holdId           String?       // LoyaltyHold that was finalized
+  adminUserId      String?
+  referralId       String?
+  referral         Referral?     @relation(fields: [referralId], references: [id], onDelete: SetNull)
+  createdAt        DateTime      @default(now())
+
+  account LoyaltyAccount @relation(fields: [loyaltyAccountId], references: [id], onDelete: Cascade)
+
+  @@index([loyaltyAccountId, createdAt])
+  @@index([orderId])
+  // Idempotency: one EARN per order, one REDEEM per order
+  @@unique([loyaltyAccountId, orderId, type], name: "unique_loyalty_order_tx")
+}
+
+// Reservation model for loyalty — same pattern as WalletHold
+model LoyaltyHold {
+  id               String     @id @default(uuid())
+  loyaltyAccountId String
+  orderId          String?
+  sessionId        String     @unique
+  points           Int
+  monetaryValue    Decimal    @db.Decimal(12, 2)
+  status           HoldStatus @default(PENDING)
+  expiresAt        DateTime
+  createdAt        DateTime   @default(now())
+  updatedAt        DateTime   @updatedAt
+
+  account LoyaltyAccount @relation(fields: [loyaltyAccountId], references: [id], onDelete: Cascade)
+
+  @@index([loyaltyAccountId, status])
+  @@index([sessionId])
+  @@index([expiresAt, status])
+}
+
+model Referral {
+  id             String         @id @default(uuid())
+  referrerId     String
+  refereeId      String         @unique
+  code           String
+  status         ReferralStatus @default(PENDING_FIRST_ORDER)
+  referrerPoints Int            @default(100)
+  refereePoints  Int            @default(50)
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+
+  referrer     User                 @relation("Referrer", fields: [referrerId], references: [id], onDelete: Cascade)
+  referee      User                 @relation("Referee", fields: [refereeId], references: [id], onDelete: Cascade)
+  transactions LoyaltyTransaction[]
+
+  @@index([referrerId])
+  @@index([code])
+}
+
+
 model ShippingProvider {
   id        String   @id @default(uuid())
   name      String
@@ -948,6 +1121,11 @@ model Order {
   discountValue  Decimal? @db.Decimal(10, 2)
   couponDiscount Decimal? @db.Decimal(10, 2)
 
+  // Wallet & Loyalty payment allocation (for refund routing)
+  walletAmountUsed    Decimal? @db.Decimal(10, 2)
+  pointsRedeemed      Int?
+  pointsMonetaryValue Decimal? @db.Decimal(10, 2)
+
   // Shipping Snapshot
   shippingProvider  String?
   trackingNumber    String?
@@ -963,6 +1141,8 @@ model Order {
   payment         Payment?
   timeline        OrderTimeline[]
   returns         Return[]
+  walletTxs       WalletTransaction[]
+  loyaltyTxs      LoyaltyTransaction[]
 
   @@index([userId])
   @@index([status])

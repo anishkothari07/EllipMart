@@ -20,12 +20,13 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useEffect, useMemo, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
-import { OrderSummary } from '@/components/cart/order-summary'
+import { OrderSummary, useOrderTotals } from '@/components/cart/order-summary'
 import { CheckoutSteps } from '@/components/checkout/checkout-steps'
 import { Container } from '@corecart/ui'
 import { useStore } from '@/components/providers/store-provider'
 import { formatPrice } from '@corecart/shared'
 import { cn } from '@corecart/shared'
+import { Coins, Gift } from 'lucide-react'
 
 type Address = {
   email: string
@@ -146,6 +147,13 @@ export function CheckoutView() {
   const [loadingMethods, setLoadingMethods] = useState(false)
   const [selectedMethodCode, setSelectedMethodCode] = useState<string>('UPI')
 
+  // Wallet & Loyalty State
+  const [walletBalance, setWalletBalance] = useState(0)
+  const [loyaltyPoints, setLoyaltyPoints] = useState(0)
+  const [useWallet, setUseWallet] = useState(false)
+  const [useLoyalty, setUseLoyalty] = useState(false)
+  const [discountPct, setDiscountPct] = useState(0)
+
   // Sub-selection state
   const [upiOption, setUpiOption] = useState<'gpay' | 'phonepe' | 'paytm' | 'bhim' | 'vpa'>('gpay')
   const [upiVpa, setUpiVpa] = useState('')
@@ -228,6 +236,41 @@ export function CheckoutView() {
     loadMethods()
   }, [cartSubtotal, shipUpcharge])
 
+  // Fetch Wallet and Loyalty Balances
+  useEffect(() => {
+    async function loadBalances() {
+      try {
+        const [walletRes, loyaltyRes] = await Promise.all([
+          fetch('/api/v1/wallet'),
+          fetch('/api/v1/loyalty')
+        ])
+        const walletData = await walletRes.json()
+        const loyaltyData = await loyaltyRes.json()
+        
+        if (walletData.success) {
+          setWalletBalance(Number(walletData.data.availableBalance) || 0)
+        }
+        if (loyaltyData.success) {
+          setLoyaltyPoints(loyaltyData.data.availablePoints || 0)
+        }
+      } catch (err) {
+        console.error('Error fetching balances:', err)
+      }
+    }
+    loadBalances()
+  }, [])
+
+  const { total: rawTotal } = useOrderTotals(cartSubtotal, discountPct)
+  const totalBeforeMethods = rawTotal + shipUpcharge
+  
+  // Calculate remaining amount after wallet/loyalty
+  const loyaltyDeduction = useLoyalty ? Math.min(loyaltyPoints, totalBeforeMethods) : 0
+  const afterLoyalty = totalBeforeMethods - loyaltyDeduction
+  const walletDeduction = useWallet ? Math.min(walletBalance, afterLoyalty) : 0
+  const remainingAmount = afterLoyalty - walletDeduction
+
+  const isFullyCovered = remainingAmount <= 0
+
   if (cart.length === 0 && !placing) {
     return (
       <Container className="flex flex-col items-center gap-4 py-24 text-center">
@@ -275,25 +318,36 @@ export function CheckoutView() {
         }
       }
 
+      const addressWithGst = {
+        fullName: `${address.firstName} ${address.lastName}`,
+        phone: address.phone,
+        street: address.address,
+        city: address.city,
+        state: address.state,
+        country: 'IN',
+        postalCode: address.zip,
+      }
+
+      const payload = {
+        addressId: null,
+        address: addressWithGst,
+        couponCode: null,
+        shippingRateId: null,
+        shippingProvider: shipMethod,
+        paymentProvider: isFullyCovered ? 'INTERNAL' : selectedMethodCode,
+        paymentMethodCode: isFullyCovered ? 'INTERNAL' : selectedMethodCode,
+        isBusiness,
+        gstin,
+        companyName,
+        useWallet,
+        useLoyalty
+      }
+
+
       const res = await fetch('/api/v1/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'x-user-id': 'mock-user-id' },
-        body: JSON.stringify({
-          address: {
-            fullName: `${address.firstName} ${address.lastName}`,
-            phone: address.phone,
-            street: address.address,
-            city: address.city,
-            state: address.state,
-            country: 'IN',
-            postalCode: address.zip,
-          },
-          isBusiness,
-          gstin,
-          companyName,
-          paymentMethodCode: selectedMethodCode,
-          paymentProvider: selectedMethodCode,
-        }),
+        body: JSON.stringify(payload),
       })
       const data = await res.json()
       if (data.success) {
@@ -506,7 +560,72 @@ export function CheckoutView() {
                 </span>
               </div>
 
-              {loadingMethods ? (
+              {/* Wallet & Loyalty Apply Section */}
+              {(walletBalance > 0 || loyaltyPoints > 0) && (
+                <div className="flex flex-col gap-3 mb-2 rounded-2xl border border-border bg-card p-4 sm:p-5 shadow-sm">
+                  <h3 className="text-sm font-semibold mb-1">Use Balances</h3>
+                  
+                  {walletBalance > 0 && (
+                    <label className="flex cursor-pointer items-center justify-between rounded-xl border border-border bg-background p-3 hover:border-foreground/30 transition-colors">
+                      <div className="flex items-center gap-3">
+                        <input
+                          type="checkbox"
+                          checked={useWallet}
+                          onChange={(e) => setUseWallet(e.target.checked)}
+                          className="size-4 accent-foreground"
+                        />
+                        <div className="flex flex-col">
+                          <span className="text-sm font-medium flex items-center gap-1.5">
+                            <Wallet className="size-4 text-emerald-600" /> SmartGO Wallet
+                          </span>
+                          <span className="text-xs text-muted-foreground">
+                            Available: {formatPrice(walletBalance)}
+                          </span>
+                        </div>
+                      </div>
+                      <span className="text-sm font-semibold">
+                        {useWallet && walletDeduction > 0 ? `-${formatPrice(walletDeduction)}` : ''}
+                      </span>
+                    </label>
+                  )}
+
+                  {loyaltyPoints > 0 && (
+                    <label className="flex cursor-pointer items-center justify-between rounded-xl border border-border bg-background p-3 hover:border-foreground/30 transition-colors">
+                      <div className="flex items-center gap-3">
+                        <input
+                          type="checkbox"
+                          checked={useLoyalty}
+                          onChange={(e) => setUseLoyalty(e.target.checked)}
+                          className="size-4 accent-foreground"
+                        />
+                        <div className="flex flex-col">
+                          <span className="text-sm font-medium flex items-center gap-1.5">
+                            <Gift className="size-4 text-amber-500" /> Loyalty Points
+                          </span>
+                          <span className="text-xs text-muted-foreground">
+                            Available: {loyaltyPoints} pts ({formatPrice(loyaltyPoints)})
+                          </span>
+                        </div>
+                      </div>
+                      <span className="text-sm font-semibold">
+                        {useLoyalty && loyaltyDeduction > 0 ? `-${formatPrice(loyaltyDeduction)}` : ''}
+                      </span>
+                    </label>
+                  )}
+                </div>
+              )}
+
+              {isFullyCovered ? (
+                <div className="rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-6 text-center">
+                  <CheckCircle2 className="size-8 text-emerald-500 mx-auto mb-3" />
+                  <h3 className="text-base font-semibold text-emerald-700 dark:text-emerald-400">Order fully covered!</h3>
+                  <p className="text-sm text-emerald-600/80 dark:text-emerald-400/80 mt-1">
+                    Your wallet and loyalty balances cover the entire amount.
+                  </p>
+                </div>
+              ) : (
+                <>
+                  {loadingMethods ? (
                 <div className="flex flex-col gap-3">
                   {[1, 2, 3, 4].map((i) => (
                     <div
@@ -819,6 +938,8 @@ export function CheckoutView() {
                   })}
                 </div>
               )}
+                </>
+              )}
             </motion.section>
           )}
 
@@ -971,7 +1092,33 @@ export function CheckoutView() {
         </div>
 
         <aside className="lg:sticky lg:top-24 lg:self-start">
-          <OrderSummary subtotal={cartSubtotal + shipUpcharge} showCoupon={step >= 2} />
+          <OrderSummary 
+            subtotal={cartSubtotal} 
+            showCoupon={step >= 2}
+            onDiscountChange={setDiscountPct}
+          >
+            {/* Inject wallet and loyalty deductions into the summary visually */}
+            {step === 2 && (useLoyalty || useWallet) && (
+              <div className="mt-4 border-t border-border pt-4 flex flex-col gap-2.5 text-sm">
+                {useLoyalty && loyaltyDeduction > 0 && (
+                  <div className="flex justify-between text-amber-600 dark:text-amber-400">
+                    <dt>Loyalty Points</dt>
+                    <dd className="font-medium">-{formatPrice(loyaltyDeduction)}</dd>
+                  </div>
+                )}
+                {useWallet && walletDeduction > 0 && (
+                  <div className="flex justify-between text-emerald-600 dark:text-emerald-400">
+                    <dt>Wallet Balance</dt>
+                    <dd className="font-medium">-{formatPrice(walletDeduction)}</dd>
+                  </div>
+                )}
+                <div className="flex justify-between border-t border-border pt-3 mt-1">
+                  <dt className="text-base font-semibold">To Pay</dt>
+                  <dd className="text-xl font-semibold">{formatPrice(remainingAmount)}</dd>
+                </div>
+              </div>
+            )}
+          </OrderSummary>
         </aside>
       </div>
     </Container>

@@ -1,0 +1,12 @@
+export const dynamic = 'force-dynamic';
+import type { Metadata } from 'next'
+import { WalletView } from '@/components/account/wallet-view'
+
+export const metadata: Metadata = {
+  title: 'My Wallet · SmartGO',
+  description: 'Manage your SmartGO wallet balance and view transaction history.',
+}
+
+export default function WalletPage() {
+  return <WalletView />
+}

@@ -8,6 +8,7 @@ import { z } from 'zod';
 import { loginSchema, registerSchema, verifyEmailSchema, resetPasswordSchema, forgotPasswordSchema, refreshSchema } from './auth.dto';
 import crypto from 'crypto';
 import { prisma } from '@corecart/database';
+import { loyaltyService } from '../loyalty/loyalty.service';
 
 function generateOTP(): string {
   return Math.floor(100000 + Math.random() * 900000).toString();
@@ -94,6 +95,16 @@ export class AuthService {
       const refreshToken = await signRefreshToken({ userId: user.id, role: user.role, email: user.email, sessionId: session.id });
 
       await authRepository.updateUser(user.id, { lastLoginAt: new Date() });
+
+      // Grant Welcome Bonus & Process Referral (if provided)
+      try {
+        await loyaltyService.grantWelcomeBonus(user.id);
+        if (payload.referralCode) {
+          await loyaltyService.processReferralSignup(user.id, payload.referralCode);
+        }
+      } catch (err: any) {
+        console.error('[AuthService] Loyalty bonus hook failed:', err.message);
+      }
 
       // Safe user object for response
       const safeUser = {
@@ -393,16 +404,37 @@ export const authService = new AuthService();
 import { NextRequest } from 'next/server';
 
 export async function getAuthUser(req: NextRequest) {
-  // Simplified for sprint 4 - normally decodes bearer token from req headers
+  // 1. Try Bearer token from Authorization header
   const authHeader = req.headers.get('authorization');
-  if (!authHeader?.startsWith('Bearer ')) return null;
-
-  const token = authHeader.split(' ')[1];
-  try {
-    const decoded = await verifyRefreshToken(token); // Or verifyAccessToken if implemented
-    const user = await authRepository.findUserById(decoded.userId);
-    return user && user.status === 'ACTIVE' ? user : null;
-  } catch (e) {
-    return null;
+  if (authHeader?.startsWith('Bearer ')) {
+    const token = authHeader.split(' ')[1];
+    try {
+      const decoded = await verifyRefreshToken(token);
+      const user = await authRepository.findUserById(decoded.userId);
+      if (user && user.status === 'ACTIVE') return user;
+    } catch (e) {
+      // fall through to other methods
+    }
   }
+
+  // 2. Try x-user-id header (dev auth pattern used across the storefront)
+  const xUserId = req.headers.get('x-user-id');
+  if (xUserId) {
+    const user = await authRepository.findUserById(xUserId);
+    if (user && user.status === 'ACTIVE') return user;
+  }
+
+  // 3. Try session cookie (smartgo_customer_refresh)
+  const cookieToken = req.cookies.get('smartgo_customer_refresh')?.value;
+  if (cookieToken) {
+    try {
+      const decoded = await verifyRefreshToken(cookieToken);
+      const user = await authRepository.findUserById(decoded.userId);
+      if (user && user.status === 'ACTIVE') return user;
+    } catch (e) {
+      // fall through
+    }
+  }
+
+  return null;
 }

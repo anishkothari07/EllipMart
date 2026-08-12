@@ -30,3 +30,5 @@ out/
 
 # TypeScript cache
 *.tsbuildinfo
+scratch/
+

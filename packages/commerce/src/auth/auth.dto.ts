@@ -11,6 +11,7 @@ export const registerSchema = z.object({
     variantId: z.string().uuid().optional(),
     quantity: z.number().int().min(1)
   })).optional(),
+  referralCode: z.string().trim().optional(),
 });
 
 export const loginSchema = z.object({

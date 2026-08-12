@@ -48,6 +48,8 @@ export * from './cart/cart.service';
 
 // Checkout
 export * from './checkout/checkout.service';
+export * from './checkout/checkout-wallet.service';
+export * from './checkout/checkout-loyalty.service';
 
 // Payment
 export * from './payment/payment.service';
@@ -89,3 +91,9 @@ export * from './auth/auth.repository';
 export * from './shipping/shipping.service';
 export * from './tax/tax.service';
 export * from './inventory/inventory.service';
+
+// Wallet
+export * from './wallet/wallet.service';
+
+// Loyalty Points
+export * from './loyalty/loyalty.service';

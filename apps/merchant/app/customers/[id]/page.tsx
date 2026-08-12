@@ -12,6 +12,7 @@ import { CustomerNotes } from '@/components/merchant/customer/CustomerNotes';
 import { CustomerTags } from '@/components/merchant/customer/CustomerTags';
 import { CustomerSegmentBadge } from '@/components/merchant/customer/CustomerSegmentBadge';
 import { CustomerCommunication } from '@/components/merchant/customer/CustomerCommunication';
+import { AdminLoyaltyManager } from '@/components/merchant/customer/AdminLoyaltyManager';
 import { cn } from '@corecart/shared';
 
 interface PageProps {
@@ -166,6 +167,9 @@ export default function MerchantCustomerDetailPage({ params }: PageProps) {
               <p>Joined: {new Date(profile.customerSince).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
             </div>
           </div>
+
+          {/* Admin Loyalty Manager Panel */}
+          <AdminLoyaltyManager userId={profile.id} />
 
           {/* Customer notes */}
           <CustomerNotes userId={profile.id} notes={profile.notes} onUpdate={loadProfile} />

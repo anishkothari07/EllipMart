@@ -2,6 +2,8 @@ import { prisma } from '@corecart/database';
 import { OrderStatus } from '@corecart/database';
 import { notificationService } from '../notification/notification.service';
 import { AppError, NotFoundError, ForbiddenError, ValidationError } from '@corecart/shared';
+import { loyaltyService } from '../loyalty/loyalty.service';
+import { walletService } from '../wallet/wallet.service';
 
 export const orderService = {
   async createOrder(data: any) {
@@ -130,6 +132,21 @@ export const orderService = {
         firstName: order.user.firstName,
         orderNumber: order.orderNumber
       });
+
+      // ── Earn loyalty points (idempotent) ────────────────────────────────────────
+      // Eligible amount = merchandise value only (unitPrice × qty, before discounts)
+      // Excludes: shipping, tax, wallet deduction, redeemed points
+      try {
+        const orderItems = await prisma.orderItem.findMany({ where: { orderId: order.id } });
+        const eligibleAmount = orderItems.reduce(
+          (sum, item) => sum + Number(item.unitPrice) * item.quantity,
+          0,
+        );
+        await loyaltyService.earnPoints(order.userId, eligibleAmount, order.id);
+        await loyaltyService.processReferralFirstOrder(order.userId);
+      } catch (err: any) {
+        console.error('[OrderService] Loyalty earn / referral processing failed:', err.message);
+      }
     }
 
     if (newStatus === OrderStatus.CANCELLED) {
@@ -222,6 +239,37 @@ export const orderService = {
       firstName: order.user.firstName,
       orderNumber: order.orderNumber
     });
+
+    // ── Wallet refund ────────────────────────────────────────────────────────────
+    // Only the wallet-funded portion goes back to wallet.
+    // The Razorpay-funded portion is handled separately by refund.service.ts.
+    const freshOrder = await prisma.order.findUnique({ where: { id: orderId } });
+    if (freshOrder?.walletAmountUsed && Number(freshOrder.walletAmountUsed) > 0) {
+      try {
+        await walletService.refund(
+          userId,
+          Number(freshOrder.walletAmountUsed),
+          orderId,
+          `Refund for cancelled order #${order.orderNumber}`,
+        );
+      } catch (err: any) {
+        console.error('[OrderService] Wallet refund failed:', err.message);
+      }
+    }
+
+    // ── Loyalty points restore ─────────────────────────────────────────────────
+    // Restore redeemed points as an ADJUSTMENT (immutable ledger).
+    if (freshOrder?.pointsRedeemed && freshOrder.pointsRedeemed > 0) {
+      try {
+        await loyaltyService.adminAdjust(
+          userId,
+          freshOrder.pointsRedeemed,
+          `Points restored — order #${order.orderNumber} cancelled`,
+        );
+      } catch (err: any) {
+        console.error('[OrderService] Loyalty points restore failed:', err.message);
+      }
+    }
 
     return { success: true };
   }

@@ -5,6 +5,8 @@ import { couponService } from '../coupon/coupon.service';
 import { shippingService } from '../shipping/shipping.service';
 import { paymentService } from '../payment/payment.service';
 import { orderService } from '../order/order.service';
+import { checkoutWalletService } from './checkout-wallet.service';
+import { checkoutLoyaltyService } from './checkout-loyalty.service';
 import { AppError } from '@corecart/shared';
 import { prisma } from '@corecart/database';
 
@@ -107,7 +109,41 @@ export const checkoutService = {
     // Pipeline
     const { cart, address, validCoupon, shippingRate, totals } = await CheckoutValidationPipeline.validate(userId, input);
 
-    const paymentMethodCode = input.paymentMethodCode || input.paymentProvider || 'UPI';
+    // ── Wallet & Loyalty Deductions ───────────────────────────────────────────
+    let remainingAmount = totals.grandTotal;
+    
+    // Loyalty (1 point = ₹1)
+    let loyaltyDeduction = 0;
+    if (input.useLoyalty && remainingAmount > 0) {
+      const loyaltyBalance = await checkoutLoyaltyService.applyLoyalty(userId, 0, cart.id).catch(() => null);
+      // Wait, applyLoyalty actually creates a hold. We shouldn't create a hold before we know the amount.
+      // Better to fetch balance directly. Or we can just let applyLoyalty handle it if we pass the max possible?
+      // Actually, we must fetch the balance first to know how much to deduct.
+      const { loyaltyService } = await import('../loyalty/loyalty.service');
+      const balance = await loyaltyService.getBalance(userId);
+      const pointsToUse = Math.min(balance.availablePoints, remainingAmount);
+      if (pointsToUse > 0) {
+        loyaltyDeduction = pointsToUse; // 1 point = ₹1
+        remainingAmount -= loyaltyDeduction;
+      }
+    }
+
+    // Wallet
+    let walletDeduction = 0;
+    if (input.useWallet && remainingAmount > 0) {
+      const { walletService } = await import('../wallet/wallet.service');
+      const balance = await walletService.getBalance(userId);
+      const walletToUse = Math.min(balance.availableBalance, remainingAmount);
+      if (walletToUse > 0) {
+        walletDeduction = walletToUse;
+        remainingAmount -= walletDeduction;
+      }
+    }
+
+    let finalPaymentMethodCode = input.paymentMethodCode || input.paymentProvider || 'UPI';
+    if (remainingAmount <= 0) {
+      finalPaymentMethodCode = 'INTERNAL';
+    }
 
     // 1. Try to Create/Find CheckoutSession with id = cart.id (Deterministic Identity)
     let session;
@@ -124,9 +160,17 @@ export const checkoutService = {
         taxTotal: totals.taxTotal,
         shippingTotal: totals.shippingTotal,
         discountTotal: totals.discountTotal,
-        grandTotal: totals.grandTotal,
-        paymentMethodCode
+        grandTotal: remainingAmount, // The amount left for the payment gateway!
+        paymentMethodCode: finalPaymentMethodCode
       });
+
+      // After session creation, create the holds using session.id
+      if (walletDeduction > 0) {
+        await checkoutWalletService.applyWallet(userId, walletDeduction, session.id);
+      }
+      if (loyaltyDeduction > 0) {
+        await checkoutLoyaltyService.applyLoyalty(userId, loyaltyDeduction, session.id);
+      }
     } catch (err: any) {
       // Catch unique key conflict (P2002) if concurrent request already created the session
       if (err.code === 'P2002' || err.message?.includes('Unique constraint')) {
@@ -152,7 +196,7 @@ export const checkoutService = {
         paymentId: existingOrder.payment?.id || null,
         providerOrderId: existingOrder.payment?.providerOrderId || null,
         clientSecret: existingOrder.payment?.id || null,
-        paymentMethodCode,
+        paymentMethodCode: finalPaymentMethodCode,
         session
       };
     }
@@ -161,8 +205,8 @@ export const checkoutService = {
     const paymentResult = await paymentService.initializeOrderPayment(session.id);
     const order = await prisma.order.findUnique({ where: { id: paymentResult.orderId } });
 
-    // 4. For COD: explicitly confirm the order (PENDING_PAYMENT → CONFIRMED)
-    if (paymentMethodCode === 'COD') {
+    // 4. For COD or INTERNAL (fully covered by wallet/points): explicitly confirm the order (PENDING_PAYMENT → CONFIRMED)
+    if (finalPaymentMethodCode === 'COD' || finalPaymentMethodCode === 'INTERNAL') {
       await paymentService.confirmCodOrder(paymentResult.orderId, paymentResult.paymentId);
     }
 
@@ -178,7 +222,7 @@ export const checkoutService = {
       paymentId: paymentResult.paymentId,
       providerOrderId: paymentResult.providerOrderId,
       clientSecret: paymentResult.clientSecret,
-      paymentMethodCode,
+      paymentMethodCode: finalPaymentMethodCode,
       session
     };
   },

@@ -8,6 +8,8 @@ import { RazorpayProvider } from "./providers/razorpay.provider";
 import { IPaymentProvider } from "./types";
 import { orderService } from '../order/order.service';
 import { inventoryService } from '../inventory/inventory.service';
+import { checkoutWalletService } from '../checkout/checkout-wallet.service';
+import { checkoutLoyaltyService } from '../checkout/checkout-loyalty.service';
 
 // Register provider factories
 paymentRegistry.register("MOCK", (config) => new MockProvider(config));
@@ -434,7 +436,35 @@ export class PaymentService {
     // Fetch order items for inventory operations
     const orderItems = await db.orderItem.findMany({ where: { orderId } });
 
+    // Fetch CheckoutSession so we can finalize wallet/loyalty holds by sessionId
+    const orderRecord = await db.order.findUnique({
+      where: { id: orderId },
+      select: { checkoutSessionId: true },
+    });
+    const sessionId = orderRecord?.checkoutSessionId;
+
     if (newOrderStatus === OrderStatus.CONFIRMED) {
+      // ── Finalize wallet + loyalty holds ─────────────────────────────
+      if (sessionId) {
+        try {
+          const walletTx = await checkoutWalletService.finalizeWallet(sessionId, orderId);
+          const loyaltyTx = await checkoutLoyaltyService.finalizeLoyalty(sessionId, orderId);
+
+          // Store payment allocation on the order so refund logic knows the split
+          await db.order.update({
+            where: { id: orderId },
+            data: {
+              walletAmountUsed: walletTx ? Math.abs(Number(walletTx.amount)) : null,
+              pointsRedeemed: loyaltyTx ? Math.abs(loyaltyTx.points) : null,
+              pointsMonetaryValue: loyaltyTx ? Number(loyaltyTx.monetaryValue) : null,
+            },
+          });
+        } catch (err: any) {
+          // Non-fatal — log and continue; inventory and order status already updated
+          console.error('[PaymentVerify] Wallet/Loyalty finalize failed:', err.message);
+        }
+      }
+
       // Convert reserved stock to sold stock
       for (const item of orderItems) {
         if (item.variantId) {
@@ -451,6 +481,16 @@ export class PaymentService {
         }
       }
     } else {
+      // ── Release wallet + loyalty holds on payment failure ────────────
+      if (sessionId) {
+        try {
+          await checkoutWalletService.releaseWallet(sessionId);
+          await checkoutLoyaltyService.releaseLoyalty(sessionId);
+        } catch (err: any) {
+          console.error('[PaymentVerify] Hold release failed:', err.message);
+        }
+      }
+
       // Release reserved stock because payment failed
       for (const item of orderItems) {
         if (item.variantId) {
