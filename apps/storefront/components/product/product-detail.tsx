@@ -241,83 +241,122 @@ export function ProductDetail({
               )}
             </div>
 
-            {/* Mobile-only: Quantity selector (desktop has it in the inline actions row) */}
-            <div className="mt-5 flex items-center gap-3 sm:hidden">
-              <span className="text-sm font-medium text-muted-foreground">Qty</span>
-              <QuantityStepper value={qty} onChange={setQty} />
-            </div>
+            {/* ── Actions ── */}
+            {/*
+              Mobile layout (flex-col):
+                [- 1 +]
+                [🛍 Add to bag — full width]
+                [❤️]  [🔗]  ← side by side via nested flex row
+                [Buy it now — full width]
+              Desktop layout (sm:flex-row):
+                [- 1 +]  [🛍 Add to bag]  [❤️]  [🔗]  all in one row
+            */}
+            <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center">
+              {/* Qty stepper */}
+              <QuantityStepper value={qty} onChange={setQty} className="self-start shrink-0" />
 
-            {/* ── Actions (Desktop: always-inline row. Mobile: hidden — handled by sticky bar below) ── */}
-            <div className="mt-6 hidden sm:flex items-center gap-3">
-              <QuantityStepper value={qty} onChange={setQty} className="shrink-0" />
+              {/* Add to bag — full width on mobile, flex-1 on desktop */}
               <button
                 type="button"
                 disabled={!product.inStock}
-                onClick={() => { handleAdd(); navigator.vibrate?.(80) }}
-                className="flex h-12 flex-1 items-center justify-center gap-2 rounded-full bg-foreground text-sm font-medium text-background transition-transform hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50"
+                onClick={() => {
+                  handleAdd()
+                  if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(80)
+                }}
+                className="flex h-12 w-full flex-1 items-center justify-center gap-2 rounded-full bg-foreground text-sm font-medium text-background transition-transform hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50"
               >
                 <ShoppingBag className="size-4" />
                 {product.inStock ? 'Add to bag' : 'Sold out'}
               </button>
-              <button
-                type="button"
-                onClick={() => { toggleWishlist(product); navigator.vibrate?.(80) }}
-                aria-label="Add to wishlist"
-                className="grid size-12 shrink-0 place-items-center rounded-full border border-border transition-colors hover:bg-muted"
-              >
-                <Heart className={cn('size-5', wishlisted && 'fill-accent text-accent')} />
-              </button>
-              <button
-                type="button"
-                onClick={async () => {
-                  if (navigator.share) {
-                    try { await navigator.share({ title: product.name, text: `Check out ${product.name} on SmartGO India!`, url: window.location.href }) } catch {}
-                  } else {
-                    await navigator.clipboard.writeText(window.location.href)
-                  }
-                }}
-                aria-label="Share"
-                className="grid size-12 shrink-0 place-items-center rounded-full border border-border transition-colors hover:bg-muted"
-              >
-                <Share2 className="size-5" />
-              </button>
+
+              {/*
+                Heart + Share wrapper:
+                - Mobile (flex-col parent): this div is a flex row → buttons sit side-by-side ✓
+                - Desktop (flex-row parent): sm:contents dissolves the wrapper → buttons flow inline ✓
+              */}
+              <div className="flex items-center gap-2 sm:contents">
+                <button
+                  type="button"
+                  onClick={() => {
+                    toggleWishlist(product)
+                    if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(80)
+                  }}
+                  aria-label="Add to wishlist"
+                  className="grid size-12 shrink-0 place-items-center rounded-full border border-border transition-colors hover:bg-muted"
+                >
+                  <Heart className={cn('size-5', wishlisted && 'fill-accent text-accent')} />
+                </button>
+                <button
+                  type="button"
+                  onClick={async () => {
+                    if (typeof navigator !== 'undefined' && navigator.share) {
+                      try {
+                        await navigator.share({
+                          title: product.name,
+                          text: `Check out ${product.name} on SmartGO India!`,
+                          url: window.location.href,
+                        })
+                      } catch {}
+                    } else {
+                      navigator.clipboard.writeText(window.location.href)
+                    }
+                  }}
+                  aria-label="Share"
+                  className="grid size-12 shrink-0 place-items-center rounded-full border border-border transition-colors hover:bg-muted"
+                >
+                  <Share2 className="size-5" />
+                </button>
+              </div>
             </div>
 
-            {/* Desktop: Buy it now secondary CTA */}
+            {/* Buy it now — full width on mobile, full width on desktop too */}
             {product.inStock && (
               <button
-                onClick={() => { handleAdd(); setCartOpen(false); navigator.vibrate?.([80, 50, 80]); router.push('/checkout') }}
-                className="mt-3 hidden sm:flex h-12 w-full items-center justify-center rounded-full border border-foreground text-sm font-medium transition-colors hover:bg-foreground hover:text-background"
+                onClick={() => {
+                  handleAdd()
+                  setCartOpen(false)
+                  if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate([80, 50, 80])
+                  router.push('/checkout')
+                }}
+                className="mt-3 flex h-12 w-full items-center justify-center rounded-full border border-foreground text-sm font-medium transition-colors hover:bg-foreground hover:text-background"
               >
                 Buy it now
               </button>
             )}
 
-            {/* ── Mobile Sticky Action Bar (sits above the bottom nav at h=64px) ── */}
+            {/* ── Mobile Sticky Action Bar — sits above the 64px bottom nav ── */}
             <div className="fixed bottom-16 inset-x-0 z-40 sm:hidden flex items-center gap-2 px-3 py-2.5 bg-background/95 backdrop-blur-md border-t border-border shadow-[0_-4px_24px_rgba(0,0,0,0.08)]">
-              {/* Wishlist */}
               <button
                 type="button"
-                onClick={() => { toggleWishlist(product); navigator.vibrate?.(80) }}
+                onClick={() => {
+                  toggleWishlist(product)
+                  if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(80)
+                }}
                 aria-label="Wishlist"
                 className="grid size-12 shrink-0 place-items-center rounded-full border border-border bg-card"
               >
                 <Heart className={cn('size-5', wishlisted && 'fill-accent text-accent')} />
               </button>
-              {/* Add to Cart */}
               <button
                 type="button"
                 disabled={!product.inStock}
-                onClick={() => { handleAdd(); navigator.vibrate?.(80) }}
+                onClick={() => {
+                  handleAdd()
+                  if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(80)
+                }}
                 className="flex h-12 flex-1 items-center justify-center gap-1.5 rounded-full bg-foreground text-xs font-semibold text-background disabled:opacity-50"
               >
                 <ShoppingBag className="size-3.5" /> Add to Cart
               </button>
-              {/* Buy Now */}
               {product.inStock && (
                 <button
                   type="button"
-                  onClick={() => { handleAdd(); setCartOpen(false); navigator.vibrate?.([80, 50, 80]); router.push('/checkout') }}
+                  onClick={() => {
+                    handleAdd()
+                    setCartOpen(false)
+                    if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate([80, 50, 80])
+                    router.push('/checkout')
+                  }}
                   className="flex h-12 flex-1 items-center justify-center rounded-full bg-primary text-xs font-semibold text-primary-foreground"
                 >
                   Buy Now
