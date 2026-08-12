@@ -241,21 +241,15 @@ export function ProductDetail({
               )}
             </div>
 
-            {/* ── Actions ── */}
-            {/*
-              Mobile layout (flex-col):
-                [- 1 +]
-                [🛍 Add to bag — full width]
-                [❤️]  [🔗]  ← side by side via nested flex row
-                [Buy it now — full width]
-              Desktop layout (sm:flex-row):
-                [- 1 +]  [🛍 Add to bag]  [❤️]  [🔗]  all in one row
-            */}
-            <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center">
-              {/* Qty stepper */}
-              <QuantityStepper value={qty} onChange={setQty} className="self-start shrink-0" />
-
-              {/* Add to bag — full width on mobile, flex-1 on desktop */}
+            {/* ════════════════════════════════════════
+                MOBILE ACTIONS  (hidden at sm and above)
+                Row 1: [- 1 +]
+                Row 2: [🛍 Add to bag ─ full width]
+                Row 3: [❤️]  [🔗]  ← flex row, side-by-side
+                Row 4: [Buy it now ─ full width]
+                ════════════════════════════════════════ */}
+            <div className="mt-6 flex flex-col gap-3 sm:hidden">
+              <QuantityStepper value={qty} onChange={setQty} className="self-start" />
               <button
                 type="button"
                 disabled={!product.inStock}
@@ -263,18 +257,13 @@ export function ProductDetail({
                   handleAdd()
                   if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(80)
                 }}
-                className="flex h-12 w-full flex-1 items-center justify-center gap-2 rounded-full bg-foreground text-sm font-medium text-background transition-transform hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50"
+                className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground text-sm font-medium text-background transition-transform active:scale-[0.99] disabled:opacity-50"
               >
                 <ShoppingBag className="size-4" />
                 {product.inStock ? 'Add to bag' : 'Sold out'}
               </button>
-
-              {/*
-                Heart + Share wrapper:
-                - Mobile (flex-col parent): this div is a flex row → buttons sit side-by-side ✓
-                - Desktop (flex-row parent): sm:contents dissolves the wrapper → buttons flow inline ✓
-              */}
-              <div className="flex items-center gap-2 sm:contents">
+              {/* Heart + Share — always side-by-side */}
+              <div className="flex items-center gap-2">
                 <button
                   type="button"
                   onClick={() => {
@@ -282,7 +271,7 @@ export function ProductDetail({
                     if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(80)
                   }}
                   aria-label="Add to wishlist"
-                  className="grid size-12 shrink-0 place-items-center rounded-full border border-border transition-colors hover:bg-muted"
+                  className="grid size-12 place-items-center rounded-full border border-border transition-colors hover:bg-muted"
                 >
                   <Heart className={cn('size-5', wishlisted && 'fill-accent text-accent')} />
                 </button>
@@ -290,26 +279,77 @@ export function ProductDetail({
                   type="button"
                   onClick={async () => {
                     if (typeof navigator !== 'undefined' && navigator.share) {
-                      try {
-                        await navigator.share({
-                          title: product.name,
-                          text: `Check out ${product.name} on SmartGO India!`,
-                          url: window.location.href,
-                        })
-                      } catch {}
+                      try { await navigator.share({ title: product.name, text: `Check out ${product.name} on SmartGO India!`, url: window.location.href }) } catch {}
                     } else {
                       navigator.clipboard.writeText(window.location.href)
                     }
                   }}
                   aria-label="Share"
-                  className="grid size-12 shrink-0 place-items-center rounded-full border border-border transition-colors hover:bg-muted"
+                  className="grid size-12 place-items-center rounded-full border border-border transition-colors hover:bg-muted"
                 >
                   <Share2 className="size-5" />
                 </button>
               </div>
+              {product.inStock && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    handleAdd()
+                    setCartOpen(false)
+                    if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate([80, 50, 80])
+                    router.push('/checkout')
+                  }}
+                  className="flex h-12 w-full items-center justify-center rounded-full border border-foreground text-sm font-medium transition-colors hover:bg-foreground hover:text-background"
+                >
+                  Buy it now
+                </button>
+              )}
             </div>
 
-            {/* Buy it now — full width on mobile, full width on desktop too */}
+            {/* ════════════════════════════════════════
+                DESKTOP ACTIONS  (hidden below sm)
+                [- 1 +]  [🛍 Add to bag]  [❤️]  [🔗]
+                ════════════════════════════════════════ */}
+            <div className="mt-6 hidden sm:flex items-center gap-3">
+              <QuantityStepper value={qty} onChange={setQty} className="shrink-0" />
+              <button
+                type="button"
+                disabled={!product.inStock}
+                onClick={() => {
+                  handleAdd()
+                  if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(80)
+                }}
+                className="flex h-12 flex-1 items-center justify-center gap-2 rounded-full bg-foreground text-sm font-medium text-background transition-transform hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50"
+              >
+                <ShoppingBag className="size-4" />
+                {product.inStock ? 'Add to bag' : 'Sold out'}
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  toggleWishlist(product)
+                  if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(80)
+                }}
+                aria-label="Add to wishlist"
+                className="grid size-12 shrink-0 place-items-center rounded-full border border-border transition-colors hover:bg-muted"
+              >
+                <Heart className={cn('size-5', wishlisted && 'fill-accent text-accent')} />
+              </button>
+              <button
+                type="button"
+                onClick={async () => {
+                  if (typeof navigator !== 'undefined' && navigator.share) {
+                    try { await navigator.share({ title: product.name, text: `Check out ${product.name} on SmartGO India!`, url: window.location.href }) } catch {}
+                  } else {
+                    navigator.clipboard.writeText(window.location.href)
+                  }
+                }}
+                aria-label="Share"
+                className="grid size-12 shrink-0 place-items-center rounded-full border border-border transition-colors hover:bg-muted"
+              >
+                <Share2 className="size-5" />
+              </button>
+            </div>
             {product.inStock && (
               <button
                 onClick={() => {
@@ -318,11 +358,12 @@ export function ProductDetail({
                   if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate([80, 50, 80])
                   router.push('/checkout')
                 }}
-                className="mt-3 flex h-12 w-full items-center justify-center rounded-full border border-foreground text-sm font-medium transition-colors hover:bg-foreground hover:text-background"
+                className="mt-3 hidden sm:flex h-12 w-full items-center justify-center rounded-full border border-foreground text-sm font-medium transition-colors hover:bg-foreground hover:text-background"
               >
                 Buy it now
               </button>
             )}
+
 
             {/* ── Mobile Sticky Action Bar — sits above the 64px bottom nav ── */}
             <div className="fixed bottom-16 inset-x-0 z-40 sm:hidden flex items-center gap-2 px-3 py-2.5 bg-background/95 backdrop-blur-md border-t border-border shadow-[0_-4px_24px_rgba(0,0,0,0.08)]">
