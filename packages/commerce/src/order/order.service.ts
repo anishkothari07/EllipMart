@@ -1,5 +1,5 @@
 import { prisma } from '@corecart/database';
-import { OrderStatus } from '@prisma/client';
+import { OrderStatus } from '@corecart/database';
 import { notificationService } from '../notification/notification.service';
 import { AppError, NotFoundError, ForbiddenError, ValidationError } from '@corecart/shared';
 

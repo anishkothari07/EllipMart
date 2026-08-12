@@ -1,7 +1,7 @@
 import { productRepository } from './product.repository';
 import { CreateProductInput, UpdateProductInput, ProductSearchInput } from './product.dto';
 import { AppError } from '@corecart/shared';
-import type { Prisma } from '@prisma/client';
+import type { Prisma } from '@corecart/database';
 
 export class ProductService {
   async createProduct(input: CreateProductInput) {

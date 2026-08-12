@@ -1,7 +1,7 @@
 import { categoryRepository } from './category.repository';
 import { CreateCategoryInput, UpdateCategoryInput, CategorySearchInput } from './category.dto';
 import { AppError } from '@corecart/shared';
-import type { Prisma } from '@prisma/client';
+import type { Prisma } from '@corecart/database';
 
 export class CategoryService {
   async createCategory(input: CreateCategoryInput) {

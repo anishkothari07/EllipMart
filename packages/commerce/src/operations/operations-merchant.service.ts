@@ -1,5 +1,5 @@
 import { prisma } from '@corecart/database';
-import { Role, UserStatus } from '@prisma/client';
+import { Role, UserStatus } from '@corecart/database';
 import { AppError } from '@corecart/shared';
 import bcrypt from 'bcryptjs';
 

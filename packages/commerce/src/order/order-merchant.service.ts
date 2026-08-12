@@ -1,5 +1,5 @@
 import { prisma } from '@corecart/database';
-import { OrderStatus } from '@prisma/client';
+import { OrderStatus } from '@corecart/database';
 import { AppError } from '@corecart/shared';
 import { inventoryService } from '../inventory/inventory.service';
 

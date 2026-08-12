@@ -1,6 +1,6 @@
 import { prisma } from '@corecart/database';
 import { AppError } from '@corecart/shared';
-import type { Prisma } from '@prisma/client';
+import type { Prisma } from '@corecart/database';
 
 export interface MerchantProductListItem {
   id: string;

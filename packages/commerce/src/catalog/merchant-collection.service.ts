@@ -1,7 +1,7 @@
 import { prisma } from '@corecart/database';
 import { collectionRepository } from './collection.repository';
 import { AppError } from '@corecart/shared';
-import type { Prisma } from '@prisma/client';
+import type { Prisma } from '@corecart/database';
 
 export class MerchantCollectionService {
   static async listCollections(params: {

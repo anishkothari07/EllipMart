@@ -1,7 +1,7 @@
 import { collectionRepository } from './collection.repository';
 import { CreateCollectionInput, UpdateCollectionInput, CollectionSearchInput } from './collection.dto';
 import { AppError } from '@corecart/shared';
-import type { Prisma } from '@prisma/client';
+import type { Prisma } from '@corecart/database';
 
 export class CollectionService {
   async createCollection(input: CreateCollectionInput) {

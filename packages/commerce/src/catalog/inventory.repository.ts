@@ -1,4 +1,4 @@
-import type { Prisma } from '@prisma/client';
+import type { Prisma } from '@corecart/database';
 import { prisma } from '@corecart/database';
 
 export class InventoryRepository {

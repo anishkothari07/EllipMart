@@ -1,5 +1,5 @@
 import { prisma } from '@corecart/database';
-import { UserStatus } from '@prisma/client';
+import { UserStatus } from '@corecart/database';
 import { AppError } from '@corecart/shared';
 
 // ─────────────────────────────────────────────

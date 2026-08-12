@@ -1,7 +1,7 @@
 import { inventoryRepository } from './inventory.repository';
 import { CreateInventoryMovementInput, UpdateInventoryInput, InventorySearchInput } from './inventory.dto';
 import { AppError } from '@corecart/shared';
-import type { Prisma } from '@prisma/client';
+import type { Prisma } from '@corecart/database';
 import { prisma } from '@corecart/database';
 
 

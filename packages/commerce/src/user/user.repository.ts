@@ -1,5 +1,5 @@
 import { prisma } from '@corecart/database';
-import type { User, Address, Prisma } from '@prisma/client';
+import type { User, Address, Prisma } from '@corecart/database';
 
 export class UserRepository {
   async updateProfile(userId: string, data: Prisma.UserUpdateInput): Promise<User> {
