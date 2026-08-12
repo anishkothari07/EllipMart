@@ -1,0 +1,66 @@
+# render.yaml — SmartGO Monorepo deployment config
+# Docs: https://render.com/docs/blueprint-spec
+
+services:
+  # ── Storefront ──────────────────────────────────────────────
+  - type: web
+    name: smartgo-storefront
+    runtime: docker
+    dockerfilePath: ./apps/storefront/Dockerfile
+    dockerContext: .
+    plan: free
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        sync: false
+      - key: NEXTAUTH_SECRET
+        sync: false
+      - key: NEXTAUTH_URL
+        sync: false
+      - key: NEXT_PUBLIC_API_URL
+        sync: false
+      - key: CLOUDINARY_CLOUD_NAME
+        sync: false
+      - key: CLOUDINARY_API_KEY
+        sync: false
+      - key: CLOUDINARY_API_SECRET
+        sync: false
+
+  # ── Admin ───────────────────────────────────────────────────
+  - type: web
+    name: smartgo-admin
+    runtime: docker
+    dockerfilePath: ./apps/admin/Dockerfile
+    dockerContext: .
+    plan: free
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        sync: false
+      - key: NEXTAUTH_SECRET
+        sync: false
+      - key: NEXTAUTH_URL
+        sync: false
+      - key: NEXT_PUBLIC_API_URL
+        sync: false
+
+  # ── Merchant ─────────────────────────────────────────────────
+  - type: web
+    name: smartgo-merchant
+    runtime: docker
+    dockerfilePath: ./apps/merchant/Dockerfile
+    dockerContext: .
+    plan: free
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        sync: false
+      - key: NEXTAUTH_SECRET
+        sync: false
+      - key: NEXTAUTH_URL
+        sync: false
+      - key: NEXT_PUBLIC_API_URL
+        sync: false
