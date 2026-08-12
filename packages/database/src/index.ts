@@ -10,17 +10,6 @@ import { PrismaClient } from '@prisma/client';
 
 const globalForPrisma = global as unknown as { prisma: PrismaClient | null };
 
-const databaseUrl = process.env.DATABASE_URL;
-if (!databaseUrl) {
-  throw new Error('DATABASE_URL environment variable is required.');
-}
-
-// Append connection_limit to keep pool small on Railway free tier
-if (!databaseUrl.includes('connection_limit')) {
-  const sep = databaseUrl.includes('?') ? '&' : '?';
-  process.env.DATABASE_URL = `${databaseUrl}${sep}connection_limit=3&pool_timeout=10`;
-}
-
 function createPrismaClient(): PrismaClient {
   return new PrismaClient({
     log: process.env.NODE_ENV === 'development' ? ['error', 'warn'] : ['error'],
@@ -29,6 +18,14 @@ function createPrismaClient(): PrismaClient {
 
 function getPrismaClient(): PrismaClient {
   if (!globalForPrisma.prisma) {
+    const databaseUrl = process.env.DATABASE_URL;
+    if (!databaseUrl) {
+      throw new Error('DATABASE_URL environment variable is required.');
+    }
+    if (!databaseUrl.includes('connection_limit')) {
+      const sep = databaseUrl.includes('?') ? '&' : '?';
+      process.env.DATABASE_URL = `${databaseUrl}${sep}connection_limit=3&pool_timeout=10`;
+    }
     globalForPrisma.prisma = createPrismaClient();
   }
   return globalForPrisma.prisma;
