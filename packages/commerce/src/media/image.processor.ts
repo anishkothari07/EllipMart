@@ -1,4 +1,3 @@
-import sharp from "sharp";
 import crypto from "crypto";
 
 export interface ProcessedImageMetadata {
@@ -17,6 +16,16 @@ export interface GeneratedVariant {
   height?: number;
   mimeType: string;
   extension: string;
+}
+
+async function getSharp() {
+  try {
+    const sharpModule = await import("sharp");
+    return sharpModule.default || sharpModule;
+  } catch (err) {
+    console.warn("Sharp image library is not available in this environment:", err);
+    return null;
+  }
 }
 
 export class ImageProcessor {
@@ -38,6 +47,11 @@ export class ImageProcessor {
     }
 
     try {
+      const sharp = await getSharp();
+      if (!sharp) {
+        return { fileHash };
+      }
+
       const image = sharp(buffer);
       const meta = await image.metadata();
 
@@ -90,6 +104,11 @@ export class ImageProcessor {
     const variants: GeneratedVariant[] = [];
 
     try {
+      const sharp = await getSharp();
+      if (!sharp) {
+        return variants;
+      }
+
       // 1. THUMBNAIL (150x150 cover crop)
       const thumbBuffer = await sharp(buffer)
         .resize(150, 150, { fit: "cover" })

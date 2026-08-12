@@ -21,7 +21,7 @@ const nextConfig = {
       }
     ],
   },
-  serverExternalPackages: ['@prisma/client', 'bcryptjs', '@corecart/database'],
+  serverExternalPackages: ['sharp', '@prisma/client', 'bcryptjs', '@corecart/database'],
   transpilePackages: ['@corecart/commerce', '@corecart/shared', '@corecart/ui', '@corecart/types'],
   
   poweredByHeader: false,
