@@ -13,21 +13,24 @@ const envSchema = z.object({
 
 export type Env = z.infer<typeof envSchema>;
 
+// Skip validation during Docker/CI builds — env vars are only available at runtime
+const skipValidation = !!process.env.SKIP_ENV_VALIDATION;
+
 // On the client side, process.env won't have server-only vars — skip validation
 const isServer = typeof window === 'undefined';
 
 let _envData: Env;
 
-if (isServer) {
+if (skipValidation || !isServer) {
+  // Client or build-time: return a best-effort object without throwing
+  _envData = process.env as unknown as Env;
+} else {
   const _env = envSchema.safeParse(process.env);
   if (!_env.success) {
     console.error('❌ Invalid environment variables:', _env.error.format());
     throw new Error('Invalid environment variables');
   }
   _envData = _env.data;
-} else {
-  // Client: return a best-effort object without throwing
-  _envData = process.env as unknown as Env;
 }
 
 export const env = _envData;
