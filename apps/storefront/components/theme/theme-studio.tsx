@@ -112,7 +112,7 @@ function StorePreview() {
     <div className="flex h-full w-full flex-col bg-background text-foreground transition-colors duration-300">
       {/* Mock Navbar */}
       <header className="sticky top-0 z-10 flex h-16 items-center justify-between border-b border-border bg-background/80 px-8 backdrop-blur-md transition-colors duration-300">
-        <div className="text-xl font-serif font-bold tracking-tight">SmartGO</div>
+        <div className="text-xl font-serif font-bold tracking-tight">EllipMart</div>
         <nav className="flex items-center gap-6 text-sm font-medium">
           <span className="cursor-pointer hover:text-accent transition-colors duration-300">Shop</span>
           <span className="cursor-pointer hover:text-accent transition-colors duration-300">Collections</span>

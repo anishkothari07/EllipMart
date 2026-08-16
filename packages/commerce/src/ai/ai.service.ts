@@ -37,7 +37,7 @@ export class AIService {
     }
 
     if (!requiredApiKey) {
-      throw new Error("GEMINI_API_KEY is not configured on the SmartGO backend");
+      throw new Error("GEMINI_API_KEY is not configured on the EllipMart backend");
     }
 
     if (config) {

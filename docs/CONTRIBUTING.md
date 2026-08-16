@@ -1,12 +1,12 @@
-# SmartGO Developer Contributing Guide
+# EllipMart Developer Contributing Guide
 
-Welcome to the SmartGO development team! This document outlines coding standards, monorepo conventions, workflow guidelines, and the pull request process.
+Welcome to the EllipMart development team! This document outlines coding standards, monorepo conventions, workflow guidelines, and the pull request process.
 
 ---
 
 ## 1. Monorepo Workflow
 
-SmartGO uses `pnpm` workspace filters and `turbo` for build caching.
+EllipMart uses `pnpm` workspace filters and `turbo` for build caching.
 
 ### Useful Commands
 - **Start Development**:

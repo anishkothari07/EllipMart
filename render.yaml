@@ -1,10 +1,10 @@
-# render.yaml — SmartGO Monorepo deployment config
+# render.yaml — EllipMart Monorepo deployment config
 # Docs: https://render.com/docs/blueprint-spec
 
 services:
   # ── Storefront ──────────────────────────────────────────────
   - type: web
-    name: smartgo-storefront
+    name: ellipmart-storefront
     runtime: docker
     dockerfilePath: ./apps/storefront/Dockerfile
     dockerContext: .
@@ -29,7 +29,7 @@ services:
 
   # ── Merchant Admin ───────────────────────────────────────────
   - type: web
-    name: smartgo-merchant
+    name: ellipmart-merchant
     runtime: docker
     dockerfilePath: ./apps/merchant/Dockerfile
     dockerContext: .

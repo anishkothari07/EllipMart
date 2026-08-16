@@ -6,7 +6,7 @@ const BASE_URL = `http://localhost:${STOREFRONT_PORT}`;
 test.describe('Customer End-to-End Journey', () => {
   test('Storefront Homepage loads and renders header elements', async ({ page }) => {
     await page.goto(BASE_URL);
-    await expect(page).toHaveTitle(/SmartGO/i);
+    await expect(page).toHaveTitle(/EllipMart/i);
     await expect(page.locator('header')).toBeVisible();
   });
 

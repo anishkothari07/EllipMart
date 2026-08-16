@@ -1,6 +1,6 @@
 # Transactions Strategy
 
-In SmartGO, ensuring data consistency across multiple database operations is critical. 
+In EllipMart, ensuring data consistency across multiple database operations is critical. 
 All complex workflows (like Checkout) MUST use Prisma Transactions.
 
 ## Transaction Rules

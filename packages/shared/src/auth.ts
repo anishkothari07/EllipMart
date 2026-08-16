@@ -6,9 +6,9 @@ export async function getCurrentUser(portal: 'storefront' | 'merchant' | 'admin'
   try {
     const cookieStore = await cookies();
 
-    let cookieName = 'smartgo_customer_refresh';
-    if (portal === 'merchant') cookieName = 'smartgo_merchant_refresh';
-    if (portal === 'admin') cookieName = 'smartgo_admin_refresh';
+    let cookieName = 'ellipmart_customer_refresh';
+    if (portal === 'merchant') cookieName = 'ellipmart_merchant_refresh';
+    if (portal === 'admin') cookieName = 'ellipmart_admin_refresh';
 
     const token = cookieStore.get(cookieName)?.value;
 

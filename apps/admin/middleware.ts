@@ -18,7 +18,7 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  const token = request.cookies.get('smartgo_admin_refresh')?.value;
+  const token = request.cookies.get('ellipmart_admin_refresh')?.value;
 
   if (!token) {
     // Redirect to admin login screen if there is no session token
@@ -33,13 +33,13 @@ export async function middleware(request: NextRequest) {
     const isSuperAdmin = payload.role === 'ADMIN' && email && SUPER_ADMIN_EMAILS.includes(email);
     if (!isSuperAdmin) {
       const response = NextResponse.redirect(new URL('/login', request.url));
-      response.cookies.delete('smartgo_admin_refresh');
+      response.cookies.delete('ellipmart_admin_refresh');
       return response;
     }
   } catch (e) {
     // Clear invalid token and redirect to login page
     const response = NextResponse.redirect(new URL('/login', request.url));
-    response.cookies.delete('smartgo_admin_refresh');
+    response.cookies.delete('ellipmart_admin_refresh');
     return response;
   }
 

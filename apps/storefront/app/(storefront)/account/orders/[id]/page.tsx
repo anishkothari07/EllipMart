@@ -28,7 +28,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { id } = await params
   return {
-    title: `Order ${id} · SmartGO`,
+    title: `Order ${id} · EllipMart`,
     description: `Details and tracking for order ${id}.`,
   }
 }

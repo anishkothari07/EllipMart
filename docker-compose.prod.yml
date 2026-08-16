@@ -10,7 +10,7 @@ services:
       - "3000:3000"
     environment:
       - NODE_ENV=production
-      - DATABASE_URL=mysql://smartgo_user:smartgo_pass@mysql:3306/smartgo
+      - DATABASE_URL=mysql://ellipmart_user:ellipmart_pass@mysql:3306/ellipmart
       - REDIS_URL=redis://redis:6379
       - REDIS_HOST=redis
       - REDIS_PORT=6379
@@ -23,9 +23,9 @@ services:
     restart: always
     environment:
       MYSQL_ROOT_PASSWORD: root_password
-      MYSQL_DATABASE: smartgo
-      MYSQL_USER: smartgo_user
-      MYSQL_PASSWORD: smartgo_pass
+      MYSQL_DATABASE: ellipmart
+      MYSQL_USER: ellipmart_user
+      MYSQL_PASSWORD: ellipmart_pass
     ports:
       - "3306:3306"
     volumes:

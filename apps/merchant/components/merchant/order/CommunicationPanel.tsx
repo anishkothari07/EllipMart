@@ -16,7 +16,7 @@ export function CommunicationPanel({ orderNumber, customerEmail }: Communication
   const templates = {
     CONFIRMATION: {
       subject: `Order Confirmation - #${orderNumber}`,
-      body: `Hi there!\n\nYour order #${orderNumber} has been successfully placed. We're getting it ready now.\n\nThanks for shopping with SmartGO!`,
+      body: `Hi there!\n\nYour order #${orderNumber} has been successfully placed. We're getting it ready now.\n\nThanks for shopping with EllipMart!`,
     },
     SHIPPING: {
       subject: `Your order #${orderNumber} is on the way!`,

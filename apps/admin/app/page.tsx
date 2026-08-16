@@ -56,7 +56,7 @@ export default function AdminDashboard() {
               </thead>
               <tbody className="divide-y divide-border/40 text-muted-foreground">
                 {[
-                  { name: 'SmartGO Electronics', domain: 'electronics.smartgo.com', owner: 'owner@smartgo.com', db: 'cluster-db-in-1', status: 'Healthy' },
+                  { name: 'EllipMart Electronics', domain: 'electronics.ellipmart.com', owner: 'owner@ellipmart.com', db: 'cluster-db-in-1', status: 'Healthy' },
                   { name: 'Aroma Threads', domain: 'aroma-apparel.in', owner: 'aroma@threads.com', db: 'cluster-db-in-1', status: 'Healthy' },
                   { name: 'TechWare Store', domain: 'techware-intl.com', owner: 'sales@techware.com', db: 'cluster-db-us-3', status: 'Healthy' },
                 ].map((site) => (

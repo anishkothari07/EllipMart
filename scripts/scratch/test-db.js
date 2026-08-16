@@ -4,9 +4,9 @@ async function testConnection() {
   try {
     const connection = await mysql.createConnection({
       host: 'localhost',
-      user: '<SmartGO>',
+      user: '<EllipMart>',
       password: '<@nisH321>',
-      database: 'smartgo',
+      database: 'ellipmart',
       port: 3306
     });
     console.log('Connection successful!');

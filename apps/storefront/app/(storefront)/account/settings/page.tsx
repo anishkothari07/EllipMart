@@ -3,7 +3,7 @@ import type { Metadata } from 'next'
 import { SettingsView } from '@/components/account/settings-view'
 
 export const metadata: Metadata = {
-  title: 'Settings · SmartGO',
+  title: 'Settings · EllipMart',
   description: 'Manage notifications, privacy, and preferences.',
 }
 

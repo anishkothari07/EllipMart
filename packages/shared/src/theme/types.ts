@@ -38,7 +38,7 @@ export interface Theme {
   id: string
   name: string
   description: string
-  category: 'SmartGO' | 'Light' | 'Dark' | 'Luxury' | 'Modern'
+  category: 'EllipMart' | 'Light' | 'Dark' | 'Luxury' | 'Modern'
   isDark: boolean
   colors: ThemeColors
   radius: number // base radius in rem

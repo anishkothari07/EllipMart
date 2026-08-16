@@ -17,12 +17,12 @@ export async function generateMetadata({
   try {
     const product = await shoppingProductService.getProductBySlug(slug)
     return {
-      title: `${product.name} — SmartGO`,
+      title: `${product.name} — EllipMart`,
       description: product.description,
       openGraph: { images: product.images.slice(0, 1) },
     }
   } catch (e) {
-    return { title: 'Product not found — SmartGO' }
+    return { title: 'Product not found — EllipMart' }
   }
 }
 

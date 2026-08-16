@@ -23,7 +23,7 @@ export async function loginMerchantAction(payload: any) {
     }
 
     const cookieStore = await cookies();
-    cookieStore.set('smartgo_merchant_refresh', result.refreshToken, {
+    cookieStore.set('ellipmart_merchant_refresh', result.refreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
@@ -40,7 +40,7 @@ export async function loginMerchantAction(payload: any) {
 export async function logoutMerchantAction() {
   try {
     const cookieStore = await cookies();
-    cookieStore.delete('smartgo_merchant_refresh');
+    cookieStore.delete('ellipmart_merchant_refresh');
     return { success: true };
   } catch (e: any) {
     return { success: false, error: e.message };

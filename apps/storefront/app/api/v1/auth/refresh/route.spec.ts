@@ -61,7 +61,7 @@ describe('Auth Refresh API Route (Layer 1)', () => {
       method: 'POST',
       body: JSON.stringify({ refreshToken: validToken }),
       headers: {
-        'Cookie': `smartgo_customer_refresh=${validToken}`
+        'Cookie': `ellipmart_customer_refresh=${validToken}`
       }
     });
     
@@ -74,7 +74,7 @@ describe('Auth Refresh API Route (Layer 1)', () => {
     // Verify cookie was rotated (or handled via JSON)
     const cookies = response.headers.get('set-cookie') || response.headers.get('Set-Cookie');
     if (cookies) {
-      expect(cookies).toContain('smartgo_customer_refresh');
+      expect(cookies).toContain('ellipmart_customer_refresh');
     }
   });
 });

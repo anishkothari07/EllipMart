@@ -36,7 +36,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('smartgo_wishlist')
+      const saved = localStorage.getItem('ellipmart_wishlist')
       if (saved) {
         try {
           setWishlist(JSON.parse(saved))
@@ -48,7 +48,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     if (isWishlistLoaded && typeof window !== 'undefined') {
-      localStorage.setItem('smartgo_wishlist', JSON.stringify(wishlist))
+      localStorage.setItem('ellipmart_wishlist', JSON.stringify(wishlist))
     }
   }, [wishlist, isWishlistLoaded])
 
@@ -86,7 +86,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
               id: dbItem.variantId, // Keep this as variantId since the UI uses product.id for removals
               name: dbItem.variant?.product?.name || 'Unknown Product',
               slug: dbItem.variant?.product?.slug || 'unknown-product',
-              brand: dbItem.variant?.product?.brand?.name || 'SmartGO',
+              brand: dbItem.variant?.product?.brand?.name || 'EllipMart',
               price: Number(dbItem.variant?.pricing?.sellingPrice || 0),
               currency: 'USD',
               images: itemImages,

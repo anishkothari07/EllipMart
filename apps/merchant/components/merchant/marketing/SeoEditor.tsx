@@ -89,7 +89,7 @@ export function SeoEditor({ seo, onChange }: SeoEditorProps) {
             <input
               type="text"
               required
-              placeholder="e.g. SmartGO Store | Buy Electronics Online"
+              placeholder="e.g. EllipMart Store | Buy Electronics Online"
               value={activeMeta.title}
               onChange={(e) => updateMeta('title', e.target.value)}
               className="w-full px-3 py-2 text-xs border border-border/80 bg-background rounded-xl outline-none"
@@ -100,7 +100,7 @@ export function SeoEditor({ seo, onChange }: SeoEditorProps) {
             <label className="text-[10px] font-bold text-muted-foreground">Canonical URL</label>
             <input
               type="text"
-              placeholder="e.g. https://smartgo.com"
+              placeholder="e.g. https://ellipmart.com"
               value={activeMeta.canonical}
               onChange={(e) => updateMeta('canonical', e.target.value)}
               className="w-full px-3 py-2 text-xs border border-border/80 bg-background rounded-xl outline-none"

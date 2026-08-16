@@ -2,10 +2,10 @@ services:
   mysql-test:
     image: mariadb:10.11
     environment:
-      MYSQL_DATABASE: smartgo_test
-      MYSQL_USER: smartgo_test
-      MYSQL_PASSWORD: smartgo_test_password
-      MYSQL_ROOT_PASSWORD: smartgo_test_root_password
+      MYSQL_DATABASE: ellipmart_test
+      MYSQL_USER: ellipmart_test
+      MYSQL_PASSWORD: ellipmart_test_password
+      MYSQL_ROOT_PASSWORD: ellipmart_test_root_password
     ports:
       - "3307:3306"
     healthcheck:

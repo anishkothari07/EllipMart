@@ -4,7 +4,7 @@ import { successResponse, errorResponse } from '@corecart/shared';
 
 export async function POST(req: NextRequest) {
   // Extract refresh token from cookie or body
-  let refreshToken = req.cookies.get('smartgo_customer_refresh')?.value;
+  let refreshToken = req.cookies.get('ellipmart_customer_refresh')?.value;
   
   if (!refreshToken) {
     try {

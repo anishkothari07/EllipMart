@@ -20,7 +20,7 @@ type ThemeContextValue = {
 const ThemeContext = createContext<ThemeContextValue | null>(null)
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [themeId, setThemeIdState] = useState<string>('smartgo-default')
+  const [themeId, setThemeIdState] = useState<string>('ellipmart-default')
   const [activeTheme, setActiveTheme] = useState<Theme | null>(null)
   const [themes, setThemes] = useState<Theme[]>([])
   const [favoriteThemes, setFavoriteThemes] = useState<string[]>([])
@@ -32,8 +32,8 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     resolver.getThemes().then(loadedThemes => {
       setThemes(loadedThemes)
       
-      const storedId = (typeof window !== 'undefined' && window.localStorage.getItem('smartgo-theme')) as string | null
-      const storedFavs = (typeof window !== 'undefined' && window.localStorage.getItem('smartgo-theme-favorites'))
+      const storedId = (typeof window !== 'undefined' && window.localStorage.getItem('ellipmart-theme')) as string | null
+      const storedFavs = (typeof window !== 'undefined' && window.localStorage.getItem('ellipmart-theme-favorites'))
       
       if (storedFavs) {
         try { setFavoriteThemes(JSON.parse(storedFavs)) } catch {}
@@ -60,17 +60,17 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     root.style.colorScheme = activeTheme.isDark ? 'dark' : 'light'
 
     // We can inject a dynamic style tag for the CSS variables
-    let styleEl = document.getElementById('smartgo-theme-vars')
+    let styleEl = document.getElementById('ellipmart-theme-vars')
     if (!styleEl) {
       styleEl = document.createElement('style')
-      styleEl.id = 'smartgo-theme-vars'
+      styleEl.id = 'ellipmart-theme-vars'
       document.head.appendChild(styleEl)
     }
     
     styleEl.innerHTML = generateThemeCSS(activeTheme, ':root')
 
     try {
-      window.localStorage.setItem('smartgo-theme', activeTheme.id)
+      window.localStorage.setItem('ellipmart-theme', activeTheme.id)
     } catch {
       // ignore
     }
@@ -78,7 +78,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     try {
-      window.localStorage.setItem('smartgo-theme-favorites', JSON.stringify(favoriteThemes))
+      window.localStorage.setItem('ellipmart-theme-favorites', JSON.stringify(favoriteThemes))
     } catch {}
   }, [favoriteThemes])
 

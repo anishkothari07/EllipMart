@@ -5,7 +5,7 @@ import { prisma, ProductStatus, ProductVisibility } from '../packages/database/s
 
 async function traceProductLifecycle() {
   console.log('=================================================================');
-  console.log('[DIAGNOSTIC TRACE] Starting SmartGO Product Synchronization Audit');
+  console.log('[DIAGNOSTIC TRACE] Starting EllipMart Product Synchronization Audit');
   console.log('=================================================================\n');
 
   const testSlug = `diag-product-${Date.now()}`;

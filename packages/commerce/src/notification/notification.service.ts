@@ -120,7 +120,7 @@ export class NotificationService {
 
     domainEventBus.subscribe("InventoryLow", async (evt) => {
       await this.sendNotification({
-        recipientContact: "admin@smartgo.com",
+        recipientContact: "admin@ellipmart.com",
         event: "InventoryLow",
         category: NotificationCategory.SYSTEM,
         channel: NotificationChannel.EMAIL,

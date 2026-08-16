@@ -5,7 +5,7 @@ import { jwtVerify } from 'jose';
 const JWT_REFRESH_SECRET = new TextEncoder().encode(process.env.JWT_REFRESH_SECRET || 'b'.repeat(32));
 
 export async function middleware(request: NextRequest) {
-  const token = request.cookies.get('smartgo_merchant_refresh')?.value;
+  const token = request.cookies.get('ellipmart_merchant_refresh')?.value;
 
   if (token) {
     try {
@@ -14,13 +14,13 @@ export async function middleware(request: NextRequest) {
       // Enforce that only ADMIN users can access merchant pages
       if (payload.role !== 'ADMIN') {
         const response = NextResponse.next();
-        response.cookies.delete('smartgo_merchant_refresh');
+        response.cookies.delete('ellipmart_merchant_refresh');
         return response;
       }
     } catch (e) {
       // Invalid token, clear it and let normal flow handle auth
       const response = NextResponse.next();
-      response.cookies.delete('smartgo_merchant_refresh');
+      response.cookies.delete('ellipmart_merchant_refresh');
       return response;
     }
   }

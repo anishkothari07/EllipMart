@@ -1,6 +1,6 @@
-# SmartGO Automated Testing Guide
+# EllipMart Automated Testing Guide
 
-SmartGO utilizes a two-layer automated testing strategy complemented by Playwright End-to-End (E2E) verification.
+EllipMart utilizes a two-layer automated testing strategy complemented by Playwright End-to-End (E2E) verification.
 
 ---
 

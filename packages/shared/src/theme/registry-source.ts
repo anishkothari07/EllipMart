@@ -2,13 +2,13 @@ import { Theme, ThemeSource } from './types'
 
 const themes: Theme[] = [
   // ====================
-  // SMARTGO (Default)
+  // ELLIPMART (Default)
   // ====================
   {
-    id: 'smartgo-default',
-    name: 'SmartGO Classic',
-    description: 'The standard premium light theme for SmartGO',
-    category: 'SmartGO',
+    id: 'ellipmart-default',
+    name: 'EllipMart Classic',
+    description: 'The standard premium light theme for EllipMart',
+    category: 'EllipMart',
     isDark: false,
     radius: 0.875,
     colors: {

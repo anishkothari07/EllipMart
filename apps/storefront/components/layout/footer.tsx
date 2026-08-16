@@ -44,7 +44,7 @@ export function Footer() {
         <div className="flex flex-col gap-8 rounded-3xl bg-foreground p-8 text-background md:flex-row md:items-center md:justify-between md:p-12">
           <div className="max-w-md">
             <h2 className="font-serif text-3xl leading-tight text-balance">
-              Join the SmartGO inner circle
+              Join the EllipMart inner circle
             </h2>
             <p className="mt-2 text-sm text-background/70">
               Early access to drops, members-only pricing, and a little something for your first order.
@@ -91,7 +91,7 @@ export function Footer() {
               <span className="grid size-8 place-items-center rounded-lg bg-foreground text-background">
                 <ShoppingBag className="size-4" />
               </span>
-              <span className="text-xl font-semibold tracking-tight">SmartGO</span>
+              <span className="text-xl font-semibold tracking-tight">EllipMart</span>
             </Link>
             <p className="mt-4 max-w-xs text-sm text-muted-foreground">
               Elevated everyday commerce. Curated collections and luxury essentials, delivered with care.
@@ -132,7 +132,7 @@ export function Footer() {
         {/* Bottom */}
         <div className="mt-14 flex flex-col gap-4 border-t border-border pt-6 md:flex-row md:items-center md:justify-between">
           <p className="text-xs text-muted-foreground">
-            © {new Date().getFullYear()} SmartGO Inc. All rights reserved.
+            © {new Date().getFullYear()} EllipMart Inc. All rights reserved.
           </p>
           <div className="flex items-center gap-1.5">
             {payments.map((p) => (

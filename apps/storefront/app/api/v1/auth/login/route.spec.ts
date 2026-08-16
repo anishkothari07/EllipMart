@@ -70,7 +70,7 @@ describe('Auth Login API Route (Layer 1)', () => {
     
     // Verify HTTP-only cookie was set
     const cookies = response.headers.get('set-cookie');
-    expect(cookies).toContain('smartgo_customer_refresh');
+    expect(cookies).toContain('ellipmart_customer_refresh');
     expect(cookies).toContain('HttpOnly');
   });
 

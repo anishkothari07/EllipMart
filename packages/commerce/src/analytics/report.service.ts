@@ -13,7 +13,7 @@ export class ReportService {
         content += `${ev.id},${ev.event},${ev.userId || "guest"},${ev.sessionId || "none"},${ev.createdAt.toISOString()}\n`;
       });
     } else {
-      content = `--- SMARTGO BI ANALYTICS PDF REPORT ---\nMetric: ${metric}\nGenerated At: ${new Date().toISOString()}\n\n`;
+      content = `--- ELLIPMART BI ANALYTICS PDF REPORT ---\nMetric: ${metric}\nGenerated At: ${new Date().toISOString()}\n\n`;
       events.forEach((ev: any) => {
         content += `[${ev.createdAt.toISOString()}] Event: ${ev.event} | User: ${ev.userId || "guest"}\n`;
       });

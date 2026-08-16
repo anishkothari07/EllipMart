@@ -106,7 +106,7 @@ export function SiteChrome({
               </nav>
               
               <div className="mt-auto border-t border-border pt-4 text-xs text-muted-foreground text-center">
-                SmartGO India Regional Store · v1.4
+                EllipMart India Regional Store · v1.4
               </div>
             </motion.div>
           </>

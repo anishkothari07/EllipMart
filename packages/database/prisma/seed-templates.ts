@@ -8,16 +8,16 @@ const defaultTemplates = [
     channel: NotificationChannel.EMAIL,
     category: NotificationCategory.AUTH,
     name: "Welcome Email",
-    subject: "Welcome to SmartGO, {{firstName}}!",
+    subject: "Welcome to EllipMart, {{firstName}}!",
     html: `
       <div style="font-family: Arial, sans-serif; padding: 20px; color: #333;">
-        <h2 style="color: #4F46E5;">Welcome to SmartGO, {{firstName}}!</h2>
+        <h2 style="color: #4F46E5;">Welcome to EllipMart, {{firstName}}!</h2>
         <p>We are thrilled to have you on board.</p>
         <p>Explore our premium collections and discover exclusive member offers.</p>
         <a href="{{websiteUrl}}" style="background: #4F46E5; color: #fff; padding: 10px 20px; text-decoration: none; border-radius: 8px;">Start Shopping</a>
       </div>
     `,
-    text: "Welcome to SmartGO, {{firstName}}! Visit {{websiteUrl}} to start shopping.",
+    text: "Welcome to EllipMart, {{firstName}}! Visit {{websiteUrl}} to start shopping.",
     variables: JSON.stringify(["firstName", "email", "websiteUrl"]),
   },
   {
@@ -25,7 +25,7 @@ const defaultTemplates = [
     channel: NotificationChannel.EMAIL,
     category: NotificationCategory.AUTH,
     name: "Email OTP Verification",
-    subject: "{{otp}} is your SmartGO verification code",
+    subject: "{{otp}} is your EllipMart verification code",
     html: `
       <div style="font-family: Arial, sans-serif; padding: 20px;">
         <h3>Verify Your Email</h3>
@@ -34,7 +34,7 @@ const defaultTemplates = [
         <p>This code expires in 10 minutes.</p>
       </div>
     `,
-    text: "Your SmartGO verification code is {{otp}}. Expires in 10 minutes.",
+    text: "Your EllipMart verification code is {{otp}}. Expires in 10 minutes.",
     variables: JSON.stringify(["otp", "email"]),
   },
   {
@@ -42,7 +42,7 @@ const defaultTemplates = [
     channel: NotificationChannel.EMAIL,
     category: NotificationCategory.SECURITY,
     name: "Password Reset Request",
-    subject: "Reset your SmartGO password",
+    subject: "Reset your EllipMart password",
     html: `
       <div style="font-family: Arial, sans-serif; padding: 20px;">
         <h3>Password Reset Request</h3>
@@ -191,7 +191,7 @@ const defaultTemplates = [
         <a href="{{productUrl}}" style="background: #10B981; color: #fff; padding: 10px 20px; text-decoration: none; border-radius: 8px;">Shop Now</a>
       </div>
     `,
-    text: "{{productName}} is back in stock at SmartGO!",
+    text: "{{productName}} is back in stock at EllipMart!",
     variables: JSON.stringify(["productName", "productUrl"]),
   },
 ];

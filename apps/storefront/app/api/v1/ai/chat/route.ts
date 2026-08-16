@@ -87,7 +87,7 @@ ${searchProducts.map(p => `- ID: ${p.id}, Name: ${p.name}, Description: ${p.long
 
     // Instructions to force JSON format containing message, productIds, sources, and suggestions
     const jsonInstruction = `
-You are SmartGO AI Copilot, an enterprise-grade shopping assistant.
+You are EllipMart AI Copilot, an enterprise-grade shopping assistant.
 You must return a valid JSON object matching this schema:
 {
   "message": "Write a helpful conversational response to the customer. Ground your answer strictly in the provided database context for catalog queries, comparison requests, or order checks. If the query requires store information that doesn't exist, respond 'I couldn't find that information in this store.' For general knowledge, answer naturally using your general knowledge.",
@@ -168,7 +168,7 @@ Return only the raw JSON.
     console.error("[ChatAPI Error]:", error);
     return NextResponse.json({ 
       success: false, 
-      error: "SmartGO Assistant is temporarily unavailable. Please try again." 
+      error: "EllipMart Assistant is temporarily unavailable. Please try again." 
     }, { status: 500 });
   }
 }

@@ -88,7 +88,7 @@
   --sidebar-ring: oklch(0.68 0.16 45);
 }
 
-/* The default fallback theme (SmartGO Classic) is kept here.
+/* The default fallback theme (EllipMart Classic) is kept here.
    The ThemeProvider will inject a <style> tag at runtime to override these.
    No .dark block is needed since the ThemeProvider injects the full palette dynamically. */
 

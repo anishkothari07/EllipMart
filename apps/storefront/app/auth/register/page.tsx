@@ -5,15 +5,15 @@ import { AuthShell } from '@/components/auth/auth-shell'
 import { RegisterForm } from '@/components/auth/register-form'
 
 export const metadata: Metadata = {
-  title: 'Create account · SmartGO',
-  description: 'Join SmartGO for early access, faster checkout, and easy returns.',
+  title: 'Create account · EllipMart',
+  description: 'Join EllipMart for early access, faster checkout, and easy returns.',
 }
 
 export default function RegisterPage() {
   return (
     <AuthShell
       title="Create your account"
-      subtitle="Join SmartGO for early access, faster checkout, and members-only perks."
+      subtitle="Join EllipMart for early access, faster checkout, and members-only perks."
       image="/images/hero-tech.png"
       footer={
         <>

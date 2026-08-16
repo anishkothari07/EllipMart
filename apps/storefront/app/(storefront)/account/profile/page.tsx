@@ -3,7 +3,7 @@ import type { Metadata } from 'next'
 import { ProfileView } from '@/components/account/profile-view'
 
 export const metadata: Metadata = {
-  title: 'Profile · SmartGO',
+  title: 'Profile · EllipMart',
   description: 'Manage your personal information.',
 }
 

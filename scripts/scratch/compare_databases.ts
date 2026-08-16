@@ -3,7 +3,7 @@ import * as mysql from 'mysql2/promise';
 
 async function main() {
     const railwayUrl = process.env.DATABASE_URL;
-    const localUrl = "mysql://root:@localhost:3306/smartgo";
+    const localUrl = "mysql://root:@localhost:3306/ellipmart";
 
     if (!railwayUrl) throw new Error("No DATABASE_URL set");
 

@@ -101,7 +101,7 @@ export const marketingMerchantService = {
       if (!website) {
         website = await prisma.website.create({
           data: {
-            name: 'SmartGO Store',
+            name: 'EllipMart Store',
             domain: 'localhost',
           },
         });
@@ -110,8 +110,8 @@ export const marketingMerchantService = {
       settings = await prisma.websiteSettings.create({
         data: {
           websiteId: website.id,
-          brandName: 'SmartGO',
-          websiteName: 'SmartGO Store',
+          brandName: 'EllipMart',
+          websiteName: 'EllipMart Store',
           tagline: 'Premium Agentic Commerce',
           defaultCurrency: 'INR',
           defaultLanguage: 'en',
@@ -196,15 +196,15 @@ export const marketingMerchantService = {
         },
         seoSettings: {
           homepage: {
-            title: 'SmartGO — Premium Agentic E-Commerce Store',
+            title: 'EllipMart — Premium Agentic E-Commerce Store',
             description: 'Buy premium products with automated checkout workflows and AI shopping assistance.',
-            canonical: 'https://smartgo.example.com',
+            canonical: 'https://ellipmart.example.com',
             ogImage: '',
             robots: 'index, follow',
             keywords: 'ecommerce, agentic, gemini, automated shopping',
           },
           collectionDefaults: {
-            title: 'Collections — SmartGO',
+            title: 'Collections — EllipMart',
             description: 'Browse collections of curated products.',
             canonical: '',
             ogImage: '',
@@ -212,7 +212,7 @@ export const marketingMerchantService = {
             keywords: 'collections, items',
           },
           categoryDefaults: {
-            title: 'Categories — SmartGO',
+            title: 'Categories — EllipMart',
             description: 'Browse products by department.',
             canonical: '',
             ogImage: '',
@@ -220,7 +220,7 @@ export const marketingMerchantService = {
             keywords: 'categories, departments',
           },
           productDefaults: {
-            title: 'Buy Products Online — SmartGO',
+            title: 'Buy Products Online — EllipMart',
             description: 'View pricing, details, and checkout options.',
             canonical: '',
             ogImage: '',

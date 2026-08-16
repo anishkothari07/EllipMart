@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import { OrderSuccess } from '@/components/checkout/order-success'
 
 export const metadata: Metadata = {
-  title: 'Order confirmed · SmartGO',
+  title: 'Order confirmed · EllipMart',
   description: 'Your order has been placed successfully.',
 }
 

@@ -111,7 +111,7 @@ export function Header({
             <span className="grid size-8 place-items-center rounded-lg bg-foreground text-background">
               <ShoppingBag className="size-4" />
             </span>
-            <span className="text-xl font-semibold tracking-tight">SmartGO</span>
+            <span className="text-xl font-semibold tracking-tight">EllipMart</span>
           </Link>
 
           {/* Desktop nav */}

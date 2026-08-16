@@ -7,9 +7,9 @@ export const getApiDocs = async () => {
     definition: {
       openapi: '3.0.0',
       info: {
-        title: 'SmartGO API Documentation',
+        title: 'EllipMart API Documentation',
         version: '1.0.0',
-        description: 'Complete API documentation for the SmartGO e-commerce backend.',
+        description: 'Complete API documentation for the EllipMart e-commerce backend.',
       },
       components: {
         securitySchemes: {

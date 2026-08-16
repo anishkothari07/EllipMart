@@ -15,15 +15,15 @@ export function CustomerCommunication({ customerName, customerEmail }: CustomerC
 
   const templates = {
     WELCOME: {
-      subject: `Welcome to SmartGO, ${customerName}!`,
-      body: `Hi ${customerName},\n\nWelcome to our store! We're excited to have you as part of our community.\n\nEnjoy 10% off your next order with the code WELCOME10.\n\nBest regards,\nSmartGO Team`,
+      subject: `Welcome to EllipMart, ${customerName}!`,
+      body: `Hi ${customerName},\n\nWelcome to our store! We're excited to have you as part of our community.\n\nEnjoy 10% off your next order with the code WELCOME10.\n\nBest regards,\nEllipMart Team`,
     },
     OFFER: {
       subject: `Exclusive VIP Offer for ${customerName}`,
       body: `Hi ${customerName},\n\nBecause you are one of our top customers, we have unlocked a special 20% discount on all items in our New Arrivals collection.\n\nUse coupon code VIP20 at checkout.\n\nHappy Shopping!`,
     },
     SUPPORT: {
-      subject: `How can we help? - SmartGO Support`,
+      subject: `How can we help? - EllipMart Support`,
       body: `Hi ${customerName},\n\nWe noticed you haven't made a purchase in a while. If you had any issues during checkout or need assistance with your previous orders, please reply directly to this message.\n\nWe're always here to help.`,
     },
   };

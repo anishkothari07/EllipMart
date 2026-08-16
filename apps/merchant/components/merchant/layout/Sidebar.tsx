@@ -25,7 +25,7 @@ export function Sidebar() {
           <Store className="size-5 shrink-0" />
         </div>
         <div className="flex flex-col">
-          <span className="text-sm font-bold tracking-tight text-foreground leading-none">SmartGO</span>
+          <span className="text-sm font-bold tracking-tight text-foreground leading-none">EllipMart</span>
           <span className="text-[10px] text-muted-foreground font-semibold uppercase tracking-wider mt-0.5">Merchant Admin</span>
         </div>
       </div>

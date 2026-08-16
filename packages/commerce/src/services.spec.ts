@@ -635,7 +635,7 @@ describe('AuthService', () => {
   it('should enforce role restrictions and verify admin status', async () => {
     mockPrisma.user.findUnique.mockResolvedValue({
       id: 'user_admin',
-      email: 'admin@smartgo.com',
+      email: 'admin@ellipmart.com',
       role: 'ADMIN',
     });
     const profile = await mockPrisma.user.findUnique({ where: { id: 'user_admin' } });

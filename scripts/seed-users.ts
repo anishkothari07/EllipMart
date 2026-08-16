@@ -31,14 +31,14 @@ async function main() {
 
   // 2. Demo Merchant user
   const merchant = await prisma.user.upsert({
-    where: { email: 'merchant@smartgo.com' },
+    where: { email: 'merchant@ellipmart.com' },
     update: {
       passwordHash,
       role: Role.MERCHANT,
       status: UserStatus.ACTIVE,
     },
     create: {
-      email: 'merchant@smartgo.com',
+      email: 'merchant@ellipmart.com',
       passwordHash,
       firstName: 'Merchant',
       lastName: 'User',

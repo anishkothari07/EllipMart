@@ -424,8 +424,8 @@ export async function getAuthUser(req: NextRequest) {
     if (user && user.status === 'ACTIVE') return user;
   }
 
-  // 3. Try session cookie (smartgo_customer_refresh)
-  const cookieToken = req.cookies.get('smartgo_customer_refresh')?.value;
+  // 3. Try session cookie (ellipmart_customer_refresh)
+  const cookieToken = req.cookies.get('ellipmart_customer_refresh')?.value;
   if (cookieToken) {
     try {
       const decoded = await verifyRefreshToken(cookieToken);

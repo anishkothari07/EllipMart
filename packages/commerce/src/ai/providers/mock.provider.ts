@@ -40,7 +40,7 @@ export class MockProvider implements IAIProvider {
       mockData = {
         title: "Grounded Gaming Gear | CoreCart",
         description: "Explore the best catalog items.",
-        keywords: ["gaming", "deals", "smartgo"],
+        keywords: ["gaming", "deals", "ellipmart"],
         score: 85,
         suggestions: ["Add meta description keyword 'best price'"]
       };

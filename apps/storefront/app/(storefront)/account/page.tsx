@@ -17,8 +17,8 @@ import { getCurrentUser } from '@corecart/shared/src/auth'
 import { prisma } from '@corecart/database'
 
 export const metadata: Metadata = {
-  title: 'Account · SmartGO',
-  description: 'Manage your SmartGO account, orders, and preferences.',
+  title: 'Account · EllipMart',
+  description: 'Manage your EllipMart account, orders, and preferences.',
 }
 
 export default async function AccountDashboardPage() {

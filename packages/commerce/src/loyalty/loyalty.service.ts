@@ -296,7 +296,7 @@ export class LoyaltyService {
           points: bonusPoints,
           pointsBalance: newPoints,
           monetaryValue: this.pointsToRupees(bonusPoints),
-          description: `Welcome bonus for joining SmartGO (+${bonusPoints} pts)`,
+          description: `Welcome bonus for joining EllipMart (+${bonusPoints} pts)`,
         },
       });
     });

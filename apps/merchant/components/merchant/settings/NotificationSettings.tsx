@@ -22,17 +22,17 @@ export function NotificationSettings() {
     CONFIRMATION: {
       title: 'Order Confirmation Email',
       subject: 'Order Confirmed: Thank you for shopping with us! (#ORD-123456)',
-      body: `Hi Customer,\n\nThanks for shopping with SmartGO! We've received your order and are getting it ready for shipment.\n\nYour Order details:\n- Item: Premium Noise-Cancelling Headphones x 1\n- Price: ₹2,499.00\n- Shipping Address: 123 Prime Towers, Bangalore\n\nYou'll receive another notification once your items ship.\n\nBest regards,\nSmartGO Support`,
+      body: `Hi Customer,\n\nThanks for shopping with EllipMart! We've received your order and are getting it ready for shipment.\n\nYour Order details:\n- Item: Premium Noise-Cancelling Headphones x 1\n- Price: ₹2,499.00\n- Shipping Address: 123 Prime Towers, Bangalore\n\nYou'll receive another notification once your items ship.\n\nBest regards,\nEllipMart Support`,
     },
     SHIPPING: {
       title: 'Shipping Notification Email',
       subject: 'Your order has been shipped! (#ORD-123456)',
-      body: `Hi Customer,\n\nGood news! Your order #ORD-123456 has been shipped via Delhivery.\n\nTracking Details:\n- Carrier: Delhivery\n- Tracking Code: TRK7890123\n- Est. Delivery: 2-3 Business Days\n\nYou can track the package status using the tracking code provided above.\n\nBest regards,\nSmartGO Fulfilment`,
+      body: `Hi Customer,\n\nGood news! Your order #ORD-123456 has been shipped via Delhivery.\n\nTracking Details:\n- Carrier: Delhivery\n- Tracking Code: TRK7890123\n- Est. Delivery: 2-3 Business Days\n\nYou can track the package status using the tracking code provided above.\n\nBest regards,\nEllipMart Fulfilment`,
     },
     DELIVERED: {
       title: 'Order Delivered Email',
       subject: 'Delivered: Your package has arrived! (#ORD-123456)',
-      body: `Hi Customer,\n\nYour package for order #ORD-123456 has been successfully delivered to your address.\n\nWe hope you love your purchase! If you have any feedback or queries, reply directly to this email.\n\nBest regards,\nSmartGO Team`,
+      body: `Hi Customer,\n\nYour package for order #ORD-123456 has been successfully delivered to your address.\n\nWe hope you love your purchase! If you have any feedback or queries, reply directly to this email.\n\nBest regards,\nEllipMart Team`,
     },
   };
 

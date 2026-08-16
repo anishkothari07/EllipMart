@@ -6,7 +6,7 @@ import { prisma } from '@corecart/database'
 const specialTitles: Record<string, { title: string; description: string; image: string }> = {
   all: {
     title: 'All Products',
-    description: 'Explore the full SmartGO collection across every category.',
+    description: 'Explore the full EllipMart collection across every category.',
     image: '/images/cat-fashion.png',
   },
   sale: {
@@ -31,12 +31,12 @@ export async function generateMetadata({
     const category = await prisma.category.findUnique({ where: { slug } })
     const title = category?.name ?? specialTitles[slug]?.title ?? 'Shop'
     return {
-      title: `${title} — SmartGO`,
+      title: `${title} — EllipMart`,
       description: category?.description ?? specialTitles[slug]?.description,
     }
   } catch {
     const title = specialTitles[slug]?.title ?? 'Shop'
-    return { title: `${title} — SmartGO` }
+    return { title: `${title} — EllipMart` }
   }
 }
 

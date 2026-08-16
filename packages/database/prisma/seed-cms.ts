@@ -3,7 +3,7 @@ import { prisma } from '../lib/prisma/client';
 import { publishWebsite } from '../lib/corecart/compiler';
 
 async function main() {
-  console.log('Seeding SmartGO Storefront CMS...');
+  console.log('Seeding EllipMart Storefront CMS...');
 
   // 1. Seed Component Registry definitions
   const registryHero = await prisma.componentRegistry.upsert({
@@ -107,27 +107,27 @@ async function main() {
 
   console.log('Stale tenant data cleared.');
 
-  // 3. Create core SmartGO website definition
-  const smartgo = await prisma.website.create({
+  // 3. Create core EllipMart website definition
+  const ellipmart = await prisma.website.create({
     data: {
-      id: 'smartgo-storefront',
-      name: 'SmartGO',
+      id: 'ellipmart-storefront',
+      name: 'EllipMart',
       domain: 'localhost',
     },
   });
 
   await prisma.websiteSettings.create({
     data: {
-      websiteId: smartgo.id,
-      brandName: 'SmartGO',
-      websiteName: 'SmartGO',
+      websiteId: ellipmart.id,
+      brandName: 'EllipMart',
+      websiteName: 'EllipMart',
       logoUrl: '/logo.png',
       faviconUrl: '/favicon.ico',
       tagline: 'Diwali special offers and items',
       defaultCurrency: 'INR',
       defaultLanguage: 'en',
       searchPlaceholder: 'Search products...',
-      copyright: '© SmartGO India Pvt Ltd. All Rights Reserved.',
+      copyright: '© EllipMart India Pvt Ltd. All Rights Reserved.',
       announcementsJson: JSON.stringify([
         'Complimentary shipping on qualifying orders',
         'Members get early access to seasonal drops',
@@ -159,25 +159,25 @@ async function main() {
 
   await prisma.websiteAIConfig.create({
     data: {
-      websiteId: smartgo.id,
-      assistantName: 'SmartGO Assistant',
-      greeting: 'Welcome to SmartGO! Looking for Diwali Specials?',
+      websiteId: ellipmart.id,
+      assistantName: 'EllipMart Assistant',
+      greeting: 'Welcome to EllipMart! Looking for Diwali Specials?',
       suggestionsJson: JSON.stringify(['Diwali special items', 'Fastest deliveries']),
     },
   });
 
   await prisma.websiteDraft.create({
     data: {
-      websiteId: smartgo.id,
-      name: 'SmartGO Draft',
+      websiteId: ellipmart.id,
+      name: 'EllipMart Draft',
     },
   });
 
-  const smartgoTheme = await prisma.websiteTheme.create({
+  const ellipmartTheme = await prisma.websiteTheme.create({
     data: {
-      id: 'smartgo-theme',
-      websiteId: smartgo.id,
-      name: 'SmartGO Default Theme',
+      id: 'ellipmart-theme',
+      websiteId: ellipmart.id,
+      name: 'EllipMart Default Theme',
       isActive: true,
     },
   });
@@ -194,26 +194,26 @@ async function main() {
   for (const t of defaultTokens) {
     await prisma.themeToken.create({
       data: {
-        themeId: smartgoTheme.id,
+        themeId: ellipmartTheme.id,
         key: t.key,
         value: t.value,
       },
     });
   }
 
-  const smartgoLayout = await prisma.websiteLayout.create({
+  const ellipmartLayout = await prisma.websiteLayout.create({
     data: {
-      id: 'smartgo-layout',
-      themeId: smartgoTheme.id,
-      name: 'SmartGO Layout',
+      id: 'ellipmart-layout',
+      themeId: ellipmartTheme.id,
+      name: 'EllipMart Layout',
     },
   });
 
-  const smartgoPage = await prisma.websitePage.create({
+  const ellipmartPage = await prisma.websitePage.create({
     data: {
-      id: 'smartgo-homepage',
-      layoutId: smartgoLayout.id,
-      title: 'SmartGO Home',
+      id: 'ellipmart-homepage',
+      layoutId: ellipmartLayout.id,
+      title: 'EllipMart Home',
       slug: 'home',
       isPublished: true,
     },
@@ -221,7 +221,7 @@ async function main() {
 
   await prisma.pageRoute.create({
     data: {
-      pageId: smartgoPage.id,
+      pageId: ellipmartPage.id,
       routePath: '/',
     },
   });
@@ -229,16 +229,16 @@ async function main() {
   // Hero Section (sortOrder 0)
   const refHeroSection = await prisma.websiteSection.create({
     data: {
-      id: 'smartgo-hero-section',
-      pageId: smartgoPage.id,
+      id: 'ellipmart-hero-section',
+      pageId: ellipmartPage.id,
       name: 'Hero Section',
       sortOrder: 0,
     },
   });
 
-  const smartgoHeroComponent = await prisma.websiteComponent.create({
+  const ellipmartHeroComponent = await prisma.websiteComponent.create({
     data: {
-      id: 'smartgo-hero-component',
+      id: 'ellipmart-hero-component',
       sectionId: refHeroSection.id,
       registryId: registryHero.id,
       sortOrder: 0,
@@ -246,11 +246,11 @@ async function main() {
   });
 
   const refHeroProps = [
-    { id: 'ref-h-title', componentId: smartgoHeroComponent.id, key: 'title', literalValue: 'SmartGO Diwali Special', schemaType: 'string' },
-    { id: 'ref-h-sub', componentId: smartgoHeroComponent.id, key: 'subtitle', literalValue: 'Elevate your festive shopping with curated premium models.', schemaType: 'string' },
-    { id: 'ref-h-img', componentId: smartgoHeroComponent.id, key: 'imageUrl', literalValue: '/images/hero-home.png', schemaType: 'string' },
-    { id: 'ref-h-btn', componentId: smartgoHeroComponent.id, key: 'buttonText', literalValue: 'Explore Diwali Deals', schemaType: 'string' },
-    { id: 'ref-h-url', componentId: smartgoHeroComponent.id, key: 'buttonUrl', literalValue: '/search', schemaType: 'string' },
+    { id: 'ref-h-title', componentId: ellipmartHeroComponent.id, key: 'title', literalValue: 'EllipMart Diwali Special', schemaType: 'string' },
+    { id: 'ref-h-sub', componentId: ellipmartHeroComponent.id, key: 'subtitle', literalValue: 'Elevate your festive shopping with curated premium models.', schemaType: 'string' },
+    { id: 'ref-h-img', componentId: ellipmartHeroComponent.id, key: 'imageUrl', literalValue: '/images/hero-home.png', schemaType: 'string' },
+    { id: 'ref-h-btn', componentId: ellipmartHeroComponent.id, key: 'buttonText', literalValue: 'Explore Diwali Deals', schemaType: 'string' },
+    { id: 'ref-h-url', componentId: ellipmartHeroComponent.id, key: 'buttonUrl', literalValue: '/search', schemaType: 'string' },
   ];
 
   for (const p of refHeroProps) {
@@ -260,8 +260,8 @@ async function main() {
   // Trust Bar Section (sortOrder 1)
   const refTrustSection = await prisma.websiteSection.create({
     data: {
-      id: 'smartgo-trust-section',
-      pageId: smartgoPage.id,
+      id: 'ellipmart-trust-section',
+      pageId: ellipmartPage.id,
       name: 'Trust Bar Section',
       sortOrder: 1,
     },
@@ -269,7 +269,7 @@ async function main() {
 
   const refTrustComponent = await prisma.websiteComponent.create({
     data: {
-      id: 'smartgo-trust-component',
+      id: 'ellipmart-trust-component',
       sectionId: refTrustSection.id,
       registryId: registryTrustBar.id,
       sortOrder: 0,
@@ -294,8 +294,8 @@ async function main() {
   // Category Showcase Section (sortOrder 2)
   const refCatSection = await prisma.websiteSection.create({
     data: {
-      id: 'smartgo-cat-section',
-      pageId: smartgoPage.id,
+      id: 'ellipmart-cat-section',
+      pageId: ellipmartPage.id,
       name: 'Category Showcase Section',
       sortOrder: 2,
     },
@@ -303,7 +303,7 @@ async function main() {
 
   const refCatComponent = await prisma.websiteComponent.create({
     data: {
-      id: 'smartgo-cat-component',
+      id: 'ellipmart-cat-component',
       sectionId: refCatSection.id,
       registryId: registryCategoryShowcase.id,
       sortOrder: 0,
@@ -337,8 +337,8 @@ async function main() {
   // Grid Section (sortOrder 3)
   const refGridSection = await prisma.websiteSection.create({
     data: {
-      id: 'smartgo-grid-section',
-      pageId: smartgoPage.id,
+      id: 'ellipmart-grid-section',
+      pageId: ellipmartPage.id,
       name: 'Product Grid Section',
       sortOrder: 3,
     },
@@ -346,7 +346,7 @@ async function main() {
 
   const refGridComponent = await prisma.websiteComponent.create({
     data: {
-      id: 'smartgo-grid-component',
+      id: 'ellipmart-grid-component',
       sectionId: refGridSection.id,
       registryId: registryGrid.id,
       sortOrder: 0,
@@ -366,8 +366,8 @@ async function main() {
   // Promo Banner Section (sortOrder 4)
   const refPromoSection = await prisma.websiteSection.create({
     data: {
-      id: 'smartgo-promo-section',
-      pageId: smartgoPage.id,
+      id: 'ellipmart-promo-section',
+      pageId: ellipmartPage.id,
       name: 'Promo Banner Section',
       sortOrder: 4,
     },
@@ -375,7 +375,7 @@ async function main() {
 
   const refPromoComponent = await prisma.websiteComponent.create({
     data: {
-      id: 'smartgo-promo-component',
+      id: 'ellipmart-promo-component',
       sectionId: refPromoSection.id,
       registryId: registryPromoBanner.id,
       sortOrder: 0,
@@ -397,8 +397,8 @@ async function main() {
   // Testimonials Section (sortOrder 5)
   const refTestimonialsSection = await prisma.websiteSection.create({
     data: {
-      id: 'smartgo-testimonials-section',
-      pageId: smartgoPage.id,
+      id: 'ellipmart-testimonials-section',
+      pageId: ellipmartPage.id,
       name: 'Testimonials Section',
       sortOrder: 5,
     },
@@ -406,7 +406,7 @@ async function main() {
 
   const refTestimonialsComponent = await prisma.websiteComponent.create({
     data: {
-      id: 'smartgo-testimonials-component',
+      id: 'ellipmart-testimonials-component',
       sectionId: refTestimonialsSection.id,
       registryId: registryTestimonials.id,
       sortOrder: 0,
@@ -450,8 +450,8 @@ async function main() {
   // Newsletter Section (sortOrder 6)
   const refNewsSection = await prisma.websiteSection.create({
     data: {
-      id: 'smartgo-news-section',
-      pageId: smartgoPage.id,
+      id: 'ellipmart-news-section',
+      pageId: ellipmartPage.id,
       name: 'Newsletter Section',
       sortOrder: 6,
     },
@@ -459,7 +459,7 @@ async function main() {
 
   const refNewsComponent = await prisma.websiteComponent.create({
     data: {
-      id: 'smartgo-news-component',
+      id: 'ellipmart-news-component',
       sectionId: refNewsSection.id,
       registryId: registryNewsletter.id,
       sortOrder: 0,
@@ -480,9 +480,9 @@ async function main() {
   // Navigation menus
   const refHeader = await prisma.websiteNavigation.create({
     data: {
-      websiteId: smartgo.id,
-      handle: 'smartgo-header',
-      name: 'SmartGO Main Header',
+      websiteId: ellipmart.id,
+      handle: 'ellipmart-header',
+      name: 'EllipMart Main Header',
       type: 'HEADER',
     },
   });
@@ -510,9 +510,9 @@ async function main() {
 
   const refMegaMenu = await prisma.websiteNavigation.create({
     data: {
-      websiteId: smartgo.id,
-      handle: 'smartgo-megamenu',
-      name: 'SmartGO Mega Menu',
+      websiteId: ellipmart.id,
+      handle: 'ellipmart-megamenu',
+      name: 'EllipMart Mega Menu',
       type: 'MEGA_MENU',
     },
   });
@@ -591,9 +591,9 @@ async function main() {
 
   const refFooter = await prisma.websiteNavigation.create({
     data: {
-      websiteId: smartgo.id,
-      handle: 'smartgo-footer',
-      name: 'SmartGO Footer Menu',
+      websiteId: ellipmart.id,
+      handle: 'ellipmart-footer',
+      name: 'EllipMart Footer Menu',
       type: 'FOOTER',
     },
   });
@@ -616,15 +616,15 @@ async function main() {
     });
   }
 
-  console.log('SmartGO website definition seeded successfully.');
+  console.log('EllipMart website definition seeded successfully.');
 
-  // Compile and Publish SmartGO directly
-  console.log('Compiling and publishing SmartGO storefront manifest payload...');
-  const pubSg = await publishWebsite(smartgo.id);
+  // Compile and Publish EllipMart directly
+  console.log('Compiling and publishing EllipMart storefront manifest payload...');
+  const pubSg = await publishWebsite(ellipmart.id);
   if (pubSg.valid) {
-    console.log('SmartGO compiled manifest payload successfully published.');
+    console.log('EllipMart compiled manifest payload successfully published.');
   } else {
-    console.error('Failed compiling SmartGO manifest:', pubSg.errors);
+    console.error('Failed compiling EllipMart manifest:', pubSg.errors);
   }
 
   console.log('CMS Direct Seeder Completed Successfully!');

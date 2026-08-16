@@ -27,7 +27,7 @@ export class SMTPProvider implements EmailProvider {
 
   async sendEmail(options: EmailOptions): Promise<void> {
     await this.transporter.sendMail({
-      from: process.env.SMTP_FROM || '"SmartGO" <noreply@smartgo.com>',
+      from: process.env.SMTP_FROM || '"EllipMart" <noreply@ellipmart.com>',
       to: options.to,
       subject: options.subject,
       html: options.html,

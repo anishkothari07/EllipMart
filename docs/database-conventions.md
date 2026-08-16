@@ -1,6 +1,6 @@
 # Database Conventions
 
-Before proceeding to Sprint 1 (Database Design), please review and adhere to these conventions for the SmartGO schema.
+Before proceeding to Sprint 1 (Database Design), please review and adhere to these conventions for the EllipMart schema.
 
 ## 1. Primary Keys
 - Use **UUIDs** (specifically `@default(uuid())`) for all primary keys to ensure global uniqueness and prevent enumerable IDs.
@@ -34,7 +34,7 @@ Before proceeding to Sprint 1 (Database Design), please review and adhere to the
 - **Prisma Models:** PascalCase (e.g., `User`, `OrderItem`).
 - **Prisma Fields:** camelCase (e.g., `firstName`, `orderStatus`).
 - **Database Mapping:** Map models and fields to `snake_case` in MySQL using `@@map` and `@map` if you want strict DB naming conventions, OR stick to Prisma defaults (camelCase) universally. Pick one and stick to it.
-- *Recommendation for SmartGO:* Stick to standard Prisma defaults (camelCase) to reduce mapping boilerplate, unless integrating with legacy systems.
+- *Recommendation for EllipMart:* Stick to standard Prisma defaults (camelCase) to reduce mapping boilerplate, unless integrating with legacy systems.
 
 ## 8. Indexing
 - Use `@@index([columnName])` on frequently queried fields, foreign keys, and fields used for sorting/filtering.

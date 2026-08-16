@@ -161,7 +161,7 @@ export function LoyaltyDashboard() {
 
           <div className="flex items-center gap-2">
             <div className="flex items-center rounded-xl border border-border bg-background px-3.5 h-11 font-mono text-sm font-bold tracking-wider">
-              {referral?.referralCode || 'REF-SMARTGO'}
+              {referral?.referralCode || 'REF-ELLIPMART'}
             </div>
             <button
               onClick={copyReferralLink}

@@ -312,7 +312,7 @@ export function CheckoutView() {
         const isMobileDevice = /Android|iPhone|iPad/i.test(navigator.userAgent);
         if (isMobileDevice) {
           const totalAmount = cartSubtotal + shipUpcharge;
-          const upiUrl = `upi://pay?pa=smartgo@okaxis&pn=SmartGO%20India&am=${totalAmount}&cu=INR&tn=Order%20Payment`;
+          const upiUrl = `upi://pay?pa=ellipmart@okaxis&pn=EllipMart%20India&am=${totalAmount}&cu=INR&tn=Order%20Payment`;
           window.location.href = upiUrl;
           await new Promise((r) => setTimeout(r, 1500));
         }
@@ -370,7 +370,7 @@ export function CheckoutView() {
     <Container className="py-8 lg:py-12">
       <div className="mb-8 flex items-center justify-between gap-4">
         <Link href="/" className="text-xl font-bold tracking-tight">
-          SmartGO
+          EllipMart
         </Link>
         <span className="flex items-center gap-1.5 text-xs font-medium text-emerald-600 dark:text-emerald-400">
           <ShieldCheck className="size-4" /> 256-Bit Encrypted Checkout
@@ -576,7 +576,7 @@ export function CheckoutView() {
                         />
                         <div className="flex flex-col">
                           <span className="text-sm font-medium flex items-center gap-1.5">
-                            <Wallet className="size-4 text-emerald-600" /> SmartGO Wallet
+                            <Wallet className="size-4 text-emerald-600" /> EllipMart Wallet
                           </span>
                           <span className="text-xs text-muted-foreground">
                             Available: {formatPrice(walletBalance)}

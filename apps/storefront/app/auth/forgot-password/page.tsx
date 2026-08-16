@@ -4,8 +4,8 @@ import { AuthShell } from '@/components/auth/auth-shell'
 import { ForgotPasswordForm } from '@/components/auth/forgot-password-form'
 
 export const metadata: Metadata = {
-  title: 'Reset password · SmartGO',
-  description: 'Reset your SmartGO account password.',
+  title: 'Reset password · EllipMart',
+  description: 'Reset your EllipMart account password.',
 }
 
 export default function ForgotPasswordPage() {

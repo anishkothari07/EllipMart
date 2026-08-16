@@ -41,7 +41,7 @@ export function AccountSidebar({ user }: { user: any }) {
       // Step 1: Call logout API — revokes session in DB and deletes the HttpOnly cookie server-side
       await fetch('/api/v1/auth/logout', { method: 'POST' })
       // Step 2: Clear client-side access token
-      localStorage.removeItem('smartgo_access_token')
+      localStorage.removeItem('ellipmart_access_token')
       // Step 3: Navigate to login. router.replace so back-button doesn't return to /account
       router.replace('/auth/login')
     } catch (err) {

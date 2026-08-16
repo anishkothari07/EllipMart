@@ -56,7 +56,7 @@ export async function middleware(req: NextRequest) {
   let token = authHeader?.startsWith('Bearer ') ? authHeader.split(' ')[1] : null;
 
   if (!token) {
-    const cookieToken = req.cookies.get('smartgo_customer_refresh')?.value;
+    const cookieToken = req.cookies.get('ellipmart_customer_refresh')?.value;
     if (cookieToken) {
       token = cookieToken;
     }
@@ -82,7 +82,7 @@ export async function middleware(req: NextRequest) {
     }
   }
 
-  console.log(`[Storefront Middleware] cookie received: ${!!req.cookies.get('smartgo_customer_refresh')}`);
+  console.log(`[Storefront Middleware] cookie received: ${!!req.cookies.get('ellipmart_customer_refresh')}`);
   console.log(`[Storefront Middleware] session id: ${payload.sessionId}`);
   console.log(`[Storefront Middleware] user id: ${payload.userId}`);
   

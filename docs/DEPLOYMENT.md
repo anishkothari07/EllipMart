@@ -1,6 +1,6 @@
-# SmartGO Production Deployment & Operating Guide
+# EllipMart Production Deployment & Operating Guide
 
-This guide details the step-by-step procedure for deploying SmartGO to **Vercel** (Next.js Apps) and **Railway** (MySQL Database).
+This guide details the step-by-step procedure for deploying EllipMart to **Vercel** (Next.js Apps) and **Railway** (MySQL Database).
 
 ---
 

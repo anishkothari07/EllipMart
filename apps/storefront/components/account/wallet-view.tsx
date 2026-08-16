@@ -115,7 +115,7 @@ export function WalletView() {
           key: keyId,
           amount: amountInPaise,
           currency: 'INR',
-          name: 'SmartGO Wallet',
+          name: 'EllipMart Wallet',
           description: 'Wallet Top-up',
           order_id: razorpayOrderId,
           handler: async () => {

@@ -1,12 +1,12 @@
-# Phase 3 Architecture Correction — Migrate Existing SmartGO Website to Database
+# Phase 3 Architecture Correction — Migrate Existing EllipMart Website to Database
 
 ## Goal
 
 The objective of this phase is **not** to introduce multiple websites, templates, cloning, or demonstrations.
 
-The objective is to migrate **the existing SmartGO storefront** into the CoreCart Website Definition so that **every website-specific value is stored in the database**, while the engine becomes completely website-agnostic.
+The objective is to migrate **the existing EllipMart storefront** into the CoreCart Website Definition so that **every website-specific value is stored in the database**, while the engine becomes completely website-agnostic.
 
-The visual appearance and behavior of the current SmartGO storefront must remain unchanged.
+The visual appearance and behavior of the current EllipMart storefront must remain unchanged.
 
 ---
 
@@ -98,13 +98,13 @@ Modify `prisma/seed-cms.ts`
 Website
 
 id:
-smartgo-storefront
+ellipmart-storefront
 
 domain:
 localhost
 
 name:
-SmartGO
+EllipMart
 ```
 
 Then seed under this website:
@@ -132,7 +132,7 @@ Do **not** simplify layouts.
 
 Do **not** generate demo content.
 
-The seed must represent the current SmartGO storefront exactly.
+The seed must represent the current EllipMart storefront exactly.
 
 ---
 
@@ -201,7 +201,7 @@ Expected
 
 | name    | domain    |
 | ------- | --------- |
-| SmartGO | localhost |
+| EllipMart | localhost |
 
 There must be **no**:
 

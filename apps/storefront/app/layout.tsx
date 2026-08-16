@@ -17,11 +17,11 @@ const instrumentSerif = Instrument_Serif({
 })
 
 export const metadata: Metadata = {
-  title: 'SmartGO — Elevated everyday commerce',
+  title: 'EllipMart — Elevated everyday commerce',
   description:
-    'SmartGO is an ultra-premium storefront for modern living. Discover curated collections, luxury essentials, and the season\'s best across every category.',
+    'EllipMart is an ultra-premium storefront for modern living. Discover curated collections, luxury essentials, and the season\'s best across every category.',
   generator: 'v0.app',
-  keywords: ['SmartGO', 'ecommerce', 'shopping', 'premium', 'fashion', 'lifestyle'],
+  keywords: ['EllipMart', 'ecommerce', 'shopping', 'premium', 'fashion', 'lifestyle'],
   manifest: '/manifest.json',
   icons: {
     icon: [
@@ -33,7 +33,7 @@ export const metadata: Metadata = {
     ]
   },
   openGraph: {
-    title: 'SmartGO — Elevated everyday commerce',
+    title: 'EllipMart — Elevated everyday commerce',
     description: 'Curated collections, luxury essentials, and the season\'s best.',
     type: 'website',
   },

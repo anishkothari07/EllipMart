@@ -39,7 +39,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
       <div class="invoice-box">
         <div class="header">
           <div>
-            <h1>SmartGO</h1>
+            <h1>EllipMart</h1>
             <p>Bengaluru, Karnataka, India</p>
           </div>
           <div style="text-align: right;">

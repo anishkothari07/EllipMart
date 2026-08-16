@@ -1,4 +1,4 @@
-# Production Dockerfile for SmartGO Next.js
+# Production Dockerfile for EllipMart Next.js
 FROM node:20-alpine AS base
 
 # Install dependencies only when needed

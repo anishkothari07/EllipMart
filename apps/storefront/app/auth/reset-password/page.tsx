@@ -4,8 +4,8 @@ import { AuthShell } from '@/components/auth/auth-shell'
 import { ResetPasswordForm } from '@/components/auth/reset-password-form'
 
 export const metadata: Metadata = {
-  title: 'Set new password · SmartGO',
-  description: 'Choose a new password for your SmartGO account.',
+  title: 'Set new password · EllipMart',
+  description: 'Choose a new password for your EllipMart account.',
 }
 
 export default function ResetPasswordPage() {

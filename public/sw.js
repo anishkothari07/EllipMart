@@ -1,4 +1,4 @@
-const CACHE_NAME = 'smartgo-pwa-cache-v2';
+const CACHE_NAME = 'ellipmart-pwa-cache-v2';
 const ASSETS_TO_CACHE = [
   '/',
   '/manifest.json',
@@ -59,7 +59,7 @@ self.addEventListener('fetch', (e) => {
           const acceptHeader = e.request.headers.get('accept') || '';
           if (acceptHeader.includes('text/html') || e.request.mode === 'navigate') {
             return new Response(
-              `<!DOCTYPE html><html><head><meta charset="utf-8"/><title>SmartGO Offline</title><style>body { font-family: system-ui, sans-serif; text-align: center; padding: 50px 20px; background: #fbfbf9; color: #232320; } .card { max-width: 400px; margin: 0 auto; padding: 30px; background: #fff; border-radius: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); } button { padding: 12px 24px; font-weight: 600; background: #FF5733; color: white; border: none; border-radius: 12px; cursor: pointer; font-size: 14px; margin-top: 15px; }</style></head><body><div class="card"><h1>SmartGO Offline</h1><p>You are currently offline. Pages you've previously visited remain available from cache.</p><button onclick="window.location.reload()">Retry Connection</button></div></body></html>`,
+              `<!DOCTYPE html><html><head><meta charset="utf-8"/><title>EllipMart Offline</title><style>body { font-family: system-ui, sans-serif; text-align: center; padding: 50px 20px; background: #fbfbf9; color: #232320; } .card { max-width: 400px; margin: 0 auto; padding: 30px; background: #fff; border-radius: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); } button { padding: 12px 24px; font-weight: 600; background: #FF5733; color: white; border: none; border-radius: 12px; cursor: pointer; font-size: 14px; margin-top: 15px; }</style></head><body><div class="card"><h1>EllipMart Offline</h1><p>You are currently offline. Pages you've previously visited remain available from cache.</p><button onclick="window.location.reload()">Retry Connection</button></div></body></html>`,
               { headers: { 'Content-Type': 'text/html' } }
             );
           }

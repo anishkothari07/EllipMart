@@ -207,7 +207,7 @@ export function ShoppingAssistant() {
               <div className="p-4 border-b border-border flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <Sparkles className="size-5 text-indigo-500" />
-                  <span className="font-extrabold text-sm tracking-wide text-foreground">SmartGO AI Copilot</span>
+                  <span className="font-extrabold text-sm tracking-wide text-foreground">EllipMart AI Copilot</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <button onClick={clearChat} className="p-2 hover:bg-accent rounded-xl text-muted-foreground transition-all cursor-pointer">

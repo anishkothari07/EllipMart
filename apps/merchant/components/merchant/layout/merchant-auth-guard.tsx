@@ -50,7 +50,7 @@ export function MerchantAuthGuard({ children }: { children: React.ReactNode }) {
             <Lock className="size-6 text-[#3B82F6]" />
           </div>
           <div className="space-y-2 text-center">
-            <h1 className="text-2xl font-bold tracking-tight">SmartGO Merchant Admin</h1>
+            <h1 className="text-2xl font-bold tracking-tight">EllipMart Merchant Admin</h1>
             <p className="text-sm text-gray-400">
               Sign in with your merchant credentials to continue
             </p>
@@ -72,7 +72,7 @@ export function MerchantAuthGuard({ children }: { children: React.ReactNode }) {
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="merchant@smartgo.in"
+                  placeholder="merchant@ellipmart.in"
                   className="w-full h-11 pl-11 pr-4 rounded-full bg-white/[0.04] border border-white/10 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all outline-none"
                   required
                 />

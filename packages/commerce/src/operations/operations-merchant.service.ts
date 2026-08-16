@@ -73,17 +73,17 @@ export const operationsMerchantService = {
       let website = await prisma.website.findFirst();
       if (!website) {
         website = await prisma.website.create({
-          data: { name: 'SmartGO Store', domain: 'localhost' },
+          data: { name: 'EllipMart Store', domain: 'localhost' },
         });
       }
       settings = await prisma.websiteSettings.create({
         data: {
           websiteId: website.id,
-          brandName: 'SmartGO',
-          websiteName: 'SmartGO Store',
-          contactEmail: 'contact@smartgo.com',
+          brandName: 'EllipMart',
+          websiteName: 'EllipMart Store',
+          contactEmail: 'contact@ellipmart.com',
           contactPhone: '+91 99999 99999',
-          businessAddress: '123 SmartGO Towers, Bangalore, India',
+          businessAddress: '123 EllipMart Towers, Bangalore, India',
           defaultCurrency: 'INR',
           defaultLanguage: 'en',
           announcementsJson: '[]',
@@ -394,7 +394,7 @@ export const operationsMerchantService = {
         changes: item.changes,
         createdAt: item.createdAt.toISOString(),
         userName: u ? `${u.firstName} ${u.lastName}` : 'System',
-        userEmail: u ? u.email : 'system@smartgo.com',
+        userEmail: u ? u.email : 'system@ellipmart.com',
       };
     });
 

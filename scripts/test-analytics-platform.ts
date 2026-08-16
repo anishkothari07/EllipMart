@@ -20,10 +20,10 @@ async function runAnalyticsVerification() {
   // 1. Setup mock user and order
   console.log("\n[2/6] Setting up mock data & publishing Purchase/Order events...");
   const user = await db.user.upsert({
-    where: { email: "analytics.user@smartgo.com" },
+    where: { email: "analytics.user@ellipmart.com" },
     update: {},
     create: {
-      email: "analytics.user@smartgo.com",
+      email: "analytics.user@ellipmart.com",
       firstName: "Jane",
       lastName: "Doe",
       passwordHash: "hashed",

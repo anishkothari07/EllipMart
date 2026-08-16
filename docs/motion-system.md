@@ -1,6 +1,6 @@
-# Motion Governance Document - SmartGO Motion System
+# Motion Governance Document - EllipMart Motion System
 
-This document outlines the design decisions, patterns, accessibility, and governance rules of the SmartGO Motion Design System to ensure premium, high-performance interactions across the entire ecommerce commerce application.
+This document outlines the design decisions, patterns, accessibility, and governance rules of the EllipMart Motion Design System to ensure premium, high-performance interactions across the entire ecommerce commerce application.
 
 ---
 

@@ -3,8 +3,8 @@ import type { Metadata } from 'next'
 import { OrdersView } from '@/components/account/orders-view'
 
 export const metadata: Metadata = {
-  title: 'Orders · SmartGO',
-  description: 'View and track all of your SmartGO orders.',
+  title: 'Orders · EllipMart',
+  description: 'View and track all of your EllipMart orders.',
 }
 
 import { getCurrentUser } from '@corecart/shared/src/auth'

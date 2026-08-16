@@ -5,8 +5,8 @@ import { Container } from '@corecart/ui'
 import { ProductGridSkeleton } from '@corecart/ui'
 
 export const metadata: Metadata = {
-  title: 'Search — SmartGO',
-  description: 'Search across the full SmartGO catalog.',
+  title: 'Search — EllipMart',
+  description: 'Search across the full EllipMart catalog.',
 }
 
 export const dynamic = 'force-dynamic';

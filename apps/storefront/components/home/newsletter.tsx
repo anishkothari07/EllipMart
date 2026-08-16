@@ -26,7 +26,7 @@ export function Newsletter() {
             Get 10% off your first order
           </h2>
           <p className="mx-auto mt-3 max-w-md text-pretty leading-relaxed text-muted-foreground">
-            Join the SmartGO list for early access to drops, private sales and
+            Join the EllipMart list for early access to drops, private sales and
             styling notes. No spam, unsubscribe anytime.
           </p>
           {done ? (

@@ -3,7 +3,7 @@ import type { Metadata } from 'next'
 import { AddressesView } from '@/components/account/addresses-view'
 
 export const metadata: Metadata = {
-  title: 'Addresses · SmartGO',
+  title: 'Addresses · EllipMart',
   description: 'Manage your shipping and billing addresses.',
 }
 

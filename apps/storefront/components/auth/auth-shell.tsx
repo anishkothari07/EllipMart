@@ -30,7 +30,7 @@ export function AuthShell({
             <span className="grid size-8 place-items-center rounded-lg bg-foreground text-background">
               <ShoppingBag className="size-4" />
             </span>
-            <span className="text-xl font-semibold tracking-tight">SmartGO</span>
+            <span className="text-xl font-semibold tracking-tight">EllipMart</span>
           </Link>
 
           <h1 className="font-serif text-3xl font-medium tracking-tight text-balance">{title}</h1>

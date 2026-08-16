@@ -4,7 +4,7 @@ import { prisma } from '@corecart/database';
 export const revalidate = 0;
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://smartgo.com';
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://ellipmart.com';
 
   const staticPages: MetadataRoute.Sitemap = [
     { url: `${baseUrl}`, lastModified: new Date(), changeFrequency: 'daily', priority: 1.0 },

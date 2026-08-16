@@ -27,7 +27,7 @@ export class SMTPProvider implements EmailProvider {
     const port = Number(process.env.SMTP_PORT) || 587;
     const secure = port === 465;
     const user = process.env.SMTP_USER || 'test';
-    const from = process.env.SMTP_FROM || '"SmartGO" <noreply@smartgo.com>';
+    const from = process.env.SMTP_FROM || '"EllipMart" <noreply@ellipmart.com>';
 
     console.log("---- SMTP CONFIGURATION ----");
     console.log({

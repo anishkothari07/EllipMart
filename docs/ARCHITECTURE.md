@@ -1,13 +1,13 @@
-# SmartGO Monorepo Architecture & Enterprise Guide
+# EllipMart Monorepo Architecture & Enterprise Guide
 
-SmartGO is built as a high-performance e-commerce monorepo managed by `pnpm` and `turbo`. It follows modular, domain-driven architecture to enforce strict isolation between business logic, database models, shared utilities, and UI portals.
+EllipMart is built as a high-performance e-commerce monorepo managed by `pnpm` and `turbo`. It follows modular, domain-driven architecture to enforce strict isolation between business logic, database models, shared utilities, and UI portals.
 
 ---
 
 ## 1. Monorepo Package Topology
 
 ```
-SmartGO Monorepo Root
+EllipMart Monorepo Root
 ├── apps/
 │   ├── storefront/    # Next.js Customer Portal (Port 3001)
 │   ├── merchant/      # Next.js Merchant Operations Dashboard (Port 3002)

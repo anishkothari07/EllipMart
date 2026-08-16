@@ -4,7 +4,7 @@ async function runLoadBenchmark() {
   const concurrencyLevels = [50, 100, 250];
 
   console.log('=====================================================');
-  console.log(' SmartGO Load Testing & Performance Benchmark Tool ');
+  console.log(' EllipMart Load Testing & Performance Benchmark Tool ');
   console.log('=====================================================');
 
   for (const endpoint of targetEndpoints) {

@@ -15,7 +15,7 @@ export async function adminLoginAction(payload: any) {
     }
 
     const cookieStore = await cookies();
-    cookieStore.set('smartgo_admin_refresh', result.refreshToken, {
+    cookieStore.set('ellipmart_admin_refresh', result.refreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
@@ -32,7 +32,7 @@ export async function adminLoginAction(payload: any) {
 export async function adminLogoutAction() {
   try {
     const cookieStore = await cookies();
-    cookieStore.delete('smartgo_admin_refresh');
+    cookieStore.delete('ellipmart_admin_refresh');
     return { success: true };
   } catch (e: any) {
     return { success: false, error: e.message };

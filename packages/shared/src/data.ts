@@ -879,7 +879,7 @@ export const testimonials: Testimonial[] = [
     author: 'Sofia Marchetti',
     role: 'Verified buyer',
     quote:
-      'SmartGO has completely changed how I shop online. The quality is consistently excellent and delivery is unbelievably fast.',
+      'EllipMart has completely changed how I shop online. The quality is consistently excellent and delivery is unbelievably fast.',
     rating: 5,
   },
   {

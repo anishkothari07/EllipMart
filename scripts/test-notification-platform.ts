@@ -14,10 +14,10 @@ async function runNotificationVerification() {
   // 1. Create a Test User
   console.log("\n[1/8] Setting up Test User & User Notification Preferences Matrix...");
   const testUser = await db.user.upsert({
-    where: { email: "notification.test@smartgo.com" },
+    where: { email: "notification.test@ellipmart.com" },
     update: {},
     create: {
-      email: "notification.test@smartgo.com",
+      email: "notification.test@ellipmart.com",
       name: "Alex Customer",
       passwordHash: "hashed_pass",
     },
@@ -49,7 +49,7 @@ async function runNotificationVerification() {
     firstName: "Alex",
     orderNumber: "ORD-998877",
     amount: "2,499.00",
-    orderUrl: "https://smartgo.com/account/orders/998877",
+    orderUrl: "https://ellipmart.com/account/orders/998877",
   });
 
   console.log("Rendered Template Subject:", rendered?.subject);
@@ -61,7 +61,7 @@ async function runNotificationVerification() {
     userId: testUser.id,
     email: testUser.email,
     firstName: "Alex",
-    websiteUrl: "https://smartgo.com",
+    websiteUrl: "https://ellipmart.com",
   });
 
   domainEventBus.publish("OrderCreated", {

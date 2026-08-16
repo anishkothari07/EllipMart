@@ -3,7 +3,7 @@ import type { Metadata } from 'next'
 import { PaymentsView } from '@/components/account/payments-view'
 
 export const metadata: Metadata = {
-  title: 'Payment methods · SmartGO',
+  title: 'Payment methods · EllipMart',
   description: 'Manage your saved cards and payment methods.',
 }
 

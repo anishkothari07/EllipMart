@@ -279,7 +279,7 @@ export function ProductDetail({
                   type="button"
                   onClick={async () => {
                     if (typeof navigator !== 'undefined' && navigator.share) {
-                      try { await navigator.share({ title: product.name, text: `Check out ${product.name} on SmartGO India!`, url: window.location.href }) } catch {}
+                      try { await navigator.share({ title: product.name, text: `Check out ${product.name} on EllipMart India!`, url: window.location.href }) } catch {}
                     } else {
                       navigator.clipboard.writeText(window.location.href)
                     }
@@ -339,7 +339,7 @@ export function ProductDetail({
                 type="button"
                 onClick={async () => {
                   if (typeof navigator !== 'undefined' && navigator.share) {
-                    try { await navigator.share({ title: product.name, text: `Check out ${product.name} on SmartGO India!`, url: window.location.href }) } catch {}
+                    try { await navigator.share({ title: product.name, text: `Check out ${product.name} on EllipMart India!`, url: window.location.href }) } catch {}
                   } else {
                     navigator.clipboard.writeText(window.location.href)
                   }
