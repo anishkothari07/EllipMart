@@ -1,6 +1,6 @@
 import Image from 'next/image'
 import Link from 'next/link'
-import { ShoppingBag } from 'lucide-react'
+import { Button } from '@corecart/ui'
 
 const perks = [
   'Free delivery on orders over ₹999',
@@ -26,11 +26,8 @@ export function AuthShell({
       {/* Form column */}
       <div className="flex flex-col justify-center px-4 py-12 sm:px-8 lg:px-16">
         <div className="mx-auto w-full max-w-sm">
-          <Link href="/" className="mb-10 flex items-center gap-2">
-            <span className="grid size-8 place-items-center rounded-lg bg-foreground text-background">
-              <ShoppingBag className="size-4" />
-            </span>
-            <span className="text-xl font-semibold tracking-tight">EllipMart</span>
+          <Link href="/" className="mb-10 flex justify-center">
+            <Image src="/logo.png" alt="EllipMart Logo" width={72} height={72} className="object-contain" priority />
           </Link>
 
           <h1 className="font-serif text-3xl font-medium tracking-tight text-balance">{title}</h1>

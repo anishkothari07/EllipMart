@@ -1,94 +1,57 @@
-# EllipMart Production Deployment & Operating Guide
+# Production Deployment Guide: EllipMart
 
-This guide details the step-by-step procedure for deploying EllipMart to **Vercel** (Next.js Apps) and **Railway** (MySQL Database).
-
----
-
-## 1. Prerequisites
-
-- **Vercel Account** (Connected to GitHub repository)
-- **Railway Project** (MySQL 8 / MariaDB service provisioned)
-- **Cloudinary Account** (Media storage cloud name & API credentials)
+This guide details the step-by-step procedure for deploying EllipMart to **Vercel** (Next.js Apps) and **Supabase** (PostgreSQL Database & Storage).
 
 ---
 
-## 2. Infrastructure Setup
+## 1. Prerequisites Checklist
 
-### A. Railway Database Setup
-1. Provision a MySQL or MariaDB database on Railway.
-2. Copy the `DATABASE_URL` connection string from Railway variables.
-3. Run schema migration on the database:
+- **Vercel Account** (Connected to your Git repository)
+- **Supabase Project** (PostgreSQL database + `media` Storage bucket provisioned)
+- **Upstash Redis Database** (REST URL and Token for edge rate limiting)
+- **Razorpay Account** (Live Key ID, Key Secret, and Webhook Secret)
+
+---
+
+## 2. Infrastructure Setup & Provisioning
+
+### A. Supabase Database & Storage Setup
+1. Create a project at [supabase.com](https://supabase.com).
+2. Go to **Project Settings** → **Database** → **Connection string** → **URI**.
+3. Copy:
+   - **Transaction Pooler (`DATABASE_URL`)**: Port `6543` with `?pgbouncer=true`.
+   - **Direct URL (`DIRECT_URL`)**: Port `5432`.
+4. Go to **Storage** tab, create a new public bucket named **`media`**.
+5. Push schema and seed from your terminal:
    ```bash
-   DATABASE_URL="mysql://root:password@containers-us-west-xxx.railway.app:7988/railway" pnpm --filter @corecart/database exec prisma db push
-   ```
-4. Optionally seed essential localization & initial CMS data:
-   ```bash
-   DATABASE_URL="mysql://..." pnpm seed
+   pnpm --filter @corecart/database exec prisma db push
+   pnpm exec tsx scripts/seed-users.ts
+   pnpm exec tsx packages/database/prisma/seed-localization.ts
    ```
 
-### B. Cloudinary Media Storage Setup
-1. Create a Cloudinary account.
-2. Obtain `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, and `CLOUDINARY_API_SECRET`.
-3. Verify remote patterns are allowed in `next.config.mjs` (pre-configured for `res.cloudinary.com`).
+### B. Upstash Redis Setup
+1. Create a Redis database on [Upstash](https://console.upstash.com).
+2. Copy `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN`.
 
 ---
 
-## 3. Vercel Project Configurations
+## 3. Environment Variables Reference
 
-You will create 3 Vercel projects (or subdomains under 1 team) for the monorepo:
-
-### Project 1: Storefront (`apps/storefront`)
-- **Framework Preset**: Next.js
-- **Root Directory**: `apps/storefront`
-- **Build Command**: `cd ../.. && pnpm build --filter storefront`
-- **Output Directory**: `.next`
-
-### Project 2: Merchant Portal (`apps/merchant`)
-- **Framework Preset**: Next.js
-- **Root Directory**: `apps/merchant`
-- **Build Command**: `cd ../.. && pnpm build --filter merchant`
-- **Output Directory**: `.next`
-
-### Project 3: Admin Portal (`apps/admin`)
-- **Framework Preset**: Next.js
-- **Root Directory**: `apps/admin`
-- **Build Command**: `cd ../.. && pnpm build --filter admin`
-- **Output Directory**: `.next`
-
----
-
-## 4. Required Production Environment Variables
-
-Add the following environment variables in Vercel settings for each project:
-
-| Variable Name | Scope | Description |
+| Variable Name | Target | Purpose / Format |
 |---|---|---|
-| `DATABASE_URL` | Server | Railway MySQL connection string |
-| `JWT_ACCESS_SECRET` | Server | Secret for signing access tokens |
-| `JWT_REFRESH_SECRET` | Server | Secret for signing refresh tokens |
-| `CLOUDINARY_CLOUD_NAME` | Server | Cloudinary Cloud Name |
-| `CLOUDINARY_API_KEY` | Server | Cloudinary API Key |
-| `CLOUDINARY_API_SECRET` | Server | Cloudinary API Secret |
-| `RAZORPAY_KEY_ID` | Server/Client | Razorpay Key ID |
-| `RAZORPAY_KEY_SECRET` | Server | Razorpay Secret |
-
----
-
-## 5. Post-Deployment Verification Checklist
-
-After Vercel completes deployment:
-
-- [ ] **Health Endpoint**: Ping `https://<storefront-url>/api/health` and verify `{"status":"ok","checks":{"database":"healthy"}}`.
-- [ ] **Auth Flow**: Perform Register & Login to verify JWT cookie persistence.
-- [ ] **Images**: Upload a product image from Merchant portal and verify it renders from `https://res.cloudinary.com/`.
-- [ ] **Checkout**: Create a test COD order on Storefront and confirm status updates in Merchant portal.
-- [ ] **Role Protection**: Attempt to open `/admin` without admin credentials and confirm redirect to login.
-
----
-
-## 6. Emergency Rollback Procedure
-
-If a breaking issue occurs post-deploy:
-
-1. **Vercel Rollback**: Navigate to Vercel Project -> **Deployments** -> select the previous stable deployment -> Click **Promote to Production**.
-2. **Database Rollback**: If schema changes occurred, run migration rollback scripts or restore Railway point-in-time backup.
+| `DATABASE_URL` | Server | Supabase PostgreSQL Transaction Pooler connection string (Port 6543) |
+| `DIRECT_URL` | Server | Supabase PostgreSQL Direct connection string (Port 5432) |
+| `JWT_ACCESS_SECRET` | Server | Minimum 32-character random string |
+| `JWT_REFRESH_SECRET` | Server | Minimum 32-character random string |
+| `UPSTASH_REDIS_REST_URL` | Edge/Server | Upstash REST endpoint |
+| `UPSTASH_REDIS_REST_TOKEN` | Edge/Server | Upstash REST auth token |
+| `NEXT_PUBLIC_SUPABASE_URL` | Client/Server | Supabase project URL (`https://xyz.supabase.co`) |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Client | Supabase public anonymous API key |
+| `SUPABASE_SERVICE_ROLE_KEY` | Server | Supabase secret service role key |
+| `RAZORPAY_KEY_ID` | Client/Server | Razorpay public key ID |
+| `RAZORPAY_KEY_SECRET` | Server | Razorpay secret key |
+| `RAZORPAY_WEBHOOK_SECRET` | Server | Razorpay webhook signature secret |
+| `NEXT_PUBLIC_STOREFRONT_URL` | Client | Production Storefront URL |
+| `NEXT_PUBLIC_MERCHANT_URL` | Client | Production Merchant Dashboard URL |
+| `NEXT_PUBLIC_ADMIN_URL` | Client | Production Admin Portal URL |
+| `NEXT_PUBLIC_API_URL` | Client | Production API base URL (`https://<domain>/api/v1`) |

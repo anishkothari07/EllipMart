@@ -107,11 +107,8 @@ export function Header({
             <Menu className="size-5" />
           </button>
 
-          <Link href="/" className="flex items-center gap-2">
-            <span className="grid size-8 place-items-center rounded-lg bg-foreground text-background">
-              <ShoppingBag className="size-4" />
-            </span>
-            <span className="text-xl font-semibold tracking-tight">EllipMart</span>
+          <Link href="/" className="flex items-center gap-2 shrink-0">
+            <Image src="/logo.png" alt="EllipMart Logo" width={56} height={56} className="object-contain" priority />
           </Link>
 
           {/* Desktop nav */}

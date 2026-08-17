@@ -34,7 +34,7 @@ apps (storefront, merchant, admin)
        ├──────────────────────────┐
        ▼                          ▼
 @corecart/database       @corecart/shared (JWT, AppError, Logger)
-(Prisma Client / MySQL)           │
+(Prisma Client / PostgreSQL)      │
        │                          │
        └──────────┬───────────────┘
                   ▼
@@ -46,8 +46,8 @@ apps (storefront, merchant, admin)
 ## 3. Core Architectural Patterns
 
 ### A. Separation of Concerns (SOLID)
-- **Database Layer (`packages/database`)**: Exposes the Prisma client singleton wrapped with MariaDB/MySQL drivers. No business rules are present in this layer.
-- **Service Layer (`packages/commerce`)**: Encapsulates pure business rules (order calculation, inventory reservation, COD state machine transitions, Cloudinary media processing).
+- **Database Layer (`packages/database`)**: Exposes the resilient Prisma client singleton configured for Supabase PostgreSQL with connection pooling.
+- **Service Layer (`packages/commerce`)**: Encapsulates pure business rules (order calculation, inventory reservation, COD state machine transitions, Supabase media storage & transforms).
 - **Presentation Layer (`apps/*`)**: Next.js App Router routes act purely as request handlers—parsing incoming JSON, validating payloads using `zod`, delegating to service methods, and serializing responses.
 
 ### B. Error Handling Standard
@@ -73,4 +73,4 @@ apps (storefront, merchant, admin)
 
 - **Database Queries**: Multi-entity operations are bundled in Prisma transactions (`prisma.$transaction`).
 - **Query Interceptor**: Integration tests log warnings for any database queries taking longer than 100ms.
-- **Image Optimization**: Cloudinary CDN URLs (`res.cloudinary.com`) handle dynamic variant generation, responsive resizing, and format optimization (WebP/AVIF).
+- **Image Optimization**: Supabase Storage CDN URLs handle dynamic variant rendering, responsive resizing, and format optimization (WebP/AVIF).

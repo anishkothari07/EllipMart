@@ -6,6 +6,11 @@ const nextConfig = {
     remotePatterns: [
       {
         protocol: 'https',
+        hostname: '**.supabase.co',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
         hostname: 'res.cloudinary.com',
         pathname: '/**',
       },
@@ -23,7 +28,14 @@ const nextConfig = {
   },
   serverExternalPackages: ['sharp', '@prisma/client', 'bcryptjs', '@corecart/database'],
   transpilePackages: ['@corecart/commerce', '@corecart/shared', '@corecart/ui', '@corecart/types'],
-  
+  serverActions: {
+    bodySizeLimit: '50mb',
+  },
+  experimental: {
+    serverActions: {
+      bodySizeLimit: '50mb',
+    },
+  },
   poweredByHeader: false,
   async headers() {
     return [

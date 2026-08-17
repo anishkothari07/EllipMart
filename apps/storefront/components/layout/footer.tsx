@@ -2,6 +2,7 @@
 
 import { ArrowRight, Camera, Play, Send, ShoppingBag, Users } from 'lucide-react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { useState } from 'react'
 import { Container } from '@corecart/ui'
 
@@ -88,10 +89,7 @@ export function Footer() {
         <div className="mt-16 grid grid-cols-2 gap-8 md:grid-cols-6">
           <div className="col-span-2">
             <Link href="/" className="flex items-center gap-2">
-              <span className="grid size-8 place-items-center rounded-lg bg-foreground text-background">
-                <ShoppingBag className="size-4" />
-              </span>
-              <span className="text-xl font-semibold tracking-tight">EllipMart</span>
+              <Image src="/logo.png" alt="EllipMart Logo" width={56} height={56} className="object-contain" priority />
             </Link>
             <p className="mt-4 max-w-xs text-sm text-muted-foreground">
               Elevated everyday commerce. Curated collections and luxury essentials, delivered with care.

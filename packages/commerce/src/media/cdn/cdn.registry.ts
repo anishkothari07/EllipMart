@@ -1,4 +1,4 @@
-export type CDNProviderType = 'LOCAL' | 'CLOUDFRONT' | 'CLOUDFLARE' | 'BUNNY' | 'CLOUDINARY';
+export type CDNProviderType = 'LOCAL' | 'CLOUDFRONT' | 'CLOUDFLARE' | 'BUNNY' | 'CLOUDINARY' | 'SUPABASE';
 
 export interface CDNConfig {
   provider: CDNProviderType;
@@ -12,9 +12,9 @@ class CDNProviderRegistry {
   private enabled: boolean;
 
   constructor() {
-    this.provider = (process.env.CDN_PROVIDER as CDNProviderType) || 'LOCAL';
-    this.baseUrl = process.env.CDN_BASE_URL || '';
-    this.enabled = !!process.env.CDN_BASE_URL && process.env.CDN_ENABLED !== 'false';
+    this.provider = (process.env.CDN_PROVIDER as CDNProviderType) || (process.env.NEXT_PUBLIC_SUPABASE_URL ? 'SUPABASE' : 'LOCAL');
+    this.baseUrl = process.env.CDN_BASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL || '';
+    this.enabled = !!this.baseUrl && process.env.CDN_ENABLED !== 'false';
   }
 
   public resolveUrl(
@@ -38,6 +38,18 @@ class CDNProviderRegistry {
 
     // Provider specific URL transformation parameters
     switch (this.provider) {
+      case 'SUPABASE': {
+        const bucket = process.env.SUPABASE_STORAGE_BUCKET || 'media';
+        const params: string[] = [];
+        if (options?.width) params.push(`width=${options.width}`);
+        if (options?.height) params.push(`height=${options.height}`);
+        if (options?.quality) params.push(`quality=${options.quality}`);
+        if (options?.format) params.push(`format=${options.format}`);
+        const queryStr = params.length > 0 ? `?${params.join('&')}` : '';
+        const cleanRelPath = cleanPath.replace(/^\/+/, '');
+        return `${cdnBase}/storage/v1/render/image/public/${bucket}/${cleanRelPath}${queryStr}`;
+      }
+
       case 'CLOUDFRONT':
         return `${cdnBase}${cleanPath}`;
 

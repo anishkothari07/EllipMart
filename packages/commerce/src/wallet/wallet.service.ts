@@ -62,7 +62,7 @@ export class WalletService {
     return prisma.$transaction(async (tx) => {
       // Lock the wallet row for this transaction
       const wallet = await tx.$queryRaw<{ id: string; balance: string }[]>`
-        SELECT id, balance FROM Wallet WHERE userId = ${userId} LIMIT 1 FOR UPDATE
+        SELECT "id", "balance" FROM "Wallet" WHERE "userId" = ${userId} LIMIT 1 FOR UPDATE
       `;
 
       if (!wallet.length) throw new AppError('Wallet not found', 404);
@@ -118,7 +118,7 @@ export class WalletService {
 
       // Lock wallet row for atomic debit
       const wallets = await tx.$queryRaw<{ id: string; balance: string }[]>`
-        SELECT id, balance FROM Wallet WHERE id = ${hold.walletId} LIMIT 1 FOR UPDATE
+        SELECT "id", "balance" FROM "Wallet" WHERE "id" = ${hold.walletId} LIMIT 1 FOR UPDATE
       `;
       const w = wallets[0];
       const newBalance = Number(w.balance) - Number(hold.amount);

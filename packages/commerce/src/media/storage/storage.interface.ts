@@ -6,14 +6,14 @@ export interface StorageUploadOptions {
 }
 
 export interface StorageUploadResult {
-  storageProvider: string; // "LOCAL", "AWS_S3", "CLOUDINARY", "R2"
+  storageProvider: string; // "LOCAL", "SUPABASE", "AWS_S3", "CLOUDINARY", "R2"
   storagePath: string;
   publicUrl: string;
   size: number;
 }
 
 export interface IStorageProvider {
-  id: string; // "LOCAL", "AWS_S3", "CLOUDINARY", "R2"
+  id: string; // "LOCAL", "SUPABASE", "AWS_S3", "CLOUDINARY", "R2"
   upload(options: StorageUploadOptions): Promise<StorageUploadResult>;
   delete(storagePath: string): Promise<boolean>;
   getUrl(storagePath: string): string;

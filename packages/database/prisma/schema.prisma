@@ -4,8 +4,9 @@ generator client {
 }
 
 datasource db {
-  provider = "mysql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 // ============================================================================
@@ -71,18 +72,18 @@ model Media {
 
   // Expanded AI Metadata (Sprint 10 Ready)
   aiCaption       String?         @db.Text
-  aiTags          String?         @db.LongText // JSON Array
-  ocrText         String?         @db.LongText
-  labels          String?         @db.LongText // JSON
+  aiTags          String?         @db.Text // JSON Array
+  ocrText         String?         @db.Text
+  labels          String?         @db.Text // JSON
   scene           String?
-  objects         String?         @db.LongText
-  faces           String?         @db.LongText
+  objects         String?         @db.Text
+  faces           String?         @db.Text
   brand           String?
-  keywords        String?         @db.LongText
+  keywords        String?         @db.Text
   nsfwScore       Float?
   qualityScore    Float?
-  colorPalette    String?         @db.LongText
-  embeddingVector String?         @db.LongText
+  colorPalette    String?         @db.Text
+  embeddingVector String?         @db.Text
   similarityHash  String?
 
   folderId        String?
@@ -230,7 +231,7 @@ model AssetMetadata {
   id        String   @id @default(uuid())
   mediaId   String
   key       String
-  value     String   @db.LongText
+  value     String   @db.Text
   type      String   @default("STRING") // "STRING", "NUMBER", "BOOLEAN", "JSON"
   createdAt DateTime @default(now())
 
@@ -258,8 +259,8 @@ model User {
   language            String     @default("en")
   currency            String     @default("USD")
   theme               String     @default("system")
-  savedPreferences    String?    @db.LongText
-  notificationPrefs   String?    @db.LongText
+  savedPreferences    String?    @db.Text
+  notificationPrefs   String?    @db.Text
   role                Role       @default(CUSTOMER)
   status              UserStatus @default(PENDING_VERIFICATION)
   failedLoginAttempts Int        @default(0)
@@ -465,7 +466,7 @@ model Collection {
   slug        String   @unique
   description String?  @db.Text
   isAutomatic Boolean  @default(false)
-  rules       String?  @db.LongText // JSON array of rules for automatic collections
+  rules       String?  @db.Text // JSON array of rules for automatic collections
   isActive    Boolean  @default(true)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -506,7 +507,7 @@ model Product {
   name             String
   slug             String            @unique
   shortDescription String?           @db.Text
-  longDescription  String            @db.LongText
+  longDescription  String            @db.Text
   status           ProductStatus     @default(DRAFT)
   visibility       ProductVisibility @default(PUBLIC)
   ratingAverage    Float             @default(0)
@@ -999,7 +1000,7 @@ model ShippingZone {
   id                 String  @id @default(uuid())
   shippingProviderId String?
   name               String
-  countries          String  @db.LongText // JSON ["US", "CA"]
+  countries          String  @db.Text // JSON ["US", "CA"]
   isActive           Boolean @default(true)
 
   provider ShippingProvider? @relation(fields: [shippingProviderId], references: [id], onDelete: SetNull)
@@ -1225,9 +1226,9 @@ model Coupon {
   maxUses              Int?
   usagePerCustomer     Int?
   usedCount            Int       @default(0)
-  categoryRestrictions String?   @db.LongText // JSON array of category IDs
-  productRestrictions  String?   @db.LongText // JSON array of product IDs
-  excludedProducts     String?   @db.LongText // JSON array of excluded IDs
+  categoryRestrictions String?   @db.Text // JSON array of category IDs
+  productRestrictions  String?   @db.Text // JSON array of product IDs
+  excludedProducts     String?   @db.Text // JSON array of excluded IDs
   validFrom            DateTime?
   validUntil           DateTime?
   isActive             Boolean   @default(true)
@@ -1326,7 +1327,7 @@ model PaymentMethodProvider {
   providerId      String
   priority        Int             @default(0)
   enabled         Boolean         @default(true)
-  config          String?         @db.LongText // JSON
+  config          String?         @db.Text // JSON
   createdAt       DateTime        @default(now())
   updatedAt       DateTime        @updatedAt
 
@@ -1357,10 +1358,10 @@ model PaymentMethodRule {
   paymentMethodId   String
   minAmount         Decimal?        @db.Decimal(10, 2)
   maxAmount         Decimal?        @db.Decimal(10, 2)
-  allowedPincodes   String?         @db.LongText // JSON Array
-  blockedPincodes   String?         @db.LongText // JSON Array
-  allowedCategories String?         @db.LongText // JSON Array
-  blockedCategories String?         @db.LongText // JSON Array
+  allowedPincodes   String?         @db.Text // JSON Array
+  blockedPincodes   String?         @db.Text // JSON Array
+  allowedCategories String?         @db.Text // JSON Array
+  blockedCategories String?         @db.Text // JSON Array
   createdAt         DateTime        @default(now())
   updatedAt         DateTime        @updatedAt
 
@@ -1372,7 +1373,7 @@ model PaymentEvent {
   paymentId         String
   status            PaymentEventStatus
   providerPaymentId String?
-  rawPayload        String?            @db.LongText
+  rawPayload        String?            @db.Text
   errorMessage      String?            @db.Text
   createdAt         DateTime           @default(now())
 
@@ -1398,7 +1399,7 @@ model PaymentWebhook {
   provider          String
   eventId           String   @unique
   eventType         String
-  rawPayload        String   @db.LongText
+  rawPayload        String   @db.Text
   signature         String?
   processed         Boolean  @default(false)
   receivedAt        DateTime @default(now())
@@ -1412,7 +1413,7 @@ model PaymentAudit {
   action           String
   previousStatus   PaymentStatus?
   newStatus        PaymentStatus
-  providerResponse String?        @db.LongText
+  providerResponse String?        @db.Text
   createdAt        DateTime       @default(now())
 
   payment          Payment        @relation(fields: [paymentId], references: [id], onDelete: Cascade)
@@ -1506,7 +1507,7 @@ model Notification {
   recipientContact String?              // email / phone number / webhook URL
   status           NotificationStatus   @default(PENDING)
   templateId       String?
-  payload          String?              @db.LongText // JSON payload
+  payload          String?              @db.Text // JSON payload
   title            String?
   body             String?              @db.Text
   isRead           Boolean              @default(false)
@@ -1569,7 +1570,7 @@ model NotificationLog {
   templateId     String?
   latencyMs      Int                  @default(0)
   status         NotificationStatus   @default(SENT)
-  response       String?              @db.LongText // Raw provider response JSON
+  response       String?              @db.Text // Raw provider response JSON
   retries        Int                  @default(0)
   createdAt      DateTime             @default(now())
 
@@ -1588,9 +1589,9 @@ model NotificationTemplate {
   channel        NotificationChannel  @default(EMAIL)
   category       NotificationCategory @default(ORDER)
   subject        String?
-  html           String?              @db.LongText
-  text           String?              @db.LongText
-  variables      String?              @db.LongText // JSON array of allowed variable names
+  html           String?              @db.Text
+  text           String?              @db.Text
+  variables      String?              @db.Text // JSON array of allowed variable names
   currentVersion Int                  @default(1)
   isActive       Boolean              @default(true)
   createdAt      DateTime             @default(now())
@@ -1609,9 +1610,9 @@ model NotificationTemplateVersion {
   templateId  String
   version     Int
   subject     String?
-  html        String?              @db.LongText
-  text        String?              @db.LongText
-  variables   String?              @db.LongText // JSON array
+  html        String?              @db.Text
+  text        String?              @db.Text
+  variables   String?              @db.Text // JSON array
   createdById String?
   createdAt   DateTime             @default(now())
 
@@ -1654,7 +1655,7 @@ model WebhookSubscription {
   websiteId      String?
   targetUrl      String
   secret         String   // HMAC signing secret
-  events         String   @db.LongText // JSON array of event names e.g. ["OrderCreated", "OrderPaid"]
+  events         String   @db.Text // JSON array of event names e.g. ["OrderCreated", "OrderPaid"]
   isActive       Boolean  @default(true)
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
@@ -1707,7 +1708,7 @@ model AuditLog {
   entityType String
   entityId   String
   action     String // "CREATE", "UPDATE", "DELETE"
-  changes    String   @db.LongText // JSON payload of changes
+  changes    String   @db.Text // JSON payload of changes
   userId     String? // The admin/user who made the change
   createdAt  DateTime @default(now())
 
@@ -1796,7 +1797,7 @@ model WebsiteVersion {
   id           String   @id @default(uuid())
   websiteId    String
   versionLabel String
-  payload      String   @db.LongText // JSON of compiled runtime manifest
+  payload      String   @db.Text // JSON of compiled runtime manifest
   hash         String?
   isLive       Boolean  @default(false)
   publishedAt  DateTime @default(now())
@@ -1874,7 +1875,7 @@ model Seo {
   description String? @db.Text
   canonical   String?
   robots      String? @default("index, follow")
-  schemaJson  String? @db.LongText // Structured data
+  schemaJson  String? @db.Text // Structured data
   twitterCard String? @default("summary_large_image")
   ogImageId   String?
   faviconId   String?
@@ -1887,7 +1888,7 @@ model Seo {
 model ComponentRegistry {
   id        String   @id @default(uuid())
   name      String   @unique // "HeroBanner", "ProductCarousel"
-  schema    String   @db.LongText // Valid property schema
+  schema    String   @db.Text // Valid property schema
   version   String   @default("1.0.0")
   createdAt DateTime @default(now())
 
@@ -1920,7 +1921,7 @@ model WebsiteComponentProperty {
   componentId  String
   key          String // "headline", "collectionId"
   bindingType  String  @default("LITERAL") // "LITERAL", "ENTITY", "EXPRESSION"
-  literalValue String? @db.LongText
+  literalValue String? @db.Text
   entityType   String? // "Collection", "Product"
   entityId     String?
   expression   String? // "user.firstName"
@@ -2038,7 +2039,7 @@ model AnalyticsEvent {
   category       String?
   entityType     String?
   entityId       String?
-  properties     String?            @db.LongText
+  properties     String?            @db.Text
   ipAddress      String?
   country        String?
   city           String?
@@ -2293,7 +2294,7 @@ model ScheduledReport {
 model AnalyticsDashboardCache {
   id        String   @id @default(uuid())
   key       String   @unique
-  value     String   @db.LongText
+  value     String   @db.Text
   expiresAt DateTime
   createdAt DateTime @default(now())
 }
@@ -2348,7 +2349,7 @@ model AIMessage {
   id             String         @id @default(uuid())
   conversationId String
   role           String
-  content        String         @db.LongText
+  content        String         @db.Text
   tokens         Int            @default(0)
   latencyMs      Int            @default(0)
   cost           Float          @default(0.0)
@@ -2360,8 +2361,8 @@ model AIJob {
   id        String   @id @default(uuid())
   type      String
   status    String   @default("PENDING")
-  payload   String?  @db.LongText
-  result    String?  @db.LongText
+  payload   String?  @db.Text
+  result    String?  @db.Text
   error     String?  @db.Text
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -2384,8 +2385,8 @@ model AIUsage {
 model AIPromptTemplate {
   id                String   @id @default(uuid())
   name              String   @unique
-  systemInstruction String   @db.LongText
-  userPromptSchema  String   @db.LongText
+  systemInstruction String   @db.Text
+  userPromptSchema  String   @db.Text
   variables         String   @db.Text
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
@@ -2395,7 +2396,7 @@ model AIEmbedding {
   id         String   @id @default(uuid())
   entityType String
   entityId   String
-  vector     String   @db.LongText
+  vector     String   @db.Text
   createdAt  DateTime @default(now())
 
   @@unique([entityType, entityId])
@@ -2498,7 +2499,7 @@ model ExchangeRule {
   brand             String
   modelName         String
   maxValuation      Decimal         @db.Decimal(10, 2)
-  conditionsJson    String          @db.LongText // JSON value rules based on condition grade
+  conditionsJson    String          @db.Text // JSON value rules based on condition grade
 
   program           ExchangeProgram @relation(fields: [exchangeProgramId], references: [id], onDelete: Cascade)
   category          DeviceCategory  @relation(fields: [deviceCategoryId], references: [id], onDelete: Cascade)
@@ -2540,7 +2541,7 @@ model FestivalCampaign {
   name              String
   startDate         DateTime
   endDate           DateTime
-  themeJson         String?              @db.LongText // Theme variables mapping
+  themeJson         String?              @db.Text // Theme variables mapping
   isActive          Boolean              @default(true)
 
   banners           FestivalBanner[]
@@ -2564,7 +2565,7 @@ model FestivalLayout {
   festivalCampaignId String
   sectionName        String
   sortOrder          Int
-  configJson         String           @db.LongText
+  configJson         String           @db.Text
 
   campaign           FestivalCampaign @relation(fields: [festivalCampaignId], references: [id], onDelete: Cascade)
 }
@@ -2628,7 +2629,7 @@ model RegionalConfiguration {
   countryCode       String  @unique
   defaultLanguage   String  @default("en")
   taxType           String  @default("GST") // "GST", "VAT", "SALES_TAX"
-  addressFieldsJson String  @db.LongText // JSON fields definition
+  addressFieldsJson String  @db.Text // JSON fields definition
 
   country           Country @relation(fields: [countryCode], references: [code], onDelete: Cascade)
 }

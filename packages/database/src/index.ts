@@ -1,9 +1,9 @@
 import { PrismaClient } from '@prisma/client';
 
 // ============================================================
-// Resilient Prisma singleton for Railway MySQL (free tier)
+// Resilient Prisma singleton for Supabase PostgreSQL
 //
-// connection_limit=3 prevents Railway free-tier pool exhaustion.
+// Supports connection pooling via Supavisor / PgBouncer.
 // The proxy wraps every async call: on connection drop errors it
 // resets the singleton so the next request gets a fresh client.
 // ============================================================
@@ -21,10 +21,6 @@ function getPrismaClient(): PrismaClient {
     const databaseUrl = process.env.DATABASE_URL;
     if (!databaseUrl) {
       throw new Error('DATABASE_URL environment variable is required.');
-    }
-    if (!databaseUrl.includes('connection_limit')) {
-      const sep = databaseUrl.includes('?') ? '&' : '?';
-      process.env.DATABASE_URL = `${databaseUrl}${sep}connection_limit=3&pool_timeout=10`;
     }
     globalForPrisma.prisma = createPrismaClient();
   }

@@ -1,15 +1,14 @@
 services:
-  mysql-test:
-    image: mariadb:10.11
+  postgres-test:
+    image: postgres:16-alpine
     environment:
-      MYSQL_DATABASE: ellipmart_test
-      MYSQL_USER: ellipmart_test
-      MYSQL_PASSWORD: ellipmart_test_password
-      MYSQL_ROOT_PASSWORD: ellipmart_test_root_password
+      POSTGRES_DB: ellipmart_test
+      POSTGRES_USER: ellipmart_test
+      POSTGRES_PASSWORD: ellipmart_test_password
     ports:
-      - "3307:3306"
+      - "5433:5432"
     healthcheck:
-      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      test: ["CMD-SHELL", "pg_isready -U ellipmart_test -d ellipmart_test"]
       interval: 5s
       timeout: 5s
       retries: 20

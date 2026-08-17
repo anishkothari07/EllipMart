@@ -10,26 +10,25 @@ services:
       - "3000:3000"
     environment:
       - NODE_ENV=production
-      - DATABASE_URL=mysql://ellipmart_user:ellipmart_pass@mysql:3306/ellipmart
+      - DATABASE_URL=postgresql://ellipmart_user:ellipmart_pass@postgres:5432/ellipmart?schema=public
       - REDIS_URL=redis://redis:6379
       - REDIS_HOST=redis
       - REDIS_PORT=6379
     depends_on:
-      - mysql
+      - postgres
       - redis
 
-  mysql:
-    image: mariadb:10.11
+  postgres:
+    image: postgres:16-alpine
     restart: always
     environment:
-      MYSQL_ROOT_PASSWORD: root_password
-      MYSQL_DATABASE: ellipmart
-      MYSQL_USER: ellipmart_user
-      MYSQL_PASSWORD: ellipmart_pass
+      POSTGRES_DB: ellipmart
+      POSTGRES_USER: ellipmart_user
+      POSTGRES_PASSWORD: ellipmart_pass
     ports:
-      - "3306:3306"
+      - "5432:5432"
     volumes:
-      - mysql_data:/var/lib/mysql
+      - postgres_data:/var/lib/postgresql/data
 
   redis:
     image: redis:7-alpine
@@ -51,5 +50,5 @@ services:
       - app
 
 volumes:
-  mysql_data:
+  postgres_data:
   redis_data:

@@ -71,7 +71,7 @@ export class LoyaltyService {
     return prisma.$transaction(async (tx) => {
       // Lock account row
       const accounts = await tx.$queryRaw<{ id: string; points: number }[]>`
-        SELECT id, points FROM LoyaltyAccount WHERE userId = ${userId} LIMIT 1 FOR UPDATE
+        SELECT "id", "points" FROM "LoyaltyAccount" WHERE "userId" = ${userId} LIMIT 1 FOR UPDATE
       `;
 
       if (!accounts.length) throw new AppError('Loyalty account not found', 404);
@@ -129,7 +129,7 @@ export class LoyaltyService {
 
       // Lock account row
       const accounts = await tx.$queryRaw<{ id: string; points: number; lifetimeRedeemed: number }[]>`
-        SELECT id, points, lifetimeRedeemed FROM LoyaltyAccount WHERE id = ${hold.loyaltyAccountId} LIMIT 1 FOR UPDATE
+        SELECT "id", "points", "lifetimeRedeemed" FROM "LoyaltyAccount" WHERE "id" = ${hold.loyaltyAccountId} LIMIT 1 FOR UPDATE
       `;
       const acct = accounts[0];
       const newPoints = acct.points - hold.points;
@@ -204,7 +204,7 @@ export class LoyaltyService {
 
       // Lock and update
       const accounts = await tx.$queryRaw<{ id: string; points: number; lifetimeEarned: number }[]>`
-        SELECT id, points, lifetimeEarned FROM LoyaltyAccount WHERE id = ${account.id} LIMIT 1 FOR UPDATE
+        SELECT "id", "points", "lifetimeEarned" FROM "LoyaltyAccount" WHERE "id" = ${account.id} LIMIT 1 FOR UPDATE
       `;
       const acct = accounts[0];
       const newPoints = acct.points + points;

@@ -333,6 +333,13 @@ vi.mock('nodemailer', () => ({
 // Mock fetch globally
 const mockFetch = vi.fn().mockImplementation((url) => {
   if (typeof url === 'string') {
+    if (url.includes('supabase.co')) {
+      return Promise.resolve({
+        ok: true,
+        text: () => Promise.resolve('{"Key": "media/mock-image.png"}'),
+        json: () => Promise.resolve({ Key: "media/mock-image.png" }),
+      });
+    }
     if (url.includes('cloudinary')) {
       return Promise.resolve({
         ok: true,

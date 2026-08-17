@@ -2,6 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { LayoutDashboard, Globe, Settings, LogOut, Shield } from 'lucide-react';
 import { cn } from '@corecart/shared';
@@ -18,13 +19,9 @@ export function AdminSidebar() {
   return (
     <aside className="w-64 border-r border-border/60 bg-card/50 flex flex-col h-full overflow-y-auto select-none py-6 px-4 space-y-6">
       <div className="flex items-center gap-3 px-2">
-        <div className="size-9 rounded-2xl bg-foreground text-background flex items-center justify-center shadow-md">
-          <Shield className="size-5 shrink-0" />
-        </div>
-        <div className="flex flex-col">
-          <span className="text-sm font-bold tracking-tight text-foreground leading-none">CoreCart</span>
-          <span className="text-[10px] text-muted-foreground font-semibold uppercase tracking-wider mt-0.5">Super Admin</span>
-        </div>
+        <Link href="/" className="flex items-center">
+          <Image src="/logo.png" alt="EllipMart Logo" width={48} height={48} className="object-contain" priority />
+        </Link>
       </div>
 
       <nav className="flex-1 space-y-1">
