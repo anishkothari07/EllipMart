@@ -14,7 +14,7 @@ const envSchema = z.object({
 export type Env = z.infer<typeof envSchema>;
 
 // Skip validation during Docker/CI builds — env vars are only available at runtime
-const skipValidation = !!process.env.SKIP_ENV_VALIDATION;
+const skipValidation = !!process.env.SKIP_ENV_VALIDATION || !!process.env.VERCEL;
 
 // On the client side, process.env won't have server-only vars — skip validation
 const isServer = typeof window === 'undefined';
