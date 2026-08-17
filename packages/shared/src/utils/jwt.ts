@@ -13,7 +13,7 @@ export async function signAccessToken(payload: TokenPayload): Promise<string> {
   return new SignJWT({ ...payload })
     .setProtectedHeader({ alg: 'HS256' })
     .setIssuedAt()
-    .setExpirationTime(env.JWT_ACCESS_EXPIRES)
+    .setExpirationTime(env.JWT_ACCESS_EXPIRES || '15m')
     .sign(secret);
 }
 
@@ -22,7 +22,7 @@ export async function signRefreshToken(payload: TokenPayload): Promise<string> {
   return new SignJWT({ ...payload })
     .setProtectedHeader({ alg: 'HS256' })
     .setIssuedAt()
-    .setExpirationTime(env.JWT_REFRESH_EXPIRES)
+    .setExpirationTime(env.JWT_REFRESH_EXPIRES || '30d')
     .sign(secret);
 }
 
