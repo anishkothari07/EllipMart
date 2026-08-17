@@ -1,55 +1,57 @@
-import { prisma } from '@corecart/database';
 import { AppError } from '@corecart/shared';
 
 export const couponService = {
   async validateAndApply(code: string, subtotal: number, userId: string) {
-    const coupon = await prisma.coupon.findUnique({
-      where: { code },
-      include: { rules: { include: { conditions: true } } }
-    });
-
-    if (!coupon) throw new AppError('Invalid coupon code', 400);
-    if (!coupon.isActive) throw new AppError('Coupon is no longer active', 400);
-    if (coupon.validFrom && new Date() < coupon.validFrom) throw new AppError('Coupon not yet valid', 400);
-    if (coupon.validUntil && new Date() > coupon.validUntil) throw new AppError('Coupon expired', 400);
+    const internxyBaseUrl = process.env.INTERNYX_BASE_URL;
+    const internxyApiKey = process.env.INTERNYX_API_KEY;
     
-    if (coupon.minOrderAmount && subtotal < Number(coupon.minOrderAmount)) {
-      throw new AppError(`Minimum order amount of ${coupon.minOrderAmount} required`, 400);
+    if (!internxyBaseUrl || !internxyApiKey) {
+      console.warn('[COUPON] INTERNYX_BASE_URL or INTERNYX_API_KEY not set. Falling back to mock ₹500 discount.');
+      const mockDiscount = Math.min(500, subtotal);
+      return {
+        couponId: 'mock-internyx-id',
+        code,
+        discountType: 'FIXED',
+        discountValue: mockDiscount,
+        discountAmount: mockDiscount
+      };
     }
 
-    if (coupon.maxUses && coupon.usedCount >= coupon.maxUses) {
-      throw new AppError('Coupon usage limit reached', 400);
-    }
-
-    if (coupon.usagePerCustomer) {
-      const userUsage = await prisma.couponUsage.count({
-        where: { couponId: coupon.id, userId }
+    try {
+      // Ping Internyx to validate code
+      const response = await fetch(`${internxyBaseUrl}/api/wallet/validate-code`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-api-key': internxyApiKey,
+        },
+        body: JSON.stringify({ code }),
       });
-      if (userUsage >= coupon.usagePerCustomer) {
-        throw new AppError('You have reached the maximum usage for this coupon', 400);
+
+      if (!response.ok) {
+        throw new AppError('Could not connect to Internyx server', 500);
       }
+
+      const result = await response.json();
+      
+      if (!result.valid) {
+        throw new AppError(result.message || 'Invalid or expired code', 400);
+      }
+
+      const discountValue = Number(result.valueInRupees);
+      const discountAmount = Math.min(discountValue, subtotal); // Cannot discount more than subtotal
+
+      return {
+        couponId: `internyx-${code}`,
+        code,
+        discountType: 'FIXED',
+        discountValue,
+        discountAmount
+      };
+    } catch (err: any) {
+      if (err instanceof AppError) throw err;
+      throw new AppError('Failed to verify code with Internyx', 500);
     }
-
-    // Evaluates advanced rules if any (stubbed out, currently handles base discountType)
-    // The robust domain model (CouponRule -> CouponCondition) is in place for future extensions
-    // like Buy 2 Get 1, specific categories, etc.
-
-    let discount = 0;
-    if (coupon.discountType === 'PERCENTAGE') {
-      discount = (subtotal * Number(coupon.discountValue)) / 100;
-    } else if (coupon.discountType === 'FIXED') {
-      discount = Number(coupon.discountValue);
-    } else if (coupon.discountType === 'FREE_SHIPPING') {
-      // Free shipping usually zeros out shipping cost, doesn't discount subtotal
-      discount = 0;
-    }
-
-    return {
-      couponId: coupon.id,
-      code: coupon.code,
-      discountType: coupon.discountType,
-      discountValue: Number(coupon.discountValue),
-      discountAmount: Math.min(discount, subtotal) // Cannot discount more than subtotal
-    };
   }
 };
+

@@ -1,5 +1,7 @@
 'use client'
 
+import Script from 'next/script'
+
 import {
   ArrowLeft,
   ArrowRight,
@@ -158,6 +160,7 @@ export function CheckoutView() {
   const [upiOption, setUpiOption] = useState<'gpay' | 'phonepe' | 'paytm' | 'bhim' | 'vpa'>('gpay')
   const [upiVpa, setUpiVpa] = useState('')
   const [cardHolder, setCardHolder] = useState('')
+  const [appliedCouponCode, setAppliedCouponCode] = useState<string | null>(null)
   const [cardNumber, setCardNumber] = useState('')
   const [cardExpiry, setCardExpiry] = useState('')
   const [cardCvc, setCardCvc] = useState('')
@@ -199,22 +202,6 @@ export function CheckoutView() {
         const data = await res.json()
         if (data.success && Array.isArray(data.data)) {
           const list = [...data.data];
-          list.push({
-            id: 'emi',
-            code: 'EMI',
-            name: 'EMI (Easy Installments)',
-            type: 'EMI',
-            description: 'No Cost EMI starts from ₹1,699/month on credit cards',
-            isAvailable: true
-          });
-          list.push({
-            id: 'paylater',
-            code: 'PAYLATER',
-            name: 'Pay Later',
-            type: 'PAYLATER',
-            description: 'ICICI PayLater, Simple, LazyPay or HDFC FlexiPay',
-            isAvailable: true
-          });
           setMethods(list)
           
           // Default to first available method if selectedMethodCode is not valid
@@ -308,16 +295,6 @@ export function CheckoutView() {
     setPlacing(true)
     setErrorMsg(null)
     try {
-      if (selectedMethodCode === 'UPI') {
-        const isMobileDevice = /Android|iPhone|iPad/i.test(navigator.userAgent);
-        if (isMobileDevice) {
-          const totalAmount = cartSubtotal + shipUpcharge;
-          const upiUrl = `upi://pay?pa=ellipmart@okaxis&pn=EllipMart%20India&am=${totalAmount}&cu=INR&tn=Order%20Payment`;
-          window.location.href = upiUrl;
-          await new Promise((r) => setTimeout(r, 1500));
-        }
-      }
-
       const addressWithGst = {
         fullName: `${address.firstName} ${address.lastName}`,
         phone: address.phone,
@@ -331,7 +308,7 @@ export function CheckoutView() {
       const payload = {
         addressId: null,
         address: addressWithGst,
-        couponCode: null,
+        couponCode: appliedCouponCode,
         shippingRateId: null,
         shippingProvider: shipMethod,
         paymentProvider: isFullyCovered ? 'INTERNAL' : selectedMethodCode,
@@ -343,17 +320,73 @@ export function CheckoutView() {
         useLoyalty
       }
 
-
       const res = await fetch('/api/v1/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'x-user-id': 'mock-user-id' },
         body: JSON.stringify(payload),
       })
       const data = await res.json()
+      
       if (data.success) {
-        clearCart()
-        const orderId = data.data?.orderId
-        router.push(`/checkout/success?order=${orderId}`)
+        const orderData = data.data;
+        
+        // Launch Razorpay Modal if payment method is UPI/RAZORPAY and providerOrderId exists
+        if ((orderData.paymentMethodCode === 'UPI' || orderData.paymentMethodCode === 'RAZORPAY') && orderData.providerOrderId && !orderData.providerOrderId.startsWith('rzp_mock')) {
+          const options = {
+            key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || 'rzp_test_TQnEH5uJb0vUAA',
+            amount: Math.round(orderData.session?.grandTotal * 100) || Math.round((cartSubtotal + shipUpcharge - discountPct) * 100),
+            currency: 'INR',
+            name: 'EllipMart',
+            description: `Order ${orderData.orderNumber}`,
+            order_id: orderData.providerOrderId,
+            handler: async function (response: any) {
+              try {
+                // Verify payment on the server
+                const verifyRes = await fetch('/api/v1/checkout/verify', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({
+                    razorpay_payment_id: response.razorpay_payment_id,
+                    razorpay_order_id: response.razorpay_order_id,
+                    razorpay_signature: response.razorpay_signature,
+                    orderId: orderData.orderId,
+                    paymentId: orderData.paymentId,
+                  })
+                });
+                
+                const verifyData = await verifyRes.json();
+                
+                if (verifyData.success) {
+                  clearCart();
+                  router.push(`/checkout/success?order=${orderData.orderId}`);
+                } else {
+                  setErrorMsg(verifyData.message || 'Payment verification failed.');
+                  setPlacing(false);
+                }
+              } catch (err) {
+                setErrorMsg('Network error during verification. Please contact support.');
+                setPlacing(false);
+              }
+            },
+            prefill: {
+              name: addressWithGst.fullName,
+              email: address.email,
+              contact: address.phone
+            },
+            theme: { color: '#0f172a' }
+          };
+          
+          const rzp = new (window as any).Razorpay(options);
+          rzp.on('payment.failed', function (response: any) {
+             setErrorMsg(`Payment failed: ${response.error.description}`);
+             setPlacing(false);
+          });
+          rzp.open();
+        } else {
+          // COD or fully covered by wallet/points (INTERNAL) or Mock Order
+          clearCart()
+          router.push(`/checkout/success?order=${orderData.orderId}`)
+        }
       } else {
         setErrorMsg(data.message || 'Failed to place order. Please try again.')
         setPlacing(false)
@@ -367,8 +400,10 @@ export function CheckoutView() {
   const selectedMethodObj = methods.find((m) => m.code === selectedMethodCode)
 
   return (
-    <Container className="py-8 lg:py-12">
-      <div className="mb-8 flex items-center justify-between gap-4">
+    <>
+      <Script src="https://checkout.razorpay.com/v1/checkout.js" strategy="lazyOnload" />
+      <Container className="py-8 lg:py-12">
+        <div className="mb-8 flex items-center justify-between gap-4">
         <Link href="/" className="text-xl font-bold tracking-tight">
           EllipMart
         </Link>
@@ -1096,6 +1131,7 @@ export function CheckoutView() {
             subtotal={cartSubtotal} 
             showCoupon={step >= 2}
             onDiscountChange={setDiscountPct}
+            onCouponApplied={setAppliedCouponCode}
           >
             {/* Inject wallet and loyalty deductions into the summary visually */}
             {step === 2 && (useLoyalty || useWallet) && (
@@ -1122,5 +1158,6 @@ export function CheckoutView() {
         </aside>
       </div>
     </Container>
+    </>
   )
 }

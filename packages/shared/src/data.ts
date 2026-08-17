@@ -18,6 +18,7 @@ export const navLinks: NavLink[] = [
   { label: 'Home', href: '/category/home' },
   { label: 'Beauty', href: '/category/beauty' },
   { label: 'Sale', href: '/category/sale', badge: 'Up to 60%' },
+  { label: 'Internyx Rewards', href: '/internyx', badge: 'Points' },
 ]
 
 export const megaMenu: MegaMenuSection[] = [

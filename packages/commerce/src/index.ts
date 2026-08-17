@@ -4,6 +4,7 @@ export * from './catalog/merchant-collection.service';
 export * from './catalog/merchant-inventory.service';
 export * from './catalog/merchant-product.service';
 export * from './catalog/product.service';
+export * from './catalog/internyx.service';
 export * from './catalog/category.service';
 export * from './catalog/collection.service';
 export * from './catalog/brand.service';

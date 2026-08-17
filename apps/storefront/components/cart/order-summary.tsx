@@ -21,11 +21,13 @@ export function OrderSummary({
   children,
   showCoupon = true,
   onDiscountChange,
+  onCouponApplied,
 }: {
   subtotal: number
   children?: React.ReactNode
   showCoupon?: boolean
   onDiscountChange?: (pct: number) => void
+  onCouponApplied?: (code: string | null) => void
 }) {
   const [code, setCode] = useState('')
   const [applied, setApplied] = useState<{ code: string; discountPct: number } | null>(null)
@@ -44,17 +46,15 @@ export function OrderSummary({
       const data = await res.json();
       
       if (data.success) {
-        setApplied({ code: data.data.code, discountPct: data.data.discountType === 'PERCENTAGE' ? data.data.discountValue : 0 });
-        setError('');
-        // Since the backend handles robust types (fixed, percentage, free_shipping), 
-        // the frontend logic useOrderTotals should ideally be updated, 
-        // but passing discountPct keeps it compatible for now if it's a percentage.
-        // Or if it's FIXED, we can hack it to a percentage for useOrderTotals:
         const pct = data.data.discountType === 'PERCENTAGE' 
           ? data.data.discountValue 
           : (data.data.discountValue / subtotal) * 100;
+
+        setApplied({ code: data.data.code, discountPct: pct });
+        setError('');
           
         onDiscountChange?.(pct);
+        onCouponApplied?.(data.data.code);
       } else {
         setError(data.message || 'Invalid or expired code');
       }
@@ -67,6 +67,7 @@ export function OrderSummary({
     setApplied(null)
     setCode('')
     onDiscountChange?.(0)
+    onCouponApplied?.(null)
   }
 
   return (

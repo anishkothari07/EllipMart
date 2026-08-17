@@ -57,6 +57,13 @@ export class CheckoutValidationPipeline {
     if (input.shippingRateId) {
       shippingRate = await shippingService.getRateById(input.shippingRateId);
       if (!shippingRate) throw new AppError('Invalid shipping rate selected', 400);
+    } else if (input.shippingProvider) {
+      // Support frontend's hardcoded UI shipping methods as fallback
+      if (input.shippingProvider === 'express') {
+        shippingRate = { id: 'express', cost: 12, zone: { provider: { name: 'Express' } }, estDays: '2-3 business days' };
+      } else if (input.shippingProvider === 'overnight') {
+        shippingRate = { id: 'overnight', cost: 28, zone: { provider: { name: 'Overnight' } }, estDays: 'Next business day' };
+      }
     }
 
     // 7. Calculate Totals via CartCalculator

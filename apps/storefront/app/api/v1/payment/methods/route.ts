@@ -10,9 +10,12 @@ export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url);
     const cartTotal = Number(searchParams.get("cartTotal")) || 0;
     
-    // Fetch all active payment methods ordered by displayOrder
+    // Fetch all active payment methods ordered by displayOrder, filtering for only COD and UPI
     const methods = await db.paymentMethod.findMany({
-      where: { isActive: true },
+      where: { 
+        isActive: true,
+        code: { in: ['COD', 'UPI'] }
+      },
       orderBy: { displayOrder: 'asc' },
       include: {
         rules: true,
