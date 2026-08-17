@@ -3,9 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev -p 3003",
+    "dev": "next dev -p 3002",
     "build": "next build",
-    "start": "node -e \"const port = process.env.PORT || 3003; require('child_process').execSync('next start -p ' + port, { stdio: 'inherit' });\"",
+    "start": "node -e \"const port = process.env.PORT || 3002; require('child_process').execSync('next start -p ' + port, { stdio: 'inherit' });\"",
     "lint": "eslint ."
   },
   "dependencies": {

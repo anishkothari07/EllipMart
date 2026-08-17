@@ -2,13 +2,14 @@ import { cookies } from 'next/headers';
 import { verifyRefreshToken } from './utils/jwt';
 import { prisma } from '@corecart/database';
 
-export async function getCurrentUser(portal: 'storefront' | 'merchant' | 'admin' = 'storefront') {
+export async function getCurrentUser(portal: 'storefront' | 'merchant' | 'admin' | 'seller' = 'storefront') {
   try {
     const cookieStore = await cookies();
 
     let cookieName = 'ellipmart_customer_refresh';
     if (portal === 'merchant') cookieName = 'ellipmart_merchant_refresh';
     if (portal === 'admin') cookieName = 'ellipmart_admin_refresh';
+    if (portal === 'seller') cookieName = 'ellipmart_seller_refresh';
 
     const token = cookieStore.get(cookieName)?.value;
 
@@ -51,6 +52,14 @@ export async function requireSuperAdminAccess() {
   const superAdminEmails = (process.env.SUPER_ADMIN_EMAILS || 'super@corecart.com').split(',').map(e => e.trim());
   if (!user || user.role !== 'ADMIN' || !superAdminEmails.includes(user.email)) {
     throw new Error('Unauthorized: Super Admin access required');
+  }
+  return user;
+}
+
+export async function requireSellerAccess() {
+  const user = await getCurrentUser('seller');
+  if (!user || user.role !== 'MERCHANT') {
+    throw new Error('Unauthorized: Seller access required');
   }
   return user;
 }

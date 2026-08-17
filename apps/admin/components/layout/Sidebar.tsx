@@ -9,40 +9,32 @@ import {
   LayoutDashboard,
   ShoppingBag,
   CreditCard,
-  Users,
-  FileText,
-  Megaphone,
   BarChart3,
   Settings,
-  Store,
 } from 'lucide-react';
 
 export function Sidebar() {
   return (
     <aside className="w-64 border-r border-border/60 bg-card/50 flex flex-col h-full overflow-y-auto select-none py-6 px-4 space-y-6">
-      {/* Brand Logo & Header */}
+      {/* Brand Logo */}
       <div className="flex items-center gap-3 px-2">
         <Link href="/" className="flex items-center">
           <Image src="/logo.png" alt="EllipMart Logo" width={48} height={48} className="object-contain" priority />
         </Link>
       </div>
 
-      {/* Navigation Sections */}
+      {/* Navigation */}
       <nav className="flex-1 space-y-4">
         <SidebarSection>
           <SidebarItem label="Dashboard" href="/" icon={LayoutDashboard} />
         </SidebarSection>
 
-        <SidebarSection title="Operations">
+        <SidebarSection title="My Catalog">
           <SidebarItem
             label="Catalog"
             icon={ShoppingBag}
             children={[
               { label: 'Products', href: '/products' },
-              { label: 'Collections', href: '/collections' },
-              { label: 'Categories', href: '/categories' },
-              { label: 'Brands', href: '/brands' },
-              { label: 'Inventory', href: '/inventory' },
             ]}
           />
           <SidebarItem
@@ -52,16 +44,9 @@ export function Sidebar() {
               { label: 'Orders', href: '/orders' },
             ]}
           />
-          <SidebarItem label="Customers" href="/customers" icon={Users} />
-          <SidebarItem label="Sellers" href="/sellers" icon={Store} />
         </SidebarSection>
 
-        <SidebarSection title="Marketing & Assets">
-          <SidebarItem label="Content" href="/media" icon={FileText} />
-          <SidebarItem label="Marketing" href="/marketing" icon={Megaphone} />
-        </SidebarSection>
-
-        <SidebarSection title="Analytics & Management">
+        <SidebarSection title="Analytics & Settings">
           <SidebarItem label="Reports" href="/reports" icon={BarChart3} />
           <SidebarItem label="Settings" href="/settings" icon={Settings} />
         </SidebarSection>

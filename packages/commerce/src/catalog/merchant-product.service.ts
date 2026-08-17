@@ -26,6 +26,7 @@ export class MerchantProductService {
     brandId?: string;
     status?: 'DRAFT' | 'ACTIVE' | 'ARCHIVED';
     sort?: string;
+    sellerId?: string;
   }): Promise<{
     items: MerchantProductListItem[];
     total: number;
@@ -50,6 +51,7 @@ export class MerchantProductService {
     if (params.categoryId) where.categoryId = params.categoryId;
     if (params.brandId) where.brandId = params.brandId;
     if (params.status) where.status = params.status;
+    if (params.sellerId) where.sellerId = params.sellerId;
 
     let orderBy: any = { updatedAt: 'desc' };
     if (params.sort) {
@@ -117,9 +119,12 @@ export class MerchantProductService {
     return { items, total };
   }
 
-  static async getMerchantProduct(id: string) {
-    const product = await prisma.product.findUnique({
-      where: { id },
+  static async getMerchantProduct(id: string, sellerId?: string) {
+    const where: any = { id };
+    if (sellerId) where.sellerId = sellerId;
+
+    const product = await prisma.product.findFirst({
+      where,
       include: {
         seo: true,
         category: true,
@@ -195,10 +200,10 @@ export class MerchantProductService {
       images,
     } = input;
 
-    // Use transaction to create product, variants, inventory, SEO, and tags
     return prisma.$transaction(async (tx) => {
       const product = await tx.product.create({
         data: {
+          seller: input.sellerId ? { connect: { id: input.sellerId } } : undefined,
           name,
           slug,
           shortDescription,
@@ -361,10 +366,11 @@ export class MerchantProductService {
     }, { timeout: 30000 });
   }
 
-  static async updateMerchantProduct(id: string, input: any) {
-    const product = await prisma.product.findUnique({
-      where: { id },
-    });
+  static async updateMerchantProduct(id: string, input: any, sellerId?: string) {
+    const where: any = { id };
+    if (sellerId) where.sellerId = sellerId;
+
+    const product = await prisma.product.findFirst({ where });
     if (!product) throw new AppError('Product not found', 404);
 
     const {
@@ -600,23 +606,36 @@ export class MerchantProductService {
     });
   }
 
-  static async deleteMerchantProduct(id: string) {
+  static async deleteMerchantProduct(id: string, sellerId?: string) {
+    const where: any = { id };
+    if (sellerId) where.sellerId = sellerId;
+    
+    // Check if exists/owned
+    const product = await prisma.product.findFirst({ where });
+    if (!product) throw new AppError('Product not found', 404);
+
     return prisma.product.update({
       where: { id },
       data: { deletedAt: new Date() },
     });
   }
 
-  static async bulkUpdateStatus(ids: string[], status: 'ACTIVE' | 'ARCHIVED') {
+  static async bulkUpdateStatus(ids: string[], status: 'ACTIVE' | 'ARCHIVED', sellerId?: string) {
+    const where: any = { id: { in: ids } };
+    if (sellerId) where.sellerId = sellerId;
+
     return prisma.product.updateMany({
-      where: { id: { in: ids } },
+      where,
       data: { status },
     });
   }
 
-  static async bulkDelete(ids: string[]) {
+  static async bulkDelete(ids: string[], sellerId?: string) {
+    const where: any = { id: { in: ids } };
+    if (sellerId) where.sellerId = sellerId;
+
     return prisma.product.updateMany({
-      where: { id: { in: ids } },
+      where,
       data: { deletedAt: new Date() },
     });
   }

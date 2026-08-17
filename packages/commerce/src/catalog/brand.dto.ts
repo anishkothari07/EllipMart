@@ -4,7 +4,7 @@ export const createBrandSchema = z.object({
   name: z.string().min(1, 'Brand name is required').max(100),
   slug: z.string().min(1).max(100),
   description: z.string().max(1000).optional().nullable(),
-  logoMediaId: z.string().uuid().optional().nullable(),
+  mediaId: z.string().uuid().optional().nullable(),
   website: z.string().url().optional().nullable(),
   isActive: z.boolean().default(true),
   seo: z.object({
