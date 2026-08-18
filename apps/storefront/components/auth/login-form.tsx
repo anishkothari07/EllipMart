@@ -31,9 +31,10 @@ export function LoginForm() {
         throw new Error(data.message || 'Login failed');
       }
 
-      // Successful login -> Check for callback URL or default to account
-      const callback = searchParams.get('callbackUrl') || '/account'
-      router.push(callback)
+      // Use role-based redirect from server, or explicit callbackUrl, or default
+      const callbackUrl = searchParams.get('callbackUrl');
+      const destination = callbackUrl || data.data?.redirectTo || '/';
+      router.push(destination);
     } catch (err: any) {
       setError(err.message);
     } finally {

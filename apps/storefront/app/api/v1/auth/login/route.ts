@@ -89,18 +89,29 @@ export async function POST(req: NextRequest) {
     const result = await authService.login(parsed, meta);
     console.log('[DEBUG] Login successful, returning response');
 
+    // Determine redirect destination based on role
+    const role = result.user.role;
+    let redirectTo = '/';
+    if (role === 'SELLER') redirectTo = '/seller';
+    if (role === 'ADMIN') redirectTo = '/admin';
+
     const response = successResponse(
-      { accessToken: result.accessToken, user: result.user },
+      { accessToken: result.accessToken, user: result.user, redirectTo },
       'Login successful'
     );
 
-    response.cookies.set('ellipmart_customer_refresh', result.refreshToken, {
+    const cookieOptions = {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
+      sameSite: 'lax' as const,
       path: '/',
       maxAge: 30 * 24 * 60 * 60, // 30 days
-    });
+    };
+
+    // Unified session cookie for all roles
+    response.cookies.set('ellipmart_session', result.refreshToken, cookieOptions);
+    // Legacy cookies for backward compatibility (will be removed after full migration)
+    response.cookies.set('ellipmart_customer_refresh', result.refreshToken, cookieOptions);
 
     return response;
   } catch (error: any) {

@@ -1,7 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   output: 'standalone',
-  eslint: { ignoreDuringBuilds: true },
   typescript: { ignoreBuildErrors: true },
   images: {
     unoptimized: true,
@@ -30,15 +29,13 @@ const nextConfig = {
   },
   serverExternalPackages: ['sharp', '@prisma/client', 'bcryptjs', '@corecart/database'],
   transpilePackages: ['@corecart/commerce', '@corecart/shared', '@corecart/ui', '@corecart/types'],
-  serverActions: {
-    bodySizeLimit: '50mb',
-  },
   experimental: {
     serverActions: {
       bodySizeLimit: '50mb',
     },
   },
   poweredByHeader: false,
+
   async headers() {
     return [
       {

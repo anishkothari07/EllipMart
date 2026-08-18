@@ -298,7 +298,7 @@ model User {
 enum Role {
   CUSTOMER
   ADMIN
-  MERCHANT
+  SELLER
 }
 
 enum AuthProvider {
