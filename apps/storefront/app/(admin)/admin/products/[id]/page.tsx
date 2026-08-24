@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { MerchantProductClient } from '@/lib/services/merchant-product-client';
+import { AdminProductClient } from '@/lib/services/admin-product-client';
 import { ProductForm } from '@/components/admin/product/ProductForm';
 
 export default function EditProductPage() {
@@ -19,8 +19,8 @@ export default function EditProductPage() {
     if (!productId) return;
     try {
       const [prodData, metaData] = await Promise.all([
-        MerchantProductClient.getProduct(productId),
-        MerchantProductClient.getMetadata(),
+        AdminProductClient.getProduct(productId),
+        AdminProductClient.getMetadata(),
       ]);
       setProduct(prodData);
       setMeta(metaData || null);
@@ -36,7 +36,7 @@ export default function EditProductPage() {
   }, [productId]);
 
   const handleSave = async (formData: any) => {
-    await MerchantProductClient.updateProduct(productId, formData);
+    await AdminProductClient.updateProduct(productId, formData);
     // Reload fields after successful save
     await loadData();
   };

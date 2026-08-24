@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { MerchantProductClient } from '@/lib/services/merchant-product-client';
+import { AdminProductClient } from '@/lib/services/admin-product-client';
 import { ProductTable } from '@/components/admin/product/ProductTable';
 import { Plus, Search, RefreshCw, SlidersHorizontal, ArrowLeft, ArrowRight } from 'lucide-react';
 import { Container } from '@corecart/ui';
@@ -25,7 +25,7 @@ export default function MerchantProductListPage() {
 
   const loadMetadata = async () => {
     try {
-      const meta = await MerchantProductClient.getMetadata();
+      const meta = await AdminProductClient.getMetadata();
       if (meta) setCategories(meta.categories);
     } catch (e) {
       console.error('Failed to load categories metadata:', e);
@@ -35,7 +35,7 @@ export default function MerchantProductListPage() {
   const loadProducts = async () => {
     setLoading(true);
     try {
-      const data = await MerchantProductClient.listProducts({
+      const data = await AdminProductClient.listProducts({
         page,
         limit,
         search: search || undefined,
@@ -75,7 +75,7 @@ export default function MerchantProductListPage() {
 
   const handleBulkStatusUpdate = async (ids: string[], status: 'ACTIVE' | 'ARCHIVED') => {
     try {
-      await MerchantProductClient.bulkUpdateStatus(ids, status);
+      await AdminProductClient.bulkUpdateStatus(ids, status);
       setStatusMsg({ type: 'success', text: `Successfully updated status for ${ids.length} product(s).` });
       loadProducts();
     } catch (e: any) {
@@ -85,7 +85,7 @@ export default function MerchantProductListPage() {
 
   const handleBulkDelete = async (ids: string[]) => {
     try {
-      await MerchantProductClient.bulkDelete(ids);
+      await AdminProductClient.bulkDelete(ids);
       setStatusMsg({ type: 'success', text: `Successfully deleted ${ids.length} product(s).` });
       loadProducts();
     } catch (e: any) {

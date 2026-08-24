@@ -1,6 +1,6 @@
 import { Analytics } from '@vercel/analytics/next'
 import type { Metadata, Viewport } from 'next'
-import { Geist, Geist_Mono, Instrument_Serif } from 'next/font/google'
+import { Inter, Roboto_Mono } from 'next/font/google'
 import './globals.css'
 import { ThemeProvider } from '@/components/providers/theme-provider'
 import { StoreProvider } from '@/components/providers/store-provider'
@@ -8,12 +8,13 @@ import { MotionProvider } from '@/components/providers/motion-provider'
 import { CartAnimationProvider } from '@/components/providers/cart-animation-provider'
 import { PwaProvider } from '@/components/providers/pwa-provider'
 
-const geistSans = Geist({ subsets: ['latin'], variable: '--font-geist-sans' })
-const geistMono = Geist_Mono({ subsets: ['latin'], variable: '--font-geist-mono' })
-const instrumentSerif = Instrument_Serif({
+const geistSans = Inter({ subsets: ['latin'], variable: '--font-geist-sans', display: 'swap' })
+const geistMono = Roboto_Mono({ subsets: ['latin'], variable: '--font-geist-mono', display: 'swap' })
+const instrumentSerif = Inter({
   subsets: ['latin'],
-  weight: '400',
+  weight: ['400', '500'],
   variable: '--font-instrument-serif',
+  display: 'swap',
 })
 
 export const metadata: Metadata = {

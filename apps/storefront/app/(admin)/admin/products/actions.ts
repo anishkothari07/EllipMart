@@ -1,7 +1,7 @@
 'use server';
 
 import { MerchantProductService } from '@corecart/commerce/src/catalog/merchant-product.service';
-import { requireSellerAccess } from '@corecart/shared/src/auth';
+import { requireAdminAccess } from '@corecart/shared/src/auth';
 import { prisma } from '@corecart/database';
 import { revalidatePath } from 'next/cache';
 
@@ -15,10 +15,9 @@ export async function fetchProductsAction(params: {
   sort?: string;
 }) {
   try {
-    const user = await requireSellerAccess();
+    await requireAdminAccess();
     const data = await MerchantProductService.listMerchantProducts({
       ...params,
-      sellerId: user.id, // Enforce seller isolation
     });
     return { success: true, data };
   } catch (error: any) {
@@ -28,8 +27,8 @@ export async function fetchProductsAction(params: {
 
 export async function fetchProductByIdAction(id: string) {
   try {
-    const user = await requireSellerAccess();
-    const data = await MerchantProductService.getMerchantProduct(id, user.id);
+    await requireAdminAccess();
+    const data = await MerchantProductService.getMerchantProduct(id);
     return { success: true, data: JSON.parse(JSON.stringify(data)) };
   } catch (error: any) {
     return { success: false, error: error.message || 'Failed to fetch product' };
@@ -38,7 +37,7 @@ export async function fetchProductByIdAction(id: string) {
 
 export async function fetchBrandsAndCategoriesAction() {
   try {
-    await requireSellerAccess();
+    await requireAdminAccess();
     const [brands, categories, collections] = await Promise.all([
       prisma.brand.findMany({ select: { id: true, name: true } }),
       prisma.category.findMany({ select: { id: true, name: true } }),
@@ -60,11 +59,12 @@ export async function fetchBrandsAndCategoriesAction() {
 
 export async function createProductAction(input: any) {
   try {
-    const user = await requireSellerAccess();
+    const user = await requireAdminAccess();
     const product = await MerchantProductService.createMerchantProduct({
       ...input,
-      sellerId: user.id, // Automatically set seller ID
+      sellerId: input.sellerId || user.id,
     });
+    revalidatePath('/admin/products');
     revalidatePath('/products');
     revalidatePath('/');
     return { success: true, data: JSON.parse(JSON.stringify(product)) };
@@ -75,8 +75,9 @@ export async function createProductAction(input: any) {
 
 export async function updateProductAction(id: string, input: any) {
   try {
-    const user = await requireSellerAccess();
-    await MerchantProductService.updateMerchantProduct(id, input, user.id);
+    await requireAdminAccess();
+    await MerchantProductService.updateMerchantProduct(id, input);
+    revalidatePath('/admin/products');
     revalidatePath('/products');
     revalidatePath(`/products/${id}`);
     revalidatePath('/');
@@ -88,8 +89,9 @@ export async function updateProductAction(id: string, input: any) {
 
 export async function deleteProductAction(id: string) {
   try {
-    const user = await requireSellerAccess();
-    await MerchantProductService.deleteMerchantProduct(id, user.id);
+    await requireAdminAccess();
+    await MerchantProductService.deleteMerchantProduct(id);
+    revalidatePath('/admin/products');
     revalidatePath('/products');
     revalidatePath('/');
     return { success: true };
@@ -100,8 +102,9 @@ export async function deleteProductAction(id: string) {
 
 export async function bulkUpdateStatusAction(ids: string[], status: 'ACTIVE' | 'ARCHIVED') {
   try {
-    const user = await requireSellerAccess();
-    await MerchantProductService.bulkUpdateStatus(ids, status, user.id);
+    await requireAdminAccess();
+    await MerchantProductService.bulkUpdateStatus(ids, status);
+    revalidatePath('/admin/products');
     revalidatePath('/products');
     return { success: true };
   } catch (error: any) {
@@ -111,11 +114,13 @@ export async function bulkUpdateStatusAction(ids: string[], status: 'ACTIVE' | '
 
 export async function bulkDeleteAction(ids: string[]) {
   try {
-    const user = await requireSellerAccess();
-    await MerchantProductService.bulkDelete(ids, user.id);
+    await requireAdminAccess();
+    await MerchantProductService.bulkDelete(ids);
+    revalidatePath('/admin/products');
     revalidatePath('/products');
     return { success: true };
   } catch (error: any) {
     return { success: false, error: error.message || 'Failed to bulk delete products' };
   }
 }
+

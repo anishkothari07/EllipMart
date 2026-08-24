@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState, useRef } from 'react';
-import { MerchantMediaClient } from '@/lib/services/merchant-media-client';
+import { AdminMediaClient } from '@/lib/services/admin-media-client';
 import { Search, FolderPlus, Upload, Trash2, X, PlusCircle, CheckCircle, ExternalLink } from 'lucide-react';
 import { cn } from '@corecart/shared';
 
@@ -32,11 +32,11 @@ export function MediaLibrary({ onSelect, onClose, isPicker = false }: MediaLibra
     setLoading(true);
     try {
       const [mediaRes, foldersRes] = await Promise.all([
-        MerchantMediaClient.searchMedia({
+        AdminMediaClient.searchMedia({
           query: search || undefined,
           folderId: selectedFolderId,
         }),
-        MerchantMediaClient.getFolders(),
+        AdminMediaClient.getFolders(),
       ]);
 
       setMediaItems(mediaRes.items || []);
@@ -58,7 +58,7 @@ export function MediaLibrary({ onSelect, onClose, isPicker = false }: MediaLibra
     if (!newFolderName.trim()) return;
 
     try {
-      await MerchantMediaClient.createFolder(newFolderName.trim());
+      await AdminMediaClient.createFolder(newFolderName.trim());
       setNewFolderName('');
       setShowFolderForm(false);
       loadMedia();
@@ -81,7 +81,7 @@ export function MediaLibrary({ onSelect, onClose, isPicker = false }: MediaLibra
         formData.append('folderId', selectedFolderId);
       }
 
-      await MerchantMediaClient.uploadMedia(formData);
+      await AdminMediaClient.uploadMedia(formData);
       loadMedia();
       setStatusMsg({ type: 'success', text: 'Asset uploaded successfully!' });
     } catch (err: any) {
@@ -97,7 +97,7 @@ export function MediaLibrary({ onSelect, onClose, isPicker = false }: MediaLibra
     if (!confirm('Are you sure you want to delete this asset? This cannot be undone.')) return;
 
     try {
-      await MerchantMediaClient.deleteMedia(id);
+      await AdminMediaClient.deleteMedia(id);
       loadMedia();
       setStatusMsg({ type: 'success', text: 'Media asset deleted successfully.' });
     } catch (err: any) {

@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { MerchantProductClient } from '@/lib/services/merchant-product-client';
+import { AdminProductClient } from '@/lib/services/admin-product-client';
 import { ProductForm } from '@/components/admin/product/ProductForm';
 
 export default function NewProductPage() {
@@ -14,7 +14,7 @@ export default function NewProductPage() {
   useEffect(() => {
     async function loadMeta() {
       try {
-        const data = await MerchantProductClient.getMetadata();
+        const data = await AdminProductClient.getMetadata();
         setMeta(data || null);
       } catch (err: any) {
         setError(err.message || 'Failed to retrieve catalog setup metadata.');
@@ -26,9 +26,9 @@ export default function NewProductPage() {
   }, []);
 
   const handleSave = async (formData: any) => {
-    const res = await MerchantProductClient.createProduct(formData);
+    const res = await AdminProductClient.createProduct(formData);
     // Redirect to edit page of created product
-    router.push(`/products/${res.id}`);
+    router.push(`/admin/products/${res.id}`);
   };
 
   if (loading) {

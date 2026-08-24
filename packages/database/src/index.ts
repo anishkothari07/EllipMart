@@ -70,4 +70,49 @@ export const prisma = new Proxy({} as PrismaClient, {
   },
 });
 
-export * from '@prisma/client';
+// Explicit re-exports from @prisma/client to avoid Turbopack's
+// "unexpected export *" warning which causes repeated re-compilation.
+export type {
+  Prisma,
+  User,
+  Product,
+  ProductVariant,
+  ProductImage,
+  ProductSeo,
+  ProductTag,
+  ProductVariantAttribute,
+  ProductCollection,
+  Inventory,
+  Order,
+  OrderItem,
+  OrderStatusHistory,
+  Address,
+  Cart,
+  CartItem,
+  Category,
+  Brand,
+  Collection,
+  Media,
+  MediaFolder,
+  Notification,
+  Review,
+  Coupon,
+  CouponUsage,
+  RefundRequest,
+  SellerProfile,
+  Session,
+  AuditLog,
+  Festival,
+  ProductPrice,
+} from '@prisma/client';
+
+// Runtime enum exports (cannot use 'export type' for these)
+export {
+  PrismaClient,
+  Role,
+  OrderStatus,
+  UserStatus,
+  ProductStatus,
+  PaymentStatus,
+  NotificationStatus,
+} from '@prisma/client';
