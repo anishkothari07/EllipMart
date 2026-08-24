@@ -48,14 +48,14 @@ function isConnectionError(err: unknown): boolean {
 }
 
 export const prisma = new Proxy({} as PrismaClient, {
-  get(_target, prop: string) {
+  get(_target, prop: string | symbol) {
     const client = getPrismaClient();
     const value = (client as any)[prop];
 
-    // Wrap model objects (e.g. prisma.product, prisma.user) so model methods transparently retry on connection drop
+    // Wrap model objects (e.g. prisma.product, prisma.user)
     if (value && typeof value === 'object') {
       return new Proxy(value, {
-        get(modelTarget, modelProp: string) {
+        get(modelTarget, modelProp: string | symbol) {
           const modelVal = (modelTarget as any)[modelProp];
           if (typeof modelVal !== 'function') return modelVal;
 
@@ -68,21 +68,34 @@ export const prisma = new Proxy({} as PrismaClient, {
 
             try {
               const res = execute();
-              if (res && typeof res.then === 'function') {
-                return (res as Promise<any>).catch((err: unknown) => {
-                  if (isConnectionError(err)) {
-                    console.warn('[DB] Connection dropped — reconnecting and retrying query automatically...');
-                    try { globalForPrisma.prisma?.$disconnect(); } catch {}
-                    globalForPrisma.prisma = null;
-                    return execute();
-                  }
-                  throw err;
+              if (res && typeof res === 'object' && typeof res.then === 'function') {
+                // Return a Proxy around the raw PrismaPromise to preserve Symbol.toStringTag ('PrismaPromise')
+                // required by prisma.$transaction([ ... ])
+                return new Proxy(res, {
+                  get(promiseTarget, promiseProp, receiver) {
+                    if (promiseProp === 'catch') {
+                      return (onRejected?: (reason: any) => any) => {
+                        return promiseTarget.catch((err: unknown) => {
+                          if (isConnectionError(err)) {
+                            console.warn('[DB] Connection dropped — reconnecting and retrying query...');
+                            try { globalForPrisma.prisma?.$disconnect(); } catch {}
+                            globalForPrisma.prisma = null;
+                            return execute().catch(onRejected);
+                          }
+                          if (onRejected) return onRejected(err);
+                          throw err;
+                        });
+                      };
+                    }
+                    const val = Reflect.get(promiseTarget, promiseProp, receiver);
+                    return typeof val === 'function' ? val.bind(promiseTarget) : val;
+                  },
                 });
               }
               return res;
             } catch (err: unknown) {
               if (isConnectionError(err)) {
-                console.warn('[DB] Connection dropped — reconnecting and retrying query automatically...');
+                console.warn('[DB] Connection dropped — reconnecting and retrying query...');
                 try { globalForPrisma.prisma?.$disconnect(); } catch {}
                 globalForPrisma.prisma = null;
                 return execute();
@@ -105,10 +118,10 @@ export const prisma = new Proxy({} as PrismaClient, {
 
       try {
         const res = execute();
-        if (res && typeof res.then === 'function') {
+        if (res && typeof res === 'object' && typeof res.then === 'function') {
           return (res as Promise<any>).catch((err: unknown) => {
             if (isConnectionError(err)) {
-              console.warn('[DB] Connection dropped — reconnecting and retrying transaction automatically...');
+              console.warn('[DB] Connection dropped — reconnecting and retrying transaction...');
               try { globalForPrisma.prisma?.$disconnect(); } catch {}
               globalForPrisma.prisma = null;
               return execute();
@@ -119,7 +132,7 @@ export const prisma = new Proxy({} as PrismaClient, {
         return res;
       } catch (err: unknown) {
         if (isConnectionError(err)) {
-          console.warn('[DB] Connection dropped — reconnecting and retrying transaction automatically...');
+          console.warn('[DB] Connection dropped — reconnecting and retrying transaction...');
           try { globalForPrisma.prisma?.$disconnect(); } catch {}
           globalForPrisma.prisma = null;
           return execute();
