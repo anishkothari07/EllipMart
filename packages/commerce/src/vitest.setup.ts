@@ -1,6 +1,12 @@
 process.env.DATABASE_URL = 'mysql://root:root@localhost:3306/test_db';
 process.env.JWT_ACCESS_SECRET = 'a'.repeat(32);
 process.env.JWT_REFRESH_SECRET = 'b'.repeat(32);
+process.env.GEMINI_API_KEY = 'test-gemini-key-123';
+process.env.NEXT_PUBLIC_SUPABASE_URL = 'https://test-supabase.supabase.co';
+process.env.SUPABASE_SERVICE_ROLE_KEY = 'test-supabase-service-key';
+process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY = 'test-supabase-anon-key';
+process.env.SUPABASE_STORAGE_BUCKET = 'test-bucket';
+process.env.STORAGE_PROVIDER = 'SUPABASE';
 
 import { vi } from 'vitest';
 
@@ -278,33 +284,87 @@ const mockPrisma = {
 
 vi.mock('@corecart/database', () => ({
   prisma: mockPrisma,
-  Role: {
-    CUSTOMER: 'CUSTOMER',
-    MERCHANT: 'MERCHANT',
-    ADMIN: 'ADMIN',
-  },
+  // ── User / Auth ────────────────────────────────────────────────────────────
+  Role: { CUSTOMER: 'CUSTOMER', SELLER: 'SELLER', ADMIN: 'ADMIN', MERCHANT: 'MERCHANT' },
   UserStatus: {
+    PENDING_VERIFICATION: 'PENDING_VERIFICATION',
     ACTIVE: 'ACTIVE',
-    INACTIVE: 'INACTIVE',
     SUSPENDED: 'SUSPENDED',
+    BLOCKED: 'BLOCKED',
+    DELETED: 'DELETED',
   },
+  Gender: { MALE: 'MALE', FEMALE: 'FEMALE', OTHER: 'OTHER', PREFER_NOT_TO_SAY: 'PREFER_NOT_TO_SAY' },
+  AuthProvider: { LOCAL: 'LOCAL', GOOGLE: 'GOOGLE', APPLE: 'APPLE', GITHUB: 'GITHUB', MICROSOFT: 'MICROSOFT', FACEBOOK: 'FACEBOOK' },
+  TokenType: { EMAIL_VERIFICATION: 'EMAIL_VERIFICATION', PASSWORD_RESET: 'PASSWORD_RESET', LOGIN_OTP: 'LOGIN_OTP' },
+  AddressType: { HOME: 'HOME', OFFICE: 'OFFICE', OTHER: 'OTHER' },
+  // ── Product / Catalog ──────────────────────────────────────────────────────
+  ProductStatus: { DRAFT: 'DRAFT', ACTIVE: 'ACTIVE', ARCHIVED: 'ARCHIVED', OUT_OF_STOCK: 'OUT_OF_STOCK', DISCONTINUED: 'DISCONTINUED' },
+  ProductVisibility: { PUBLIC: 'PUBLIC', HIDDEN: 'HIDDEN', SCHEDULED: 'SCHEDULED' },
+  // ── Orders ────────────────────────────────────────────────────────────────
   OrderStatus: {
-    PENDING: 'PENDING',
+    PENDING_PAYMENT: 'PENDING_PAYMENT',
+    CONFIRMED: 'CONFIRMED',
     PROCESSING: 'PROCESSING',
+    PACKED: 'PACKED',
     SHIPPED: 'SHIPPED',
     DELIVERED: 'DELIVERED',
     CANCELLED: 'CANCELLED',
+    RETURNED: 'RETURNED',
+    REFUNDED: 'REFUNDED',
+    // Legacy aliases kept for backward compat with old specs
+    PENDING: 'PENDING_PAYMENT',
   },
-  ProductStatus: {
-    ACTIVE: 'ACTIVE',
-    DRAFT: 'DRAFT',
-    ARCHIVED: 'ARCHIVED',
+  // ── Payments ──────────────────────────────────────────────────────────────
+  PaymentStatus: {
+    PENDING: 'PENDING',
+    AUTHORIZED: 'AUTHORIZED',
+    CAPTURED: 'CAPTURED',
+    FAILED: 'FAILED',
+    CANCELLED: 'CANCELLED',
+    EXPIRED: 'EXPIRED',
+    REFUND_PENDING: 'REFUND_PENDING',
+    REFUNDED: 'REFUNDED',
+    PARTIALLY_REFUNDED: 'PARTIALLY_REFUNDED',
   },
-  ProductVisibility: {
-    PUBLIC: 'PUBLIC',
-    HIDDEN: 'HIDDEN',
+  PaymentMethodType: { UPI: 'UPI', CARD: 'CARD', NETBANKING: 'NETBANKING', WALLET: 'WALLET', COD: 'COD', GIFT_CARD: 'GIFT_CARD' },
+  PaymentEventStatus: {
+    CREATED: 'CREATED',
+    AUTHORIZED: 'AUTHORIZED',
+    FAILED: 'FAILED',
+    SUCCESS: 'SUCCESS',
+    REFUND_STARTED: 'REFUND_STARTED',
+    REFUNDED: 'REFUNDED',
+    WEBHOOK_RECEIVED: 'WEBHOOK_RECEIVED',
+  },
+  // ── Wallet / Loyalty ──────────────────────────────────────────────────────
+  HoldStatus: { PENDING: 'PENDING', FINALIZED: 'FINALIZED', RELEASED: 'RELEASED' },
+  WalletTxType: { TOPUP: 'TOPUP', PURCHASE: 'PURCHASE', REFUND: 'REFUND', ADJUSTMENT: 'ADJUSTMENT' },
+  LoyaltyTxType: { EARN: 'EARN', REDEEM: 'REDEEM', ADJUSTMENT: 'ADJUSTMENT', WELCOME_BONUS: 'WELCOME_BONUS', REFERRAL: 'REFERRAL' },
+  ReferralStatus: { PENDING_FIRST_ORDER: 'PENDING_FIRST_ORDER', COMPLETED: 'COMPLETED', EXPIRED: 'EXPIRED' },
+  // ── Media ─────────────────────────────────────────────────────────────────
+  MediaVisibility: { PUBLIC: 'PUBLIC', PRIVATE: 'PRIVATE', MERCHANT_ONLY: 'MERCHANT_ONLY', SYSTEM: 'SYSTEM' },
+  MediaStatus: { ACTIVE: 'ACTIVE', ARCHIVED: 'ARCHIVED', PROCESSING: 'PROCESSING' },
+  AssetType: {
+    IMAGE: 'IMAGE', VIDEO: 'VIDEO', AUDIO: 'AUDIO', PDF: 'PDF', DOCUMENT: 'DOCUMENT',
+    MODEL_3D: 'MODEL_3D', FONT: 'FONT', SVG: 'SVG', LOTTIE: 'LOTTIE', ICON: 'ICON',
+    AI_ASSET: 'AI_ASSET', OTHER: 'OTHER',
+  },
+  // ── Notifications ─────────────────────────────────────────────────────────
+  NotificationChannel: { EMAIL: 'EMAIL', PUSH: 'PUSH', SMS: 'SMS', IN_APP: 'IN_APP' },
+  NotificationCategory: {
+    ORDER: 'ORDER', PAYMENT: 'PAYMENT', ACCOUNT: 'ACCOUNT', PROMOTION: 'PROMOTION',
+    SYSTEM: 'SYSTEM', SECURITY: 'SECURITY',
+  },
+  NotificationStatus: { PENDING: 'PENDING', SENT: 'SENT', FAILED: 'FAILED', READ: 'READ' },
+  NotificationPriority: { LOW: 'LOW', MEDIUM: 'MEDIUM', HIGH: 'HIGH', CRITICAL: 'CRITICAL' },
+  // ── Analytics ─────────────────────────────────────────────────────────────
+  AnalyticsEventType: {
+    PAGE_VIEW: 'PAGE_VIEW', PRODUCT_VIEW: 'PRODUCT_VIEW', ADD_TO_CART: 'ADD_TO_CART',
+    REMOVE_FROM_CART: 'REMOVE_FROM_CART', PURCHASE: 'PURCHASE', SEARCH: 'SEARCH',
+    CLICK: 'CLICK', IMPRESSION: 'IMPRESSION',
   },
 }));
+
 
 // Set global mocks reference
 (globalThis as any).mockPrisma = mockPrisma;

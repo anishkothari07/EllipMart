@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { NextRequest } from 'next/server';
 import { POST } from './route';
+import { checkoutService } from '@corecart/commerce';
 
 const mockPrisma = (globalThis as any).mockPrisma;
 
@@ -125,15 +126,15 @@ describe('Checkout API Route (Layer 1)', () => {
       })
     });
     
+    vi.spyOn(checkoutService, 'processCheckout').mockResolvedValue({
+      orderId: 'order-123',
+      paymentId: 'pay-123',
+      session: { id: 'sess-123' },
+    } as any);
+
     const response = await POST(req);
-    // Depending on what checkoutService.processCheckout returns, it could be 200
-    // and might even throw errors if other things like shippingRate are needed.
-    // We will verify the response.
-    
+    expect(response.status).toBe(200);
     const body = await response.json();
-    console.log('[CHECKOUT TEST] Status:', response.status);
-    console.log('[CHECKOUT TEST] Body:', body);
-    
-    expect([200, 400, 404]).toContain(response.status);
+    expect(body.success).toBe(true);
   });
 });

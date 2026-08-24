@@ -63,38 +63,37 @@ export async function middleware(req: NextRequest) {
     return NextResponse.json({ success: false, message: 'Unauthorized', error: { code: 'UNAUTHORIZED' } }, { status: 401 });
   }
 
-  // Use the correct secret depending on whether it's an access or refresh token
-  // Since we only set refreshToken in the cookie right now, it will be validated using JWT_REFRESH_SECRET if coming from cookie
-  // But wait, the standard approach would just verify it using jose.
-  // For safety, let's try access secret first, then refresh secret.
+  // Tokens from Authorization header are always access tokens — verify with access secret only.
+  // Tokens from the refreshToken cookie are only accepted on the refresh endpoint (handled above
+  // as a public route), so we never fall back to the refresh secret here. This prevents a refresh
+  // token from being used to authenticate arbitrary API calls without rotation.
   const accessSecret = new TextEncoder().encode(process.env.JWT_ACCESS_SECRET);
-  const refreshSecret = new TextEncoder().encode(process.env.JWT_REFRESH_SECRET);
 
   let payload;
   try {
     const result = await jwtVerify(token, accessSecret);
     payload = result.payload;
-  } catch (err) {
-    try {
-      const result = await jwtVerify(token, refreshSecret);
-      payload = result.payload;
-    } catch (err2) {
-      return NextResponse.json({ success: false, message: 'Invalid or expired token', error: { code: 'INVALID_TOKEN' } }, { status: 401 });
-    }
+  } catch {
+    return NextResponse.json(
+      { success: false, message: 'Invalid or expired token', error: { code: 'INVALID_TOKEN' } },
+      { status: 401 }
+    );
   }
 
-  console.log(`[Middleware] cookie received: ${!!req.cookies.get('refreshToken')}`);
-  console.log(`[Middleware] session id: ${payload.sessionId}`);
-  console.log(`[Middleware] user id: ${payload.userId}`);
-  
+
   // Add payload to headers for downstream route handlers
   const requestHeaders = new Headers(req.headers);
   requestHeaders.set('x-user-id', payload.userId as string);
   requestHeaders.set('x-user-role', payload.role as string);
   requestHeaders.set('x-session-id', payload.sessionId as string);
 
-  // Admin role check
+  // Admin role guard — /api/v1/admin/* requires ADMIN
   if (pathname.startsWith('/api/v1/admin') && payload.role !== 'ADMIN') {
+    return NextResponse.json({ success: false, message: 'Forbidden', error: { code: 'FORBIDDEN' } }, { status: 403 });
+  }
+
+  // Seller role guard — /api/v1/seller/* requires SELLER or ADMIN
+  if (pathname.startsWith('/api/v1/seller') && payload.role !== 'SELLER' && payload.role !== 'ADMIN') {
     return NextResponse.json({ success: false, message: 'Forbidden', error: { code: 'FORBIDDEN' } }, { status: 403 });
   }
 

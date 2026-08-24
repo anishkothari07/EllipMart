@@ -120,12 +120,10 @@ export const checkoutService = {
     let remainingAmount = totals.grandTotal;
     
     // Loyalty (1 point = ₹1)
+    // Fetch the balance to calculate how many points can cover the remaining amount.
+    // The actual hold is created later (after CheckoutSession is established) via checkoutLoyaltyService.applyLoyalty.
     let loyaltyDeduction = 0;
     if (input.useLoyalty && remainingAmount > 0) {
-      const loyaltyBalance = await checkoutLoyaltyService.applyLoyalty(userId, 0, cart.id).catch(() => null);
-      // Wait, applyLoyalty actually creates a hold. We shouldn't create a hold before we know the amount.
-      // Better to fetch balance directly. Or we can just let applyLoyalty handle it if we pass the max possible?
-      // Actually, we must fetch the balance first to know how much to deduct.
       const { loyaltyService } = await import('../loyalty/loyalty.service');
       const balance = await loyaltyService.getBalance(userId);
       const pointsToUse = Math.min(balance.availablePoints, remainingAmount);
