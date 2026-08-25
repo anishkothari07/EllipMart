@@ -7,7 +7,7 @@ import { StoreProvider } from '@/components/providers/store-provider'
 import { MotionProvider } from '@/components/providers/motion-provider'
 import { CartAnimationProvider } from '@/components/providers/cart-animation-provider'
 import { PwaProvider } from '@/components/providers/pwa-provider'
-
+import { AppLoaderProvider } from '@/components/providers/app-loader-provider'
 const geistSans = Inter({ subsets: ['latin'], variable: '--font-geist-sans', display: 'swap' })
 const geistMono = Roboto_Mono({ subsets: ['latin'], variable: '--font-geist-mono', display: 'swap' })
 const instrumentSerif = Inter({
@@ -65,6 +65,7 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} ${instrumentSerif.variable} bg-background`}
     >
       <body className="font-sans antialiased">
+        <AppLoaderProvider />
         <ThemeProvider>
           <StoreProvider>
             <MotionProvider>

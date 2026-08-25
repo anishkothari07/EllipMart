@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { useMerchantSession } from '../providers/merchant-auth-provider';
 import { Lock, ShieldAlert, KeyRound, Mail, Loader2 } from 'lucide-react';
+import { LogoLoader } from '@/components/shared/logo-loader';
 
 export function MerchantAuthGuard({ children }: { children: React.ReactNode }) {
   const { user, loading, login } = useMerchantSession();
@@ -32,14 +33,7 @@ export function MerchantAuthGuard({ children }: { children: React.ReactNode }) {
   };
 
   if (loading) {
-    return (
-      <div className="flex h-screen w-screen items-center justify-center bg-background">
-        <div className="flex flex-col items-center gap-2">
-          <div className="size-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
-          <p className="text-xs text-muted-foreground font-medium">Validating merchant session...</p>
-        </div>
-      </div>
-    );
+    return <LogoLoader className="flex h-screen w-screen items-center justify-center bg-background" />;
   }
 
   if (!user) {
