@@ -34,7 +34,7 @@ export function MediaLibrary({ onSelect, onClose, isPicker = false }: MediaLibra
       const [mediaRes, foldersRes] = await Promise.all([
         MerchantMediaClient.searchMedia({
           query: search || undefined,
-          folderId: selectedFolderId,
+          folderId: selectedFolderId || undefined,
         }),
         MerchantMediaClient.getFolders(),
       ]);
@@ -47,11 +47,11 @@ export function MediaLibrary({ onSelect, onClose, isPicker = false }: MediaLibra
     } finally {
       setLoading(false);
     }
-  };
+  }, [search, selectedFolderId]);
 
   useEffect(() => {
     loadMedia();
-  }, [search, selectedFolderId]);
+  }, [loadMedia]);
 
   const handleCreateFolder = async (e?: React.SyntheticEvent) => {
     e?.preventDefault();

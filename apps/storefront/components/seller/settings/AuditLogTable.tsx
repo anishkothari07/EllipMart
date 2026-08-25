@@ -17,7 +17,7 @@ export function AuditLogTable() {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
 
-  const loadLogs = async () => {
+  const loadLogs = React.useCallback(async () => {
     setLoading(true);
     try {
       const data = await MerchantOperationsClient.getAuditLogs({
@@ -35,15 +35,17 @@ export function AuditLogTable() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [page, search, action, entityType]);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setPage(1);
   }, [search, action, entityType]);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     loadLogs();
-  }, [page, search, action, entityType]);
+  }, [loadLogs]);
 
   const formatChanges = (changesStr: string) => {
     try {

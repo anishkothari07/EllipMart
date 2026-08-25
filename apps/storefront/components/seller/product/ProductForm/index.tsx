@@ -101,13 +101,19 @@ export function ProductForm({ initialProduct, brands, categories, collections, o
           : [],
       };
 
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setFormData(mapped);
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setInitialSnapshot(JSON.stringify(mapped));
     } else {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setFormData(defaultProduct);
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setInitialSnapshot(JSON.stringify(defaultProduct));
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialProduct, categories]);
+
 
   const handleFieldChange = (fields: any) => {
     setFormData((prev: any) => ({

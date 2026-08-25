@@ -51,6 +51,7 @@ export function SmartImage({
     >
       {/* Blur Hash or Skeleton Placeholder */}
       {blurHash && !loaded && !error && (
+        /* eslint-disable-next-line @next/next/no-img-element */
         <img
           src={blurHash}
           alt=""
@@ -58,6 +59,7 @@ export function SmartImage({
           className="absolute inset-0 size-full object-cover blur-lg scale-110 opacity-70 transition-opacity duration-300 pointer-events-none"
           style={{ objectPosition }}
         />
+
       )}
 
       {/* Main Image */}

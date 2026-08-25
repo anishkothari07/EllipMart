@@ -266,7 +266,7 @@ export function ThemeStudio() {
                 })}
                 {filteredThemes.length === 0 && (
                   <div className="text-center py-10 text-muted-foreground text-sm">
-                    No themes found matching "{search}"
+                    No themes found matching &quot;{search}&quot;
                   </div>
                 )}
               </div>
