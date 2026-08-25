@@ -93,3 +93,22 @@ export async function DELETE(req: NextRequest) {
   }
 }
 
+export async function PUT(req: NextRequest) {
+  try {
+    const userId = req.headers.get('x-user-id');
+    if (!userId) throw new AppError('Unauthorized', 401);
+
+    const body = await req.json();
+    const { items } = body;
+    
+    if (!Array.isArray(items)) {
+      throw new AppError('Items array is required', 400);
+    }
+
+    const cart = await cartService.syncCart(userId, items);
+    return successResponse(cart);
+  } catch (error: any) {
+    if (error.isOperational) return errorResponse(error.message, error.errorCode, undefined, error.statusCode);
+    return errorResponse(error.message || 'Internal Server Error', 'INTERNAL_SERVER_ERROR', undefined, 500);
+  }
+}

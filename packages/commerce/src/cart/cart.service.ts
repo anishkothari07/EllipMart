@@ -224,5 +224,30 @@ export const cartService = {
         where: { cartId: cart.id, isSaved: false }
       });
     }
+  },
+
+  async syncCart(userId: string, items: { variantId: string; quantity: number }[]) {
+    const cart = await this.getCart(userId); // Ensures user and cart exist
+
+    // Delete existing active items
+    await prisma.cartItem.deleteMany({
+      where: { cartId: cart.id, isSaved: false }
+    });
+
+    // Bulk create new items
+    const cartItemsData = items.map((item) => ({
+      cartId: cart.id,
+      variantId: item.variantId,
+      quantity: item.quantity,
+      isSaved: false
+    }));
+
+    if (cartItemsData.length > 0) {
+      await prisma.cartItem.createMany({
+        data: cartItemsData
+      });
+    }
+
+    return this.getCart(userId);
   }
 };
