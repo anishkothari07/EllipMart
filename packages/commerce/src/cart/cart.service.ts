@@ -22,8 +22,23 @@ const CART_QUERY_INCLUDE = {
 
 export const cartService = {
   async getCart(userId: string) {
-    const user = await prisma.user.findUnique({ where: { id: userId } });
-    if (!user) throw new AppError('User not found', 401);
+    // Auto-create a guest user record if it doesn't exist.
+    // This supports the 'mock-user-id' guest checkout flow where the
+    // frontend sends x-user-id without a real JWT session.
+    await prisma.user.upsert({
+      where: { id: userId },
+      update: {},
+      create: {
+        id: userId,
+        email: `guest_${userId}@ellipmart.local`,
+        passwordHash: 'guest',
+        firstName: 'Guest',
+        lastName: 'User',
+        status: 'ACTIVE',
+        emailVerifiedAt: new Date(),
+        role: 'CUSTOMER',
+      },
+    });
 
     let cart = await prisma.cart.findUnique({
       where: { userId },

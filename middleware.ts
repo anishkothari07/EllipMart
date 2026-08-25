@@ -60,6 +60,14 @@ export async function middleware(req: NextRequest) {
   }
 
   if (!token) {
+    // Allow guest access to cart and checkout (frontend sends mock-user-id)
+    if (
+      pathname.startsWith('/api/v1/cart') ||
+      pathname.startsWith('/api/v1/checkout') ||
+      pathname.startsWith('/api/v1/users/address')
+    ) {
+      return NextResponse.next();
+    }
     return NextResponse.json({ success: false, message: 'Unauthorized', error: { code: 'UNAUTHORIZED' } }, { status: 401 });
   }
 

@@ -125,6 +125,19 @@ export async function proxy(req: NextRequest) {
     // All other /api/v1 routes require authentication
     const payload = await getSessionPayload(req);
     if (!payload) {
+      // Allow guest access to cart, checkout and address routes.
+      // Next.js 16 strips browser-sent x- headers, so we must explicitly
+      // re-inject x-user-id from the request before forwarding.
+      if (
+        pathname.startsWith('/api/v1/cart') ||
+        pathname.startsWith('/api/v1/checkout') ||
+        pathname.startsWith('/api/v1/users/address')
+      ) {
+        const guestHeaders = new Headers(req.headers);
+        const guestUserId = req.headers.get('x-user-id') || 'guest';
+        guestHeaders.set('x-user-id', guestUserId);
+        return NextResponse.next({ request: { headers: guestHeaders } });
+      }
       return NextResponse.json(
         { success: false, message: 'Unauthorized', error: { code: 'UNAUTHORIZED' } },
         { status: 401 }

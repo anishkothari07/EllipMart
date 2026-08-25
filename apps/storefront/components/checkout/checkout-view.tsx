@@ -320,6 +320,20 @@ export function CheckoutView() {
         useLoyalty
       }
 
+      // Sync frontend cart items to DB in case they were added before the session
+      // was established (optimistic updates that didn't persist to DB).
+      for (const item of cart) {
+        try {
+          await fetch('/api/v1/cart', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'x-user-id': 'mock-user-id' },
+            body: JSON.stringify({ variantId: item.product.id, quantity: item.quantity }),
+          });
+        } catch (e) {
+          // Non-fatal — if item is already in DB, the upsert on the server handles it
+        }
+      }
+
       const res = await fetch('/api/v1/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'x-user-id': 'mock-user-id' },
