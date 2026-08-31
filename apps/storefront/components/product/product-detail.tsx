@@ -13,7 +13,7 @@ import {
   Tag,
   Truck,
 } from 'lucide-react'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import type { Product } from '@corecart/shared'
 import { cn } from '@corecart/shared'
@@ -75,6 +75,12 @@ export function ProductDetail({
 
   const wishlisted = isWishlisted(product.id)
   const discount = discountPct(product.price, product.oldPrice)
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' })
+    if (document.documentElement) document.documentElement.scrollTop = 0
+    if (document.body) document.body.scrollTop = 0
+  }, [product.id, product.slug])
 
   const checkDelivery = async () => {
     if (pincode.trim().length === 6) {
@@ -241,40 +247,13 @@ export function ProductDetail({
               )}
             </div>
 
-            {/* ════════════════════════════════════════
-                MOBILE ACTIONS  (hidden at sm and above)
-                Row 1: [- 1 +]
-                Row 2: [🛍 Add to bag ─ full width]
-                Row 3: [❤️]  [🔗]  ← flex row, side-by-side
-                Row 4: [Buy it now ─ full width]
-                ════════════════════════════════════════ */}
-            <div className="mt-6 flex flex-col gap-3 sm:hidden">
-              <QuantityStepper value={qty} onChange={setQty} className="self-start" />
-              <button
-                type="button"
-                disabled={!product.inStock}
-                onClick={() => {
-                  handleAdd()
-                  if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(80)
-                }}
-                className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground text-sm font-medium text-background transition-transform active:scale-[0.99] disabled:opacity-50"
-              >
-                <ShoppingBag className="size-4" />
-                {product.inStock ? 'Add to bag' : 'Sold out'}
-              </button>
-              {/* Heart + Share — always side-by-side */}
+            {/* Mobile Actions Header Row (Quantity & Share only — Primary actions are pinned cleanly to bottom bar) */}
+            <div className="mt-6 flex items-center justify-between gap-4 sm:hidden">
               <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={() => {
-                    toggleWishlist(product)
-                    if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(80)
-                  }}
-                  aria-label="Add to wishlist"
-                  className="grid size-12 place-items-center rounded-full border border-border transition-colors hover:bg-muted"
-                >
-                  <Heart className={cn('size-5', wishlisted && 'fill-accent text-accent')} />
-                </button>
+                <span className="text-xs font-semibold text-muted-foreground">Qty:</span>
+                <QuantityStepper value={qty} onChange={setQty} className="shrink-0" />
+              </div>
+              <div className="flex items-center gap-2">
                 <button
                   type="button"
                   onClick={async () => {
@@ -285,25 +264,11 @@ export function ProductDetail({
                     }
                   }}
                   aria-label="Share"
-                  className="grid size-12 place-items-center rounded-full border border-border transition-colors hover:bg-muted"
+                  className="flex items-center gap-1.5 px-3.5 py-2 rounded-full border border-border bg-card text-xs font-medium text-muted-foreground hover:bg-muted transition-colors"
                 >
-                  <Share2 className="size-5" />
+                  <Share2 className="size-3.5" /> Share
                 </button>
               </div>
-              {product.inStock && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    handleAdd()
-                    setCartOpen(false)
-                    if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate([80, 50, 80])
-                    router.push('/checkout')
-                  }}
-                  className="flex h-12 w-full items-center justify-center rounded-full border border-foreground text-sm font-medium transition-colors hover:bg-foreground hover:text-background"
-                >
-                  Buy it now
-                </button>
-              )}
             </div>
 
             {/* ════════════════════════════════════════
@@ -365,8 +330,8 @@ export function ProductDetail({
             )}
 
 
-            {/* ── Mobile Sticky Action Bar — sits above the 64px bottom nav ── */}
-            <div className="fixed bottom-16 inset-x-0 z-40 sm:hidden flex items-center gap-2 px-3 py-2.5 bg-background/95 backdrop-blur-md border-t border-border shadow-[0_-4px_24px_rgba(0,0,0,0.08)]">
+            {/* ── Mobile Sticky Action Bar — Cleanly anchored to bottom-0 ── */}
+            <div className="fixed bottom-0 inset-x-0 z-40 sm:hidden flex items-center gap-2.5 px-4 py-3 bg-background/95 backdrop-blur-md border-t border-border shadow-[0_-4px_24px_rgba(0,0,0,0.1)] pb-[calc(0.75rem+env(safe-area-inset-bottom,0px))]">
               <button
                 type="button"
                 onClick={() => {
@@ -374,7 +339,7 @@ export function ProductDetail({
                   if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(80)
                 }}
                 aria-label="Wishlist"
-                className="grid size-12 shrink-0 place-items-center rounded-full border border-border bg-card"
+                className="grid size-11 shrink-0 place-items-center rounded-full border border-border bg-card text-foreground hover:bg-muted active:scale-95 transition-all"
               >
                 <Heart className={cn('size-5', wishlisted && 'fill-accent text-accent')} />
               </button>
@@ -385,7 +350,7 @@ export function ProductDetail({
                   handleAdd()
                   if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(80)
                 }}
-                className="flex h-12 flex-1 items-center justify-center gap-1.5 rounded-full bg-foreground text-xs font-semibold text-background disabled:opacity-50"
+                className="flex h-11 flex-1 items-center justify-center gap-1.5 rounded-full bg-secondary border border-border text-xs font-semibold text-foreground active:scale-[0.98] transition-all disabled:opacity-50"
               >
                 <ShoppingBag className="size-3.5" /> Add to Cart
               </button>
@@ -398,7 +363,7 @@ export function ProductDetail({
                     if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate([80, 50, 80])
                     router.push('/checkout')
                   }}
-                  className="flex h-12 flex-1 items-center justify-center rounded-full bg-primary text-xs font-semibold text-primary-foreground"
+                  className="flex h-11 flex-1 items-center justify-center rounded-full bg-primary text-xs font-semibold text-primary-foreground shadow-sm active:scale-[0.98] transition-all"
                 >
                   Buy Now
                 </button>

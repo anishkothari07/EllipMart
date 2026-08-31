@@ -153,7 +153,7 @@ export function ShoppingAssistant() {
   return (
     <>
       {/* Floating Trigger Button (Hidden when assistant is open on mobile to save space) */}
-      <div className={cn("fixed bottom-24 right-4 z-40 sm:bottom-6 sm:right-6", isOpen && "hidden sm:block")}>
+      <div className={cn("fixed bottom-20 right-4 z-40 sm:bottom-6 sm:right-6", isOpen && "hidden sm:block")}>
         <button
           onClick={() => {
             setIsOpen(true);
@@ -198,6 +198,7 @@ export function ShoppingAssistant() {
               animate={{ y: 0 }}
               exit={{ y: '100%' }}
               transition={{ type: 'spring', damping: 25, stiffness: 220 }}
+              style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
               className="fixed bottom-0 inset-x-0 h-[80vh] sm:top-0 sm:right-0 sm:left-auto sm:bottom-auto sm:h-screen w-full sm:w-[420px] bg-background/95 backdrop-blur-2xl border-t sm:border-t-0 sm:border-l border-border rounded-t-[32px] sm:rounded-t-none z-50 flex flex-col shadow-2xl overflow-hidden"
             >
               {/* Drag Handle (Mobile only) */}

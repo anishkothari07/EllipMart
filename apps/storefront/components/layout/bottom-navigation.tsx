@@ -8,6 +8,11 @@ import { cn } from '@corecart/shared';
 export function BottomNavigation({ onOpenSearch, onOpenMenu }: { onOpenSearch?: () => void, onOpenMenu?: () => void }) {
   const pathname = usePathname();
 
+  // Hide general bottom navigation on product details and checkout to avoid stacked/overlapping bars
+  if (pathname.startsWith('/product/') || pathname.startsWith('/checkout')) {
+    return null;
+  }
+
   const navItems = [
     { label: 'Home', href: '/', icon: Home },
     { label: 'Categories', href: '#categories', icon: Menu, action: onOpenMenu },
@@ -17,8 +22,8 @@ export function BottomNavigation({ onOpenSearch, onOpenMenu }: { onOpenSearch?: 
   ];
 
   return (
-    <div className="fixed bottom-0 inset-x-0 z-40 block border-t border-border/80 bg-background/80 pb-safe backdrop-blur-lg lg:hidden shadow-lg">
-      <nav className="flex h-16 items-center justify-around px-2">
+    <div className="fixed bottom-0 inset-x-0 w-full max-w-full z-40 block border-t border-border/80 bg-background/80 pb-safe backdrop-blur-lg lg:hidden shadow-lg">
+      <nav className="flex h-16 w-full max-w-full items-center justify-around px-2">
         {navItems.map((item) => {
           const isActive = pathname === item.href;
           const Icon = item.icon;

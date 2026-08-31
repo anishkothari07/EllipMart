@@ -75,7 +75,8 @@ export function MobileSearchOverlay({
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: 30 }}
-        className="fixed inset-0 z-50 bg-background flex flex-col p-4"
+        style={{ paddingTop: 'calc(env(safe-area-inset-top, 0px) + 16px)', paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 16px)' }}
+        className="fixed inset-0 z-50 bg-background flex flex-col px-4 pb-4"
       >
         {/* Header Search Input */}
         <div className="flex items-center gap-3">

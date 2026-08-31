@@ -31,7 +31,7 @@ export function SiteChrome({
   const [isMenuOpen, setMenuOpen] = useState(false)
 
   return (
-    <div className="flex min-h-screen flex-col pb-16 lg:pb-0">
+    <div className="flex min-h-screen flex-col pb-16 lg:pb-0 w-full max-w-full overflow-x-clip">
       {/* Top Banner (Hidden on extra small screens for more real estate) */}
       <AnnouncementBanner announcements={announcements} />
 
@@ -42,7 +42,7 @@ export function SiteChrome({
         trendingSearches={trendingSearches}
       />
 
-      <main className="flex-1">{children}</main>
+      <main className="flex-1 w-full max-w-full min-w-0">{children}</main>
 
       <Footer />
       <CartDrawer />
@@ -76,7 +76,8 @@ export function SiteChrome({
               animate={{ x: 0 }}
               exit={{ x: '-100%' }}
               transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-              className="fixed inset-y-0 left-0 z-50 w-full max-w-xs bg-background p-6 shadow-xl flex flex-col"
+              style={{ paddingTop: 'calc(env(safe-area-inset-top, 0px) + 24px)', paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 24px)' }}
+              className="fixed inset-y-0 left-0 z-50 w-full max-w-xs bg-background px-6 shadow-xl flex flex-col"
             >
               <div className="flex items-center justify-between border-b border-border pb-4 mb-6">
                 <span className="font-semibold text-lg flex items-center gap-2">

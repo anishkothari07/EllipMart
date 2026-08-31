@@ -94,7 +94,7 @@ export function LoyaltyView() {
       {/* Balance Cards */}
       <div className="grid gap-4 sm:grid-cols-3">
         {/* Available Points */}
-        <div className="col-span-2 rounded-2xl bg-foreground p-6 text-background">
+        <div className="sm:col-span-2 rounded-2xl bg-foreground p-6 text-background">
           <div className="mb-1 flex items-center gap-2 text-sm opacity-70">
             <Star className="size-4 fill-current" /> Available Points
           </div>

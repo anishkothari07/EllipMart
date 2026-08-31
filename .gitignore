@@ -31,4 +31,5 @@ out/
 # TypeScript cache
 *.tsbuildinfo
 scratch/
-
+scripts/current_tunnel.txt
+*.mp4

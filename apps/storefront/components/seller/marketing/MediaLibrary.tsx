@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { MerchantMediaClient } from '@/lib/services/merchant-media-client';
 import { Search, FolderPlus, Upload, Trash2, X, PlusCircle, CheckCircle, ExternalLink } from 'lucide-react';
 import { cn } from '@corecart/shared';
@@ -28,7 +28,7 @@ export function MediaLibrary({ onSelect, onClose, isPicker = false }: MediaLibra
 
   const [statusMsg, setStatusMsg] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
-  const loadMedia = async () => {
+  const loadMedia = useCallback(async () => {
     setLoading(true);
     try {
       const [mediaRes, foldersRes] = await Promise.all([

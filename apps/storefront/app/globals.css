@@ -93,17 +93,42 @@
    No .dark block is needed since the ThemeProvider injects the full palette dynamically. */
 
 @layer base {
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
   * {
     @apply border-border outline-ring/50;
     transition: background-color 0.25s ease, border-color 0.25s ease, color 0.25s ease, box-shadow 0.25s ease;
   }
+  html {
+    scroll-behavior: smooth;
+    max-width: 100%;
+    overflow-x: clip;
+  }
   body {
     @apply bg-background text-foreground;
     -webkit-font-smoothing: antialiased;
+    max-width: 100%;
+    width: 100%;
+    min-width: 0;
+    overflow-x: clip;
+    position: relative;
   }
-  html {
-    scroll-behavior: smooth;
-  }
+}
+
+/* ─── Native App Safe Area Insets (Capacitor / PWA) ─────────────────────────
+   viewport-fit=cover exposes env(safe-area-inset-*) CSS variables.
+   We push the sticky site header down by exactly the status bar height
+   so it never disappears behind the clock/battery row when scrolling.
+   body gets only bottom/left/right padding (home indicator etc.)
+   ─────────────────────────────────────────────────────────────────────────── */
+body {
+  /* horizontal & bottom safe zones (home indicator, rounded corners) */
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  padding-left:   env(safe-area-inset-left,   0px);
+  padding-right:  env(safe-area-inset-right,  0px);
 }
 
 @layer utilities {

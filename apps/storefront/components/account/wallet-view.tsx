@@ -175,7 +175,7 @@ export function WalletView() {
       {/* Balance Cards */}
       <div className="grid gap-4 sm:grid-cols-3">
         {/* Available Balance */}
-        <div className="col-span-2 rounded-2xl bg-foreground p-6 text-background">
+        <div className="sm:col-span-2 rounded-2xl bg-foreground p-6 text-background">
           <div className="mb-1 flex items-center gap-2 text-sm opacity-70">
             <Wallet className="size-4" /> Available Balance
           </div>

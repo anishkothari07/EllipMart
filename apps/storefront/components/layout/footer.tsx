@@ -132,7 +132,7 @@ export function Footer() {
           <p className="text-xs text-muted-foreground">
             © {new Date().getFullYear()} EllipMart Inc. All rights reserved.
           </p>
-          <div className="flex items-center gap-1.5">
+          <div className="flex flex-wrap items-center gap-1.5">
             {payments.map((p) => (
               <span
                 key={p}

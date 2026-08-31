@@ -54,13 +54,13 @@ export function AccountSidebar({ user }: { user: any }) {
   }
 
   return (
-    <aside className="lg:sticky lg:top-24 lg:self-start">
-      <div className="mb-4 flex items-center gap-3 rounded-2xl border border-border bg-card p-4">
-        <span className="grid size-11 place-items-center rounded-full bg-foreground text-sm font-semibold text-background">
+    <aside className="w-full min-w-0 max-w-full lg:sticky lg:top-24 lg:self-start">
+      <div className="mb-4 flex items-center gap-3 rounded-2xl border border-border bg-card p-4 min-w-0">
+        <span className="grid size-11 shrink-0 place-items-center rounded-full bg-foreground text-sm font-semibold text-background">
           {user?.firstName?.[0] || ''}
           {user?.lastName?.[0] || ''}
         </span>
-        <div className="min-w-0">
+        <div className="min-w-0 flex-1">
           <p className="truncate text-sm font-medium">
             {user?.firstName || ''} {user?.lastName || ''}
           </p>
@@ -68,33 +68,39 @@ export function AccountSidebar({ user }: { user: any }) {
         </div>
       </div>
 
-      <nav className="flex gap-1 overflow-x-auto rounded-2xl border border-border bg-card p-2 no-scrollbar lg:flex-col lg:overflow-visible">
-        {links.map((link) => {
-          const active = link.exact ? pathname === link.href : pathname.startsWith(link.href)
-          return (
-            <Link
-              key={link.href}
-              href={link.href}
-              className={cn(
-                'flex shrink-0 items-center gap-2.5 rounded-xl px-3.5 py-2.5 text-sm font-medium transition-colors',
-                active ? 'bg-foreground text-background' : 'text-foreground/80 hover:bg-muted',
-              )}
-            >
-              <link.icon className="size-[18px]" />
-              {link.label}
-            </Link>
-          )
-        })}
-        <button
-          type="button"
-          onClick={handleSignOut}
-          disabled={signingOut}
-          className="flex shrink-0 items-center gap-2.5 rounded-xl px-3.5 py-2.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-destructive disabled:opacity-50"
+      <div className="w-full min-w-0 max-w-full overflow-hidden rounded-2xl border border-border bg-card p-1.5 sm:p-2">
+        <nav 
+          role="tablist"
+          aria-label="Account navigation tabs"
+          className="flex gap-1.5 overflow-x-auto w-full min-w-0 max-w-full no-scrollbar overscroll-x-contain touch-pan-x py-0.5 px-0.5 lg:flex-col lg:overflow-visible"
         >
-          <LogOut className="size-[18px]" />
-          {signingOut ? 'Signing out…' : 'Sign out'}
-        </button>
-      </nav>
+          {links.map((link) => {
+            const active = link.exact ? pathname === link.href : pathname.startsWith(link.href)
+            return (
+              <Link
+                key={link.href}
+                href={link.href}
+                className={cn(
+                  'flex shrink-0 items-center gap-2 rounded-xl px-3.5 py-2 text-xs sm:text-sm font-medium transition-colors whitespace-nowrap',
+                  active ? 'bg-foreground text-background font-semibold shadow-xs' : 'text-foreground/80 hover:bg-muted hover:text-foreground',
+                )}
+              >
+                <link.icon className="size-4 sm:size-[18px] shrink-0" />
+                {link.label}
+              </Link>
+            )
+          })}
+          <button
+            type="button"
+            onClick={handleSignOut}
+            disabled={signingOut}
+            className="flex shrink-0 items-center gap-2 rounded-xl px-3.5 py-2 text-xs sm:text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-destructive disabled:opacity-50 whitespace-nowrap"
+          >
+            <LogOut className="size-4 sm:size-[18px] shrink-0" />
+            {signingOut ? 'Signing out…' : 'Sign out'}
+          </button>
+        </nav>
+      </div>
     </aside>
   )
 }

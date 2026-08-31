@@ -1,7 +1,19 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   output: 'standalone',
+  devIndicators: false,
   typescript: { ignoreBuildErrors: true },
+  allowedDevOrigins: [
+    '192.168.68.59',
+    '192.168.68.59:3001',
+    '192.168.68.56',
+    '192.168.68.56:3001',
+    '192.168.68.57',
+    '192.168.68.57:3001',
+    'localhost:3001',
+    '*.loca.lt',
+    '*.trycloudflare.com',
+  ],
   images: {
     unoptimized: true,
     remotePatterns: [

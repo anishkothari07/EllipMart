@@ -3,7 +3,7 @@
 import { AnimatePresence, motion } from 'framer-motion'
 import { LayoutGrid, List, PackageOpen, SlidersHorizontal, X } from 'lucide-react'
 import Image from 'next/image'
-import { useMemo, useState } from 'react'
+import { useMemo, useState, useEffect } from 'react'
 import type { Product } from '@corecart/shared'
 import { cn } from '@corecart/shared'
 import { Container } from '@corecart/ui'
@@ -36,6 +36,11 @@ export function CategoryView({
   bannerImage: string
   products: Product[]
 }) {
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' })
+    if (document.documentElement) document.documentElement.scrollTop = 0
+    if (document.body) document.body.scrollTop = 0
+  }, [category?.id, title])
   const priceCeiling = useMemo(
     () => Math.ceil(Math.max(...products.map((p) => p.price), 100) / 50) * 50,
     [products],

@@ -114,36 +114,38 @@ export default async function AccountDashboardPage() {
               {ORDER_STATUS_MAP[activeOrder.status as OrderStatus]?.label || activeOrder.status}
             </span>
           </div>
-          <div className="mt-4 flex items-center gap-4">
-            <div className="flex -space-x-3">
-              {activeOrder.items.slice(0, 3).map((item: any) => (
-                <img
-                  key={item.id}
-                  src={getOrderProductImage(item)}
-                  alt=""
-                  className="size-14 rounded-xl border-2 border-card object-cover"
-                />
-              ))}
-              {activeOrder.items.length > 3 && (
-                <div className="grid size-14 place-items-center rounded-xl border-2 border-card bg-muted text-xs font-medium">
-                  +{activeOrder.items.length - 3}
-                </div>
-              )}
-            </div>
-            <div className="min-w-0 flex-1">
-              <p className="truncate text-sm font-medium">
-                {getOrderProductName(activeOrder.items[0])}
-                {activeOrder.items.length > 1 && <span className="text-muted-foreground"> and more</span>}
-              </p>
-              <p className="text-xs text-muted-foreground">
-                {activeOrder.items.length} item{activeOrder.items.length !== 1 && 's'}
-              </p>
+          <div className="mt-4 flex flex-wrap sm:flex-nowrap items-center justify-between gap-3 sm:gap-4 min-w-0">
+            <div className="flex items-center gap-3 min-w-0 flex-1">
+              <div className="flex -space-x-3 shrink-0">
+                {activeOrder.items.slice(0, 3).map((item: any) => (
+                  <img
+                    key={item.id}
+                    src={getOrderProductImage(item)}
+                    alt=""
+                    className="size-12 sm:size-14 rounded-xl border-2 border-card object-cover"
+                  />
+                ))}
+                {activeOrder.items.length > 3 && (
+                  <div className="grid size-12 sm:size-14 place-items-center rounded-xl border-2 border-card bg-muted text-xs font-medium shrink-0">
+                    +{activeOrder.items.length - 3}
+                  </div>
+                )}
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-sm font-medium">
+                  {getOrderProductName(activeOrder.items[0])}
+                  {activeOrder.items.length > 1 && <span className="text-muted-foreground"> and more</span>}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  {activeOrder.items.length} item{activeOrder.items.length !== 1 && 's'}
+                </p>
+              </div>
             </div>
             <Link
               href={`/account/orders/${activeOrder.id}`}
-              className="inline-flex h-10 shrink-0 items-center gap-1.5 rounded-full border border-border px-4 text-sm font-medium transition-colors hover:bg-accent hover:text-background"
+              className="inline-flex h-9 sm:h-10 shrink-0 items-center gap-1.5 rounded-full border border-border px-3.5 sm:px-4 text-xs sm:text-sm font-medium transition-colors hover:bg-accent hover:text-background ml-auto sm:ml-0"
             >
-              Track <ArrowRight className="size-4" />
+              Track <ArrowRight className="size-3.5 sm:size-4" />
             </Link>
           </div>
         </div>
@@ -195,11 +197,11 @@ export default async function AccountDashboardPage() {
                 : ORDER_STATUS_MAP[order.status as OrderStatus]?.className || '';
               
               return (
-                <li key={order.id} className="rounded-2xl border border-border bg-card p-5">
-                  <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border pb-4">
-                    <div className="flex items-center gap-3">
-                      <p className="text-sm font-semibold">Order #{order.orderNumber || order.id.slice(0, 8)}</p>
-                      <span className="text-xs text-muted-foreground">
+                <li key={order.id} className="rounded-2xl border border-border bg-card p-4 sm:p-5 min-w-0">
+                  <div className="flex flex-wrap items-center justify-between gap-2 sm:gap-3 border-b border-border pb-3 sm:pb-4 min-w-0">
+                    <div className="flex flex-wrap items-center gap-2 sm:gap-3 min-w-0">
+                      <p className="text-xs sm:text-sm font-semibold truncate">Order #{order.orderNumber || order.id.slice(0, 8)}</p>
+                      <span className="text-[11px] sm:text-xs text-muted-foreground whitespace-nowrap">
                         {new Date(order.createdAt).toLocaleDateString('en-US', {
                           month: 'short',
                           day: 'numeric',
@@ -207,56 +209,58 @@ export default async function AccountDashboardPage() {
                         })} • {order.items.length} item{order.items.length !== 1 && 's'}
                       </span>
                     </div>
-                    <span className={`rounded-full px-2.5 py-1 text-xs font-medium ${statusClass}`}>
+                    <span className={`rounded-full px-2.5 py-0.5 sm:py-1 text-[11px] sm:text-xs font-medium shrink-0 ${statusClass}`}>
                       {statusLabel}
                     </span>
                   </div>
 
-                  <div className="flex items-center gap-4 py-4">
-                    <div className="size-16 shrink-0 overflow-hidden rounded-xl border border-border bg-muted">
-                      <img
-                        src={image}
-                        alt=""
-                        className="size-full object-cover"
-                      />
-                    </div>
-                    
-                    <div className="min-w-0 flex-1">
-                      <p className="truncate text-sm font-medium transition-colors">
-                        {getOrderProductName(order.items[0])}
-                        {order.items.length > 1 && <span className="text-muted-foreground"> and more</span>}
-                      </p>
-                      
-                      <div className="mt-1 flex items-center gap-1.5 text-xs text-muted-foreground">
-                        <Clock className="size-3.5" />
-                        <span className={isCancelled ? "line-through opacity-70" : ""}>{deliveryMsg}</span>
+                  <div className="flex flex-wrap sm:flex-nowrap items-center justify-between gap-3 sm:gap-4 py-3 sm:py-4 min-w-0">
+                    <div className="flex items-center gap-3 sm:gap-4 min-w-0 flex-1">
+                      <div className="size-14 sm:size-16 shrink-0 overflow-hidden rounded-xl border border-border bg-muted">
+                        <img
+                          src={image}
+                          alt=""
+                          className="size-full object-cover"
+                        />
                       </div>
                       
-                      {isActive && (
-                        <div className="mt-2.5 flex items-center gap-1">
-                          {['CONFIRMED', 'PROCESSING', 'PACKED', 'SHIPPED', 'DELIVERED'].map((stepStatus, idx) => {
-                            const statuses = ['CONFIRMED', 'PROCESSING', 'PACKED', 'SHIPPED', 'DELIVERED'];
-                            const currentIdx = statuses.indexOf(order.status);
-                            const done = idx <= currentIdx;
-                            return (
-                              <div key={stepStatus} className="flex-1 h-1 rounded-full bg-border overflow-hidden">
-                                {done && <div className="h-full bg-foreground w-full" />}
-                              </div>
-                            )
-                          })}
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate text-sm font-medium transition-colors">
+                          {getOrderProductName(order.items[0])}
+                          {order.items.length > 1 && <span className="text-muted-foreground"> and more</span>}
+                        </p>
+                        
+                        <div className="mt-1 flex items-center gap-1.5 text-xs text-muted-foreground">
+                          <Clock className="size-3.5 shrink-0" />
+                          <span className={isCancelled ? "line-through opacity-70 truncate" : "truncate"}>{deliveryMsg}</span>
                         </div>
-                      )}
+                        
+                        {isActive && (
+                          <div className="mt-2.5 flex items-center gap-1 max-w-[180px] sm:max-w-none">
+                            {['CONFIRMED', 'PROCESSING', 'PACKED', 'SHIPPED', 'DELIVERED'].map((stepStatus, idx) => {
+                              const statuses = ['CONFIRMED', 'PROCESSING', 'PACKED', 'SHIPPED', 'DELIVERED'];
+                              const currentIdx = statuses.indexOf(order.status);
+                              const done = idx <= currentIdx;
+                              return (
+                                <div key={stepStatus} className="flex-1 h-1 rounded-full bg-border overflow-hidden">
+                                  {done && <div className="h-full bg-foreground w-full" />}
+                                </div>
+                              )
+                            })}
+                          </div>
+                        )}
+                      </div>
                     </div>
                     
-                    <div className="text-right shrink-0">
-                      <p className="text-sm font-medium">{formatPrice(Number(order.grandTotal))}</p>
+                    <div className="text-right shrink-0 ml-auto sm:ml-0">
+                      <p className="text-sm font-semibold">{formatPrice(Number(order.grandTotal))}</p>
                     </div>
                   </div>
 
-                  <div className="flex items-center justify-end gap-3 border-t border-border pt-4">
+                  <div className="flex items-center justify-end gap-3 border-t border-border pt-3 sm:pt-4">
                     <Link
                       href={`/account/orders/${order.id}`}
-                      className="inline-flex h-9 items-center justify-center rounded-full bg-foreground px-4 text-sm font-medium text-background transition-colors hover:bg-foreground/90"
+                      className="inline-flex h-9 items-center justify-center rounded-full bg-foreground px-4 text-xs sm:text-sm font-medium text-background transition-colors hover:bg-foreground/90"
                     >
                       View order <ArrowRight className="ml-1.5 size-3.5" />
                     </Link>

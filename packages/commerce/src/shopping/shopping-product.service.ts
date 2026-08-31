@@ -198,12 +198,24 @@ export class ShoppingProductService {
   }
 
   async getProductBySlug(slug: string, currency: string = 'INR') {
-    const cacheKey = `product:${slug}`;
+    // Normalize: decode URL encoding and try both hyphenated and space variants
+    const decodedSlug = decodeURIComponent(slug);
+    const hyphenSlug = decodedSlug.replace(/\s+/g, '-').toLowerCase();
+    const spaceSlug = decodedSlug.replace(/-/g, ' ').toLowerCase();
+
+    const cacheKey = `product:${hyphenSlug}`;
     const cached = process.env.NODE_ENV === 'production' ? await cache.get<any>(cacheKey) : null;
     if (cached) return cached;
 
-    const product = await prisma.product.findUnique({
-      where: { slug },
+    // Try exact match first, then hyphenated, then space variant
+    const product = await prisma.product.findFirst({
+      where: {
+        OR: [
+          { slug: decodedSlug },
+          { slug: hyphenSlug },
+          { slug: spaceSlug },
+        ]
+      },
       include: {
         brand: true,
         category: true,

@@ -12,11 +12,11 @@ export default async function AccountLayout({ children }: { children: React.Reac
   }
 
   return (
-    <Container className="py-8 lg:py-10">
+    <Container className="py-6 sm:py-8 lg:py-10 w-full min-w-0 max-w-full">
       <Breadcrumb items={[{ label: 'Home', href: '/' }, { label: 'Account' }]} />
-      <div className="mt-6 grid gap-8 lg:grid-cols-[260px_1fr]">
+      <div className="mt-6 grid gap-8 lg:grid-cols-[260px_1fr] w-full min-w-0 max-w-full">
         <AccountSidebar user={user} />
-        <div className="min-w-0">{children}</div>
+        <div className="min-w-0 w-full max-w-full">{children}</div>
       </div>
     </Container>
   )

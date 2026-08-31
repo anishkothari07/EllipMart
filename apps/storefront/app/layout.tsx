@@ -6,8 +6,10 @@ import { ThemeProvider } from '@/components/providers/theme-provider'
 import { StoreProvider } from '@/components/providers/store-provider'
 import { MotionProvider } from '@/components/providers/motion-provider'
 import { CartAnimationProvider } from '@/components/providers/cart-animation-provider'
+import { Suspense } from 'react'
 import { PwaProvider } from '@/components/providers/pwa-provider'
 import { AppLoaderProvider } from '@/components/providers/app-loader-provider'
+import { ScrollToTop } from '@/components/shared/scroll-to-top'
 const geistSans = Inter({ subsets: ['latin'], variable: '--font-geist-sans', display: 'swap' })
 const geistMono = Roboto_Mono({ subsets: ['latin'], variable: '--font-geist-mono', display: 'swap' })
 const instrumentSerif = Inter({
@@ -42,6 +44,7 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = {
   colorScheme: 'light dark',
+  viewportFit: 'cover',
   themeColor: [
     { media: '(prefers-color-scheme: light)', color: '#fbfbf9' },
     { media: '(prefers-color-scheme: dark)', color: '#232320' },
@@ -65,6 +68,9 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} ${instrumentSerif.variable} bg-background`}
     >
       <body className="font-sans antialiased">
+        <Suspense fallback={null}>
+          <ScrollToTop />
+        </Suspense>
         <AppLoaderProvider />
         <ThemeProvider>
           <StoreProvider>

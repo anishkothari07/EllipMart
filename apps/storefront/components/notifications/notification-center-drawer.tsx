@@ -153,7 +153,10 @@ export function NotificationCenterDrawer({
 
   return (
     <div className="fixed inset-0 z-50 flex justify-end bg-black/50 backdrop-blur-xs">
-      <div className="flex flex-col h-full w-full max-w-md bg-background border-l border-border shadow-2xl overflow-hidden animate-in slide-in-from-right duration-300">
+      <div 
+        style={{ paddingTop: 'env(safe-area-inset-top, 0px)', paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
+        className="flex flex-col h-full w-full max-w-md bg-background border-l border-border shadow-2xl overflow-hidden animate-in slide-in-from-right duration-300"
+      >
         {/* Header */}
         <div className="flex items-center justify-between border-b border-border p-4 bg-muted/10">
           <div className="flex items-center gap-2">

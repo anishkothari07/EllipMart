@@ -61,6 +61,7 @@ export function CartDrawer() {
           <motion.aside
             role="dialog"
             aria-label="Shopping cart"
+            style={{ paddingTop: 'env(safe-area-inset-top, 0px)', paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
             className="absolute right-0 top-0 flex h-full w-full max-w-md flex-col bg-background shadow-float"
             variants={motionPresets.drawer}
           >

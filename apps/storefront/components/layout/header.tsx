@@ -72,6 +72,7 @@ export function Header({
   return (
     <>
       <header
+        style={{ paddingTop: 'env(safe-area-inset-top, 0px)' }}
         className={cn(
           'sticky top-0 z-50 w-full isolate bg-background transition-all duration-300',
           scrolled && 'border-b border-border shadow-sm',
@@ -98,18 +99,20 @@ export function Header({
         </div>
 
         {/* Main bar */}
-        <Container className="flex h-16 items-center gap-4">
-          <button
-            className="grid size-9 place-items-center rounded-full hover:bg-muted lg:hidden"
-            onClick={() => setMobileOpen(true)}
-            aria-label="Open menu"
-          >
-            <Menu className="size-5" />
-          </button>
+        <Container className="flex h-16 items-center justify-between gap-2 sm:gap-4 w-full min-w-0">
+          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+            <button
+              className="grid size-9 place-items-center rounded-full hover:bg-muted lg:hidden"
+              onClick={() => setMobileOpen(true)}
+              aria-label="Open menu"
+            >
+              <Menu className="size-5" />
+            </button>
 
-          <Link href="/" className="flex items-center gap-2 shrink-0">
-            <Image src="/logo.png" alt="EllipMart Logo" width={56} height={56} className="object-contain" priority />
-          </Link>
+            <Link href="/" className="flex items-center gap-2 shrink-0">
+              <Image src="/logo.png" alt="EllipMart Logo" width={52} height={52} className="object-contain" priority />
+            </Link>
+          </div>
 
           {/* Desktop nav */}
           <nav className="ml-4 hidden items-center gap-1 lg:flex">
@@ -160,7 +163,7 @@ export function Header({
           </button>
 
           {/* Actions */}
-          <div className="ml-auto flex items-center gap-0.5 md:ml-0">
+          <div className="flex items-center gap-0.5 shrink-0 ml-auto md:ml-0">
             <button
               onClick={() => setSearchOpen(true)}
               aria-label="Search"
@@ -323,6 +326,7 @@ function MobileMenu({
             variants={{ o: { opacity: 1 }, c: { opacity: 0 } }}
           />
           <motion.aside
+            style={{ paddingTop: 'env(safe-area-inset-top, 0px)', paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
             className="absolute left-0 top-0 flex h-full w-[85%] max-w-sm flex-col bg-background shadow-float"
             variants={{ o: { x: 0 }, c: { x: '-100%' } }}
             transition={{ type: 'spring', damping: 30, stiffness: 300 }}

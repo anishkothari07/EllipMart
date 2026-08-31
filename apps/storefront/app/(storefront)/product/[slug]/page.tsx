@@ -13,7 +13,8 @@ export async function generateMetadata({
 }: {
   params: Promise<{ slug: string }>
 }): Promise<Metadata> {
-  const { slug } = await params
+  const { slug: rawSlug } = await params
+  const slug = decodeURIComponent(rawSlug).replace(/\s+/g, '-').toLowerCase()
   try {
     const product = await shoppingProductService.getProductBySlug(slug)
     return {
@@ -33,7 +34,8 @@ export default async function ProductPage({
 }: {
   params: Promise<{ slug: string }>
 }) {
-  const { slug } = await params
+  const { slug: rawSlug } = await params
+  const slug = decodeURIComponent(rawSlug).replace(/\s+/g, '-').toLowerCase()
   let product;
   try {
     product = await shoppingProductService.getProductBySlug(slug)

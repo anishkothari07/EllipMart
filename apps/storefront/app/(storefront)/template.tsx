@@ -1,11 +1,16 @@
 "use client";
 
+import { useEffect } from "react";
 import { motion } from "framer-motion";
 import { motionPresets } from '@corecart/shared/src/motion/presets';
 import { usePathname } from "next/navigation";
 
 export default function Template({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+  }, [pathname]);
   return (
     <motion.main
       key={pathname}
