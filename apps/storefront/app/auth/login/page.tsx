@@ -9,7 +9,15 @@ export const metadata: Metadata = {
   description: 'Sign in to your EllipMart account.',
 }
 
-export default function LoginPage() {
+export default async function LoginPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>
+}) {
+  const params = await searchParams
+  const callbackUrl = typeof params.callbackUrl === 'string' ? params.callbackUrl : typeof params.redirect === 'string' ? params.redirect : ''
+  const registerHref = callbackUrl ? `/auth/register?callbackUrl=${encodeURIComponent(callbackUrl)}` : '/auth/register'
+
   return (
     <AuthShell
       title="Welcome back"
@@ -17,7 +25,7 @@ export default function LoginPage() {
       footer={
         <>
           New to EllipMart?{' '}
-          <Link href="/auth/register" className="font-medium text-foreground hover:text-accent">
+          <Link href={registerHref} className="font-medium text-foreground hover:text-accent">
             Create an account
           </Link>
         </>

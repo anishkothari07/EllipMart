@@ -1,7 +1,7 @@
 'use client'
 
 import { Check } from 'lucide-react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { useMemo, useState } from 'react'
 import { cn } from '@corecart/shared'
 import { AuthField, PasswordField, SubmitButton } from './auth-fields'
@@ -14,6 +14,7 @@ const rules = [
 
 export function RegisterForm() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const [firstName, setFirstName] = useState('')
   const [lastName, setLastName] = useState('')
   const [email, setEmail] = useState('')
@@ -48,8 +49,10 @@ export function RegisterForm() {
 
       // Store email just in case we need it later, but skip OTP flow
       localStorage.setItem('auth_email', email);
-      // Auto-login successful, redirect to home
-      router.push('/')
+      // Auto-login successful, redirect to callbackUrl or home
+      const callbackUrl = searchParams.get('callbackUrl') || searchParams.get('redirect');
+      const destination = callbackUrl || data.data?.redirectTo || '/';
+      router.push(destination);
     } catch (err: any) {
       setError(err.message);
     } finally {

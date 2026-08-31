@@ -151,9 +151,27 @@ export async function proxy(req: NextRequest) {
     return NextResponse.next({ request: { headers } });
   }
 
+  // ── Customer Auth Guard: /checkout and /account require login ──────────────
+  if (
+    pathname === '/checkout' ||
+    (pathname.startsWith('/checkout') && !pathname.startsWith('/checkout/success')) ||
+    pathname.startsWith('/account')
+  ) {
+    const payload = await getSessionPayload(req);
+    if (!payload) {
+      const loginUrl = new URL('/auth/login', req.url);
+      loginUrl.searchParams.set('callbackUrl', pathname);
+      return NextResponse.redirect(loginUrl);
+    }
+    const headers = new Headers(req.headers);
+    headers.set('x-user-id', payload.userId as string);
+    headers.set('x-user-role', payload.role as string);
+    return NextResponse.next({ request: { headers } });
+  }
+
   return NextResponse.next();
 }
 
 export const config = {
-  matcher: ['/api/v1/:path*', '/seller/:path*', '/admin/:path*'],
+  matcher: ['/api/v1/:path*', '/seller/:path*', '/admin/:path*', '/checkout/:path*', '/checkout', '/account/:path*', '/account'],
 };

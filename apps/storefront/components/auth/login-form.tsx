@@ -32,7 +32,7 @@ export function LoginForm() {
       }
 
       // Use role-based redirect from server, or explicit callbackUrl, or default
-      const callbackUrl = searchParams.get('callbackUrl');
+      const callbackUrl = searchParams.get('callbackUrl') || searchParams.get('redirect');
       const destination = callbackUrl || data.data?.redirectTo || '/';
       router.push(destination);
     } catch (err: any) {
@@ -41,6 +41,10 @@ export function LoginForm() {
       setLoading(false)
     }
   }
+
+  const callbackUrl = searchParams.get('callbackUrl') || searchParams.get('redirect');
+  const forgotHref = callbackUrl ? `/auth/forgot-password?callbackUrl=${encodeURIComponent(callbackUrl)}` : '/auth/forgot-password';
+  const registerHref = callbackUrl ? `/auth/register?callbackUrl=${encodeURIComponent(callbackUrl)}` : '/auth/register';
 
   return (
     <form onSubmit={onSubmit} className="flex flex-col gap-4">
@@ -66,7 +70,7 @@ export function LoginForm() {
         value={password}
         onChange={(e) => setPassword(e.target.value)}
         hint={
-          <Link href="/auth/forgot-password" className="font-medium text-accent hover:underline">
+          <Link href={forgotHref} className="font-medium text-accent hover:underline">
             Forgot?
           </Link>
         }

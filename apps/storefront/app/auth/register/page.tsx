@@ -9,7 +9,15 @@ export const metadata: Metadata = {
   description: 'Join EllipMart for early access, faster checkout, and easy returns.',
 }
 
-export default function RegisterPage() {
+export default async function RegisterPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>
+}) {
+  const params = await searchParams
+  const callbackUrl = typeof params.callbackUrl === 'string' ? params.callbackUrl : typeof params.redirect === 'string' ? params.redirect : ''
+  const loginHref = callbackUrl ? `/auth/login?callbackUrl=${encodeURIComponent(callbackUrl)}` : '/auth/login'
+
   return (
     <AuthShell
       title="Create your account"
@@ -18,7 +26,7 @@ export default function RegisterPage() {
       footer={
         <>
           Already have an account?{' '}
-          <Link href="/auth/login" className="font-medium text-foreground hover:text-accent">
+          <Link href={loginHref} className="font-medium text-foreground hover:text-accent">
             Sign in
           </Link>
         </>
