@@ -72,9 +72,9 @@ export function Header({
   return (
     <>
       <header
-        style={{ paddingTop: 'env(safe-area-inset-top, 0px)' }}
+        style={{ paddingTop: 'max(env(safe-area-inset-top, 0px), 14px)' }}
         className={cn(
-          'sticky top-0 z-50 w-full isolate bg-background transition-all duration-300',
+          'sticky top-0 z-50 w-full isolate bg-background transition-all duration-300 lg:pt-0',
           scrolled && 'border-b border-border shadow-sm',
         )}
         onMouseLeave={() => setActiveMenu(null)}
