@@ -7,23 +7,41 @@ const config: CapacitorConfig = {
   server: {
     url: 'https://ellipmart-two.vercel.app',
     cleartext: false,
+    androidScheme: 'https',
     allowNavigation: [
       'ellipmart-two.vercel.app',
       '*.vercel.app',
       'ellipmart.com',
       'api.razorpay.com',
       'checkout.razorpay.com',
+      '*.supabase.co',
+      'res.cloudinary.com',
     ],
+  },
+  android: {
+    allowMixedContent: true,
+    captureInput: true,
+    webContentsDebuggingEnabled: false,
+    backgroundColor: '#09090b',
   },
   plugins: {
     SplashScreen: {
-      launchShowDuration: 2000,
+      launchShowDuration: 1800,
+      launchAutoHide: true,
       backgroundColor: '#09090b',
+      androidSplashResourceName: 'splash',
+      androidScaleType: 'CENTER_CROP',
+      showSpinner: false,
     },
     StatusBar: {
-      style: 'DEFAULT',
-      backgroundColor: '#fbfbf9',
+      style: 'DARK',
+      backgroundColor: '#09090b',
       overlaysWebView: false,
+    },
+    Keyboard: {
+      resize: 'body',
+      style: 'DARK',
+      resizeOnFullScreen: true,
     },
   },
 };
