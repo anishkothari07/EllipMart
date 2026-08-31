@@ -5,10 +5,11 @@ const config: CapacitorConfig = {
   appName: 'EllipMart',
   webDir: 'public',
   server: {
-    url: 'http://192.168.68.59:3001',
-    cleartext: true,
+    url: 'https://ellipmart-two.vercel.app',
+    cleartext: false,
     allowNavigation: [
-      '192.168.68.59',
+      'ellipmart-two.vercel.app',
+      '*.vercel.app',
       'ellipmart.com',
       'api.razorpay.com',
       'checkout.razorpay.com',
