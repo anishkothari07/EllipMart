@@ -1,5 +1,4 @@
 {
-  "buildCommand": "pnpm --filter @corecart/database exec prisma generate && pnpm --filter storefront build",
-  "outputDirectory": "apps/storefront/.next",
+  "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": "nextjs"
 }
